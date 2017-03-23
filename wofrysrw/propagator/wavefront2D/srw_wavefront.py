@@ -1,14 +1,4 @@
-# TODO: REMOVE THIS!!!!
-try:
-    from srwlib import *
-    SRWLIB_AVAILABLE = True
-except:
-    try:
-        from wpg.srwlib import *
-        SRWLIB_AVAILABLE = True
-    except:
-        SRWLIB_AVAILABLE = False
-        print("SRW is not available")
+from srwlib import *
 
 import numpy
 import scipy.constants as codata
@@ -84,20 +74,20 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                              1e-3)
     @classmethod
     def decorateSRWWF(self, srwwf):
-        return SRWWavefront(_arEx=srwwf._arEx,
-                              _arEy=srwwf._arEy,
-                              _typeE=srwwf._typeE,
-                              _eStart=srwwf._eStart,
-                              _eFin=srwwf._eFin,
-                              _ne=srwwf._ne,
-                              _xStart=srwwf._xStart,
-                              _xFin=srwwf._xFin,
-                              _nx=srwwf._nx,
-                              _yStart=srwwf._yStart,
-                              _yFin=srwwf._yFin,
-                              _ny=srwwf._ny,
-                              _zStart=srwwf._zStart,
-                              _partBeam=srwwf._partBeam)
+        return SRWWavefront(_arEx=srwwf.arEx,
+                            _arEy=srwwf.arEy,
+                            _typeE=srwwf.numTypeElFld,
+                            _eStart=srwwf.mesh.eStart,
+                            _eFin=srwwf.mesh.eFin,
+                            _ne=srwwf.mesh.ne,
+                            _xStart=srwwf.mesh.xStart,
+                            _xFin=srwwf.mesh.xFin,
+                            _nx=srwwf.mesh.nx,
+                            _yStart=srwwf.mesh.yStart,
+                            _yFin=srwwf.mesh.yFin,
+                            _ny=srwwf.mesh.ny,
+                            _zStart=srwwf.mesh.zStart,
+                            _partBeam=srwwf.partBeam)
 
     # ------------------------------------------------------------------
     # ------------------------------------------------------------------

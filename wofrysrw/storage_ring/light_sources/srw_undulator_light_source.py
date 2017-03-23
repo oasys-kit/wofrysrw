@@ -41,10 +41,10 @@ class SRWUndulatorLightSource(SRWLightSource):
                                                          number_of_periods))
 
     def get_length(self):
-        return self._magnetic_structure._period_length*self._magnetic_structure.number_of_periods
+        return self._magnetic_structure._period_length*self._magnetic_structure._number_of_periods
 
     def get_gamma(self):
-        self._electron_beam._energy_in_GeV / (codata_mee * 1e-3)
+        return self._electron_beam._energy_in_GeV / (codata_mee * 1e-3)
 
     def get_resonance_wavelength(self):
         return (1 + (self._magnetic_structure._K_vertical**2 + self._magnetic_structure._K_horizontal**2) / 2.0) / 2 / self.get_gamma()**2 * self._magnetic_structure._period_length
@@ -79,9 +79,11 @@ class SRWUndulatorLightSource(SRWLightSource):
                                       coherence_volume_v=cohV,
                                       diffraction_limit=dls)
 
-    def get_flux(self, photon_energy_min = 100,
+    def get_flux(self,
+                 photon_energy_min = 100,
                  photon_energy_max = 100100,
-                 photon_energy_points = 1000, max_harmonic_number = 21):
+                 photon_energy_points = 1000,
+                 max_harmonic_number = 21):
         pass
     '''
     global scanCounter

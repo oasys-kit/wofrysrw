@@ -22,11 +22,11 @@ undulator = SRWUndulatorLightSource("MicroXRD",
                                     period_length=period_length,
                                     number_of_periods=int(total_length/period_length))
 
-print(2)
+print(undulator.get_resonance_energy())
 
 wf_parameters = SourceWavefrontParameters(photon_energy_min = 1,
                                           photon_energy_max = 12001,
-                                          photon_energy_points=201,
+                                          photon_energy_points=101,
                                           h_slit_gap = 1e-3,
                                           v_slit_gap = 1e-3,
                                           distance = 10.0)
@@ -39,7 +39,9 @@ print(4)
 
 e, h, v, i = undulator.get_intensity(wavefront)
 
-print(5)
+properties = undulator.get_photon_source_properties(harmonic=1)
+
+print(properties.to_info())
 
 plot(e, SRWLightSource.get_spectrum_from_intensity(h, v, i), show=1, title="Spectrum for MicroXRD")
 plot_contour(SRWLightSource.get_power_density_from_intensity(e, i), h, v, title="Power density", show=1)

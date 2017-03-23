@@ -39,14 +39,24 @@ class PhotonSourceProperties(object):
                  coherence_volume_h = 0.0,
                  coherence_volume_v = 0.0,
                  diffraction_limit = 0.0):
-
-        self._rms_h = rms_h,
-        self._rms_v = rms_v,
-        self._rms_hp = rms_hp,
-        self._rms_vp = rms_vp,
+        self._rms_h = rms_h
+        self._rms_v = rms_v
+        self._rms_hp = rms_hp
+        self._rms_vp = rms_vp
         self._coherence_volume_h = coherence_volume_h
         self._coherence_volume_v = coherence_volume_v
         self._diffraction_limit = diffraction_limit
+
+    def to_info(self):
+        info = 'Photon beam (convolution): \n'
+        info += '   RMS size H/V [um]: '+ repr(self._rms_h*1e6) + '  /  ' + repr(self._rms_v*1e6) + '\n'
+        info += '   RMS divergence H/V [um]: '+ repr(self._rms_hp*1e6) + '  /  ' + repr(self._rms_vp*1e6) + '\n\n'
+        info += '   Coherent volume in H phase space: '+ repr(self._coherence_volume_h) + '\n'
+        info += '   Coherent volume in V phase space: '+ repr(self._coherence_volume_v) + '\n\n'
+        info += '   RMS diffraction limit source size [um]: '+ repr(self._diffraction_limit*1e6) + '\n'
+        info += '   FWHM diffraction limit source size [um]: '+ repr(self._diffraction_limit*2.35*1e6)
+
+        return info
 
 class SRWLightSource(LightSource):
     def __init__(self, name="Undefined", electron_beam=SRWElectronBeam(), magnetic_structure=SRWMagneticStructure()):

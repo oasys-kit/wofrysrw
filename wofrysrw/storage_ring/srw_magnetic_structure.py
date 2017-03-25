@@ -1,5 +1,3 @@
-
-
 from syned.storage_ring.magnetic_structure import MagneticStructure
 
 class SRWMagneticStructureDecorator():

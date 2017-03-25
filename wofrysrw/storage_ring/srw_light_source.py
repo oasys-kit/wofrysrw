@@ -1,8 +1,7 @@
 import numpy
-from array import array as _array
 import scipy.constants as codata
 
-from srwlib import *
+from srwlib import array, srwl, SRWLRadMesh, SRWLWfr
 
 from syned.storage_ring.light_source import LightSource
 
@@ -86,7 +85,7 @@ class SRWLightSource(LightSource):
 
         return SRWWavefront.decorateSRWWF(wfr)
 
-    def get_intensity(self, srw_wavefront):
+    def get_radiation(self, srw_wavefront):
 
         mesh0 = srw_wavefront.mesh
 
@@ -98,7 +97,7 @@ class SRWLightSource(LightSource):
 
         intensArray = numpy.zeros((eArray.size,hArray.size,vArray.size,))
         for ie in range(eArray.size):
-            arI0 = _array('f', [0]*mesh0.nx*mesh0.ny) #"flat" array to take 2D intensity data
+            arI0 = array('f', [0]*mesh0.nx*mesh0.ny) #"flat" array to take 2D intensity data
             srwl.CalcIntFromElecField(arI0, srw_wavefront, 6, INTENSITY_TYPE_MULTI_ELECTRON, 3, eArray[ie], 0, 0) # 6 is for total polarizarion; 0=H, 1=V
 
             data = numpy.ndarray(buffer=arI0, shape=(mesh0.ny, mesh0.nx),dtype=arI0.typecode)
@@ -110,9 +109,19 @@ class SRWLightSource(LightSource):
         return (eArray, hArray, vArray, intensArray)
 
     @classmethod
-    def get_spectrum_from_intensity(cls, hArray, vArray, intensArray):
-        return (intensArray.sum(axis=2)).sum(axis=1)*(vArray[1]-vArray[0])*(hArray[1]-hArray[0])
+    def get_spectrum_from_radiation(cls, h_array, v_array, radiation_matrix):
+        return (radiation_matrix.sum(axis=2)).sum(axis=1)*(h_array[1]-h_array[0])*(v_array[1]-v_array[0])
 
     @classmethod
-    def get_power_density_from_intensity(cls, eArray, intensArray):
-        return intensArray.sum(axis=0)*(eArray[1]-eArray[0])*codata.e*1e3
+    def get_power_density_from_radiation(cls, energy_array, radiation_matrix):
+        return radiation_matrix.sum(axis=0)*(energy_array[1]-energy_array[0])*codata.e*1e3
+
+    @classmethod
+    def get_total_power_from_power_density(cls, h_array, v_array, power_density_matrix):
+        area = numpy.abs(h_array[1]-h_array[0])*numpy.abs(v_array[1]-v_array[0])
+        total_power = 0
+        for i in range(0, len(h_array)):
+            for j in range(0, len(v_array)):
+                total_power += power_density_matrix[i, j]*area
+
+        return total_power

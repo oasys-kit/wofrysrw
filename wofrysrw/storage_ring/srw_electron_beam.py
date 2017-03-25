@@ -1,6 +1,6 @@
 import numpy
 
-from srwlib import *
+from srwlib import SRWLPartBeam
 
 from syned.storage_ring.electron_beam import ElectronBeam
 
@@ -12,6 +12,17 @@ class SRWElectronBeamDecorator():
     @classmethod
     def from_SRWLPartBeam(cls, srw_part_beam, electrons_per_bunch = 400):
         pass
+
+class SRWElectronBeamGeometricalProperties(object):
+    def __init__(self,
+                 electron_beam_size_h = 0.0,
+                 electron_beam_divergence_h = 0.0,
+                 electron_beam_size_v = 0.0,
+                 electron_beam_divergence_v = 0.0):
+        self._electron_beam_size_h = electron_beam_size_h
+        self._electron_beam_divergence_h = electron_beam_divergence_h
+        self._electron_beam_size_v = electron_beam_size_v
+        self._electron_beam_divergence_v = electron_beam_divergence_v
 
 class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
 
@@ -28,6 +39,19 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
                  moment_ypyp=0.0):
         super().__init__(energy_in_GeV, energy_spread, current, electrons_per_bunch, moment_xx, moment_xxp, moment_xpxp, moment_yy, moment_yyp, moment_ypyp)
 
+    def set_moments_from_electron_beam_geometrical_properties(self, electron_beam_geometrical_properties = SRWElectronBeamGeometricalProperties()):
+        self._moment_xx = electron_beam_geometrical_properties._electron_beam_size_h**2 #<(x-<x>)^2>
+        self._moment_xxp = 0 #<(x-<x>)(x'-<x'>)>
+        self._moment_xpxp = electron_beam_geometrical_properties._electron_beam_divergence_h #<(x'-<x'>)^2>
+        self._moment_yy = electron_beam_geometrical_properties._electron_beam_size_v**2 #<(y-<y>)^2>
+        self._moment_yyp = 0 #<(y-<y>)(y'-<y'>)>
+        self._moment_ypyp = electron_beam_geometrical_properties._electron_beam_divergence_v**2 #<(y'-<y'>)^2>
+
+    def get_electron_beam_geometrical_properties(self):
+        return SRWElectronBeamGeometricalProperties(electron_beam_size_h=numpy.sqrt(self._moment_xx),
+                                                    electron_beam_divergence_h=numpy.sqrt(self._moment_xpxp),
+                                                    electron_beam_size_v=numpy.sqrt(self._moment_yy),
+                                                    electron_beam_divergence_v=numpy.sqrt(self._moment_ypyp))
     def to_SRWLPartBeam(self):
         srw_electron_beam = SRWLPartBeam()
         srw_electron_beam.Iavg = self._current

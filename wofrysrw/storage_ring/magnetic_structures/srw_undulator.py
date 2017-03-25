@@ -1,4 +1,4 @@
-from srwlib import *
+from srwlib import array, SRWLMagFldH, SRWLMagFldU, SRWLMagFldC
 
 from syned.storage_ring.magnetic_structures.undulator import Undulator
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructureDecorator

@@ -21,17 +21,7 @@ undulator = SRWUndulatorLightSource("MicroXRD",
                                     period_length=period_length,
                                     number_of_periods=int(1.5/period_length))
 
-dict = undulator.get_magnetic_structure().to_dictionary()
-for elem in dict:
-    print(elem, dict[elem])
-
-dict = undulator.get_electron_beam().to_dictionary()
-for elem in dict:
-    print(elem, dict[elem])
-
 print(undulator.get_electron_beam().get_electron_beam_geometrical_properties().to_info())
-
-print("GAMMA", undulator.get_electron_beam().to_SRWLPartBeam().partStatMom1.gamma)
 
 resonance_energy = undulator.get_resonance_energy()
 
@@ -40,8 +30,6 @@ print("Harmonic Energy", resonance_energy*harmonic)
 properties = undulator.get_photon_source_properties(harmonic=harmonic)
 
 print(properties.to_info())
-
-print("BV", undulator.get_magnetic_structure().B_vertical())
 
 wf_parameters = SourceWavefrontParameters(photon_energy_min = resonance_energy*harmonic,
                                           photon_energy_max = resonance_energy*harmonic,

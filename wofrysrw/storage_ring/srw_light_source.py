@@ -85,11 +85,6 @@ class SRWLightSource(LightSource):
 
         srwl.CalcElecFieldSR(wfr, 0, self._magnetic_structure.get_SRWLMagFldC(), paramSE)
 
-        dict = wfr.__dict__
-        for elem in dict:
-            print(elem, dict[elem])
-
-
         return wfr
 
     def get_radiation(self, srw_wavefront):

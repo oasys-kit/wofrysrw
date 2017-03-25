@@ -24,6 +24,13 @@ class SRWElectronBeamGeometricalProperties(object):
         self._electron_beam_size_v = electron_beam_size_v
         self._electron_beam_divergence_v = electron_beam_divergence_v
 
+    def to_info(self):
+        info = 'Electron beam : \n'
+        info += '   RMS size H/V [um]: '+ repr(self._electron_beam_size_h*1e6) + '  /  ' + repr(self._electron_beam_size_v*1e6) + '\n'
+        info += '   RMS divergence H/V [urad]: '+ repr(self._electron_beam_divergence_h*1e6) + '  /  ' + repr(self._electron_beam_divergence_v*1e6) + '\n\n'
+
+        return info
+
 class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
 
     def __init__(self,
@@ -42,7 +49,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
     def set_moments_from_electron_beam_geometrical_properties(self, electron_beam_geometrical_properties = SRWElectronBeamGeometricalProperties()):
         self._moment_xx = electron_beam_geometrical_properties._electron_beam_size_h**2 #<(x-<x>)^2>
         self._moment_xxp = 0 #<(x-<x>)(x'-<x'>)>
-        self._moment_xpxp = electron_beam_geometrical_properties._electron_beam_divergence_h #<(x'-<x'>)^2>
+        self._moment_xpxp = electron_beam_geometrical_properties._electron_beam_divergence_h**2 #<(x'-<x'>)^2>
         self._moment_yy = electron_beam_geometrical_properties._electron_beam_size_v**2 #<(y-<y>)^2>
         self._moment_yyp = 0 #<(y-<y>)(y'-<y'>)>
         self._moment_ypyp = electron_beam_geometrical_properties._electron_beam_divergence_v**2 #<(y'-<y'>)^2>

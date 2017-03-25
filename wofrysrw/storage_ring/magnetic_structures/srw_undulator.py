@@ -12,8 +12,7 @@ class SRWUndulator(Undulator, SRWMagneticStructureDecorator):
                  number_of_periods = 1):
         Undulator.__init__(self, K_vertical, K_horizontal, period_length, number_of_periods)
 
-    def get_SRWLMagFldC(self):
-
+    def get_SRWLMagFldU(self):
         magnetic_fields = []
 
         if self._K_vertical > 0.0:
@@ -22,8 +21,9 @@ class SRWUndulator(Undulator, SRWMagneticStructureDecorator):
         if self._K_horizontal > 0.0:
             magnetic_fields.append(SRWLMagFldH(1, 'h', self.B_horizontal(), 0, -1, 1))
 
-        srw_undulator = SRWLMagFldU(magnetic_fields,
-                                    self._period_length,
-                                    self._number_of_periods)
+        return SRWLMagFldU(magnetic_fields,
+                           self._period_length,
+                           self._number_of_periods)
 
-        return SRWLMagFldC([srw_undulator], array('d', [0]), array('d', [0]), array('d', [0]))
+    def get_SRWLMagFldC(self):
+        return SRWLMagFldC([self.get_SRWLMagFldU()], array('d', [0]), array('d', [0]), array('d', [0]))

@@ -39,10 +39,10 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                          _ny=_ny,
                          _zStart=_zStart,
                          _partBeam=_partBeam)
-        if _eFin == 0 or _eStart == 0:
-            raise ValueError("Energy has not set!")
-
-        self._wavelength = angstroms_to_eV/((_eFin+_eStart)*0.5*1e10)
+        if (_eFin + _eStart) == 0:
+            self._wavelength = 0.0
+        else:
+            self._wavelength = angstroms_to_eV/((_eFin+_eStart)*0.5*1e10)
 
     def toGenericWavefront(self):
         wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
@@ -67,6 +67,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                              wavefront.get_coordinate_y()[-1],
                                              numpy.zeros_like(wavefront.get_complex_amplitude()),
                                              angstroms_to_eV/(wavefront.get_wavelength()*1e10),
+                                             angstroms_to_eV/(wavefront.get_wavelength()*1e10),
+                                             1,
                                              1.0,
                                              1.0,
                                              1e-3,
@@ -74,20 +76,26 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                              1e-3)
     @classmethod
     def decorateSRWWF(self, srwwf):
-        return SRWWavefront(_arEx=srwwf.arEx,
-                            _arEy=srwwf.arEy,
-                            _typeE=srwwf.numTypeElFld,
-                            _eStart=srwwf.mesh.eStart,
-                            _eFin=srwwf.mesh.eFin,
-                            _ne=srwwf.mesh.ne,
-                            _xStart=srwwf.mesh.xStart,
-                            _xFin=srwwf.mesh.xFin,
-                            _nx=srwwf.mesh.nx,
-                            _yStart=srwwf.mesh.yStart,
-                            _yFin=srwwf.mesh.yFin,
-                            _ny=srwwf.mesh.ny,
-                            _zStart=srwwf.mesh.zStart,
-                            _partBeam=srwwf.partBeam)
+        wavefront = SRWWavefrontFromElectricField(horizontal_start=srwwf.mesh.xStart,
+                                                  horizontal_end=srwwf.mesh.xFin,
+                                                  horizontal_efield=srwwf.arEx,
+                                                  vertical_start=srwwf.mesh.yStart,
+                                                  vertical_end=srwwf.mesh.yFin,
+                                                  vertical_efield=srwwf.arEy,
+                                                  energy_min=srwwf.mesh.eStart,
+                                                  energy_max=srwwf.mesh.eFin,
+                                                  energy_points=srwwf.mesh.ne,
+                                                  z=srwwf.mesh.zStart,
+                                                  Rx=srwwf.mesh.Rx,
+                                                  dRx=srwwf.mesh.dRx,
+                                                  Ry=srwwf.mesh.Ry,
+                                                  dRy=srwwf.mesh.dRy)
+
+
+        wavefront._typeE=srwwf.numTypeElFld
+        wavefront._partBeam=srwwf.partBeam
+
+        return wavefront
 
     # ------------------------------------------------------------------
     # ------------------------------------------------------------------
@@ -114,9 +122,20 @@ def SRWEFieldAsNumpy(swrwf):
 
     return e_field
 
-def SRWWavefrontFromElectricField(horizontal_start, horizontal_end, horizontal_efield,
-                                  vertical_start, vertical_end, vertical_efield,
-                                  energy, z, Rx, dRx, Ry, dRy):
+def SRWWavefrontFromElectricField(horizontal_start,
+                                  horizontal_end,
+                                  horizontal_efield,
+                                  vertical_start,
+                                  vertical_end,
+                                  vertical_efield,
+                                  energy_min,
+                                  energy_max,
+                                  energy_points,
+                                  z,
+                                  Rx,
+                                  dRx,
+                                  Ry,
+                                  dRy):
     """
     Creates a SRWWavefront from pi and sigma components of the electrical field.
     :param horizontal_start: Horizontal start position of the grid in m
@@ -148,9 +167,9 @@ def SRWWavefrontFromElectricField(horizontal_start, horizontal_end, horizontal_e
     srwwf = SRWWavefront(_arEx=horizontal_field,
                            _arEy=vertical_field,
                            _typeE='f',
-                           _eStart=energy,
-                           _eFin=energy,
-                           _ne=1,
+                           _eStart=energy_min,
+                           _eFin=energy_max,
+                           _ne=energy_points,
                            _xStart=horizontal_start,
                            _xFin=horizontal_end,
                            _nx=horizontal_size,

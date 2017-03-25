@@ -28,17 +28,17 @@ class SRWUndulatorLightSource(SRWLightSource):
                  period_length = 0.0,
                  number_of_periods = 1):
 
-        electron_beam = SRWElectronBeam(energy_in_GeV=electron_energy_in_GeV,
-                                        energy_spread=electron_energy_spread,
-                                        current=ring_current,
-                                        electrons_per_bunch=electrons_per_bunch)
+        __electron_beam = SRWElectronBeam(energy_in_GeV=electron_energy_in_GeV,
+                                          energy_spread=electron_energy_spread,
+                                          current=ring_current,
+                                          electrons_per_bunch=electrons_per_bunch)
 
-        electron_beam.set_moments_from_electron_beam_geometrical_properties(SRWElectronBeamGeometricalProperties(electron_beam_size_h=electron_beam_size_h,
-                                                                                                                 electron_beam_divergence_h=(emittance/electron_beam_size_h),
-                                                                                                                 electron_beam_size_v=electron_beam_size_v,
-                                                                                                                 electron_beam_divergence_v=(coupling_costant*emittance/electron_beam_size_v)))
+        __electron_beam.set_moments_from_electron_beam_geometrical_properties(SRWElectronBeamGeometricalProperties(electron_beam_size_h=electron_beam_size_h,
+                                                                                                                   electron_beam_divergence_h=(emittance/electron_beam_size_h),
+                                                                                                                   electron_beam_size_v=electron_beam_size_v,
+                                                                                                                   electron_beam_divergence_v=(coupling_costant*emittance/electron_beam_size_v)))
         super().__init__(name,
-                         electron_beam=electron_beam,
+                         electron_beam=__electron_beam,
                          magnetic_structure=SRWUndulator(K_vertical,
                                                          K_horizontal,
                                                          period_length,
@@ -87,44 +87,6 @@ class SRWUndulatorLightSource(SRWLightSource):
                  source_wavefront_parameters = SourceWavefrontParameters(),
                  max_harmonic_number = 21): #Maximum number of harmonics considered. This is critical for speed
 
-
-        B0_v = self._magnetic_structure._K_vertical/self._magnetic_structure._period_length/cte
-        B0_h = self._magnetic_structure._K_horizontal/self._magnetic_structure._period_length/cte
-
-        #***********Undulator
-        harmB_v = SRWLMagFldH() #magnetic field harmonic
-        harmB_v.n = 1 #harmonic number
-        harmB_v.h_or_v = 'v' #magnetic field plane: horzontal ('h') or vertical ('v')
-        harmB_v.B = B0_v #magnetic field amplitude [T]
-
-        harmB_h = SRWLMagFldH() #magnetic field harmonic
-        harmB_h.n = 1 #harmonic number
-        harmB_h.h_or_v = 'h' #magnetic field plane: horzontal ('h') or vertical ('v')
-        harmB_h.B = B0_h #magnetic field amplitude [T]
-
-        und = SRWLMagFldU([harmB_v, harmB_h])
-        und.per = self._magnetic_structure._period_length #period length [m]
-        und.nPer = self._magnetic_structure._number_of_periods #number of periods (will be rounded to integer)
-
-        #***********Electron Beam
-        eBeam = SRWLPartBeam()
-        eBeam.Iavg = self._electron_beam._current #average current [A]
-        eBeam.partStatMom1.x = 0. #initial transverse positions [m]
-        eBeam.partStatMom1.y = 0.
-        eBeam.partStatMom1.z = 0. #initial longitudinal positions (set in the middle of undulator)
-        eBeam.partStatMom1.xp = 0 #initial relative transverse velocities
-        eBeam.partStatMom1.yp = 0
-        eBeam.partStatMom1.gamma = self._electron_beam._energy_in_GeV*1e3/codata_mee #relative energy
-
-        #2nd order stat. moments:
-        eBeam.arStatMom2[0] = self._electron_beam._moment_xx #<(x-<x>)^2>
-        eBeam.arStatMom2[1] = self._electron_beam._moment_xxp #<(x-<x>)(x'-<x'>)>
-        eBeam.arStatMom2[2] = self._electron_beam._moment_xpxp #<(x'-<x'>)^2>
-        eBeam.arStatMom2[3] = self._electron_beam._moment_yy #<(y-<y>)^2>
-        eBeam.arStatMom2[4] = self._electron_beam._moment_yyp #<(y-<y>)(y'-<y'>)>
-        eBeam.arStatMom2[5] = self._electron_beam._moment_ypyp #<(y'-<y'>)^2>
-        eBeam.arStatMom2[10] = self._electron_beam._energy_spread**2 #<(E-<E>)^2>/<E>^2
-
         #***********Precision Parameters
         arPrecF = [0]*5 #for spectral flux vs photon energy
         arPrecF[0] = 1 #initial UR harmonic to take into account
@@ -147,7 +109,10 @@ class SRWUndulatorLightSource(SRWLightSource):
         #**********************Calculation (SRWLIB function calls)
         print('Performing Spectral Flux (Stokes parameters) calculation ... ') # , end='')
 
-        srwl.CalcStokesUR(stkF, eBeam, und, arPrecF)
+        srwl.CalcStokesUR(stkF,
+                          self._electron_beam.to_SRWLPartBeam(),
+                          self._magnetic_structure.get_SRWLMagFldU(),
+                          arPrecF)
 
         eArray = numpy.zeros(source_wavefront_parameters._photon_energy_points)
         intensArray = numpy.zeros(source_wavefront_parameters._photon_energy_points)
@@ -158,49 +123,7 @@ class SRWUndulatorLightSource(SRWLightSource):
 
         return (eArray, intensArray)
 
-    def get_power_density(self,
-                 source_wavefront_parameters = SourceWavefrontParameters(),
-                 max_harmonic_number = 21): #Maximum number of harmonics considered. This is critical for speed
-        global scanCounter
-
-        B0_v = self._magnetic_structure._K_vertical/self._magnetic_structure._period_length/cte
-        B0_h = self._magnetic_structure._K_horizontal/self._magnetic_structure._period_length/cte
-
-        #***********Undulator
-        harmB_v = SRWLMagFldH() #magnetic field harmonic
-        harmB_v.n = 1 #harmonic number
-        harmB_v.h_or_v = 'v' #magnetic field plane: horzontal ('h') or vertical ('v')
-        harmB_v.B = B0_v #magnetic field amplitude [T]
-
-        harmB_h = SRWLMagFldH() #magnetic field harmonic
-        harmB_h.n = 1 #harmonic number
-        harmB_h.h_or_v = 'h' #magnetic field plane: horzontal ('h') or vertical ('v')
-        harmB_h.B = B0_h #magnetic field amplitude [T]
-
-        und = SRWLMagFldU([harmB_v, harmB_h])
-        und.per = self._magnetic_structure._period_length #period length [m]
-        und.nPer = self._magnetic_structure._number_of_periods #number of periods (will be rounded to integer)
-
-        magFldCnt = SRWLMagFldC([und], array('d', [0]), array('d', [0]), array('d', [0]))
-
-        #***********Electron Beam
-        eBeam = SRWLPartBeam()
-        eBeam.Iavg = self._electron_beam._current #average current [A]
-        eBeam.partStatMom1.x = 0. #initial transverse positions [m]
-        eBeam.partStatMom1.y = 0.
-        eBeam.partStatMom1.z = 0. #initial longitudinal positions (set in the middle of undulator)
-        eBeam.partStatMom1.xp = 0 #initial relative transverse velocities
-        eBeam.partStatMom1.yp = 0
-        eBeam.partStatMom1.gamma = self._electron_beam._energy_in_GeV*1e3/codata_mee #relative energy
-
-        #2nd order stat. moments:
-        eBeam.arStatMom2[0] = self._electron_beam._moment_xx #<(x-<x>)^2>
-        eBeam.arStatMom2[1] = self._electron_beam._moment_xxp #<(x-<x>)(x'-<x'>)>
-        eBeam.arStatMom2[2] = self._electron_beam._moment_xpxp #<(x'-<x'>)^2>
-        eBeam.arStatMom2[3] = self._electron_beam._moment_yy #<(y-<y>)^2>
-        eBeam.arStatMom2[4] = self._electron_beam._moment_yyp #<(y-<y>)(y'-<y'>)>
-        eBeam.arStatMom2[5] = self._electron_beam._moment_ypyp #<(y'-<y'>)^2>
-        eBeam.arStatMom2[10] = self._electron_beam._energy_spread**2 #<(E-<E>)^2>/<E>^2
+    def get_power_density(self, source_wavefront_parameters = SourceWavefrontParameters()):
 
         #***********Precision Parameters
         arPrecP = [0]*5 #for power density
@@ -222,12 +145,14 @@ class SRWUndulatorLightSource(SRWLightSource):
         stkP.mesh.yFin =    source_wavefront_parameters._v_slit_gap/2 #final vertical position [m]
 
         #**********************Calculation (SRWLIB function calls)
-        srwl.CalcPowDenSR(stkP, eBeam, 0, magFldCnt, arPrecP)
+        srwl.CalcPowDenSR(stkP,
+                          self._electron_beam.to_SRWLPartBeam(),
+                          0,
+                          self._magnetic_structure.get_SRWLMagFldC(),
+                          arPrecP)
 
         hArray = numpy.zeros(stkP.mesh.nx)
         vArray = numpy.zeros(stkP.mesh.ny)
-        totPower = numpy.array(0.0)
-
         powerArray = numpy.zeros((stkP.mesh.nx,stkP.mesh.ny))
 
         # fill arrays
@@ -237,7 +162,6 @@ class SRWUndulatorLightSource(SRWLightSource):
                 ij += 1
                 xx = stkP.mesh.xStart + i*(stkP.mesh.xFin-stkP.mesh.xStart)/(stkP.mesh.nx-1)
                 yy = stkP.mesh.yStart + j*(stkP.mesh.yFin-stkP.mesh.yStart)/(stkP.mesh.ny-1)
-                totPower += stkP.arS[ij]
                 powerArray[i,j] = stkP.arS[ij]
                 hArray[i] = xx*1e3 # mm
                 vArray[j] = yy*1e3 # mm

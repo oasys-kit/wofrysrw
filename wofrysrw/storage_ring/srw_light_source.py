@@ -1,7 +1,9 @@
 import numpy
+import array
+
 import scipy.constants as codata
 
-from srwlib import array, srwl, SRWLRadMesh, SRWLWfr
+from srwlib import srwl, SRWLRadMesh, SRWLWfr, SRWLStokes
 
 from syned.storage_ring.light_source import LightSource
 
@@ -49,7 +51,7 @@ class PhotonSourceProperties(object):
     def to_info(self):
         info = 'Photon beam (convolution): \n'
         info += '   RMS size H/V [um]: '+ repr(self._rms_h*1e6) + '  /  ' + repr(self._rms_v*1e6) + '\n'
-        info += '   RMS divergence H/V [um]: '+ repr(self._rms_hp*1e6) + '  /  ' + repr(self._rms_vp*1e6) + '\n\n'
+        info += '   RMS divergence H/V [urad]: '+ repr(self._rms_hp*1e6) + '  /  ' + repr(self._rms_vp*1e6) + '\n\n'
         info += '   Coherent volume in H phase space: '+ repr(self._coherence_volume_h) + '\n'
         info += '   Coherent volume in V phase space: '+ repr(self._coherence_volume_v) + '\n\n'
         info += '   RMS diffraction limit source size [um]: '+ repr(self._diffraction_limit*1e6) + '\n'
@@ -69,21 +71,26 @@ class SRWLightSource(LightSource):
         mesh = SRWLRadMesh(source_wavefront_parameters._photon_energy_min,
                            source_wavefront_parameters._photon_energy_max,
                            source_wavefront_parameters._photon_energy_points,
-                           -source_wavefront_parameters._h_slit_gap/2,source_wavefront_parameters._h_slit_gap/2,source_wavefront_parameters._h_slit_points,
-                           -source_wavefront_parameters._v_slit_gap/2,source_wavefront_parameters._v_slit_gap/2,source_wavefront_parameters._v_slit_points, 
+                           -source_wavefront_parameters._h_slit_gap/2, source_wavefront_parameters._h_slit_gap/2, source_wavefront_parameters._h_slit_points,
+                           -source_wavefront_parameters._v_slit_gap/2, source_wavefront_parameters._v_slit_gap/2, source_wavefront_parameters._v_slit_points,
                            source_wavefront_parameters._distance)
 
 
         paramSE = [1, 0.01, 0, 0, 50000, 1, 0]
 
-        wfr = SRWLWfr()
+        wfr = SRWWavefront()
         wfr.mesh = mesh
         wfr.partBeam = self._electron_beam.to_SRWLPartBeam()
         wfr.allocate(mesh.ne, mesh.nx, mesh.ny)
 
         srwl.CalcElecFieldSR(wfr, 0, self._magnetic_structure.get_SRWLMagFldC(), paramSE)
 
-        return SRWWavefront.decorateSRWWF(wfr)
+        dict = wfr.__dict__
+        for elem in dict:
+            print(elem, dict[elem])
+
+
+        return wfr
 
     def get_radiation(self, srw_wavefront):
 
@@ -91,13 +98,13 @@ class SRWLightSource(LightSource):
 
         INTENSITY_TYPE_MULTI_ELECTRON=1
 
-        hArray=numpy.linspace(srw_wavefront.mesh.xStart,srw_wavefront.mesh.xFin, srw_wavefront.mesh.nx)
-        vArray=numpy.linspace(srw_wavefront.mesh.yStart,srw_wavefront.mesh.yFin, srw_wavefront.mesh.ny)
-        eArray=numpy.linspace(srw_wavefront.mesh.eStart,srw_wavefront.mesh.eFin, srw_wavefront.mesh.ne)
+        hArray=numpy.linspace(srw_wavefront.mesh.xStart, srw_wavefront.mesh.xFin, srw_wavefront.mesh.nx)
+        vArray=numpy.linspace(srw_wavefront.mesh.yStart, srw_wavefront.mesh.yFin, srw_wavefront.mesh.ny)
+        eArray=numpy.linspace(srw_wavefront.mesh.eStart, srw_wavefront.mesh.eFin, srw_wavefront.mesh.ne)
 
         intensArray = numpy.zeros((eArray.size,hArray.size,vArray.size,))
         for ie in range(eArray.size):
-            arI0 = array('f', [0]*mesh0.nx*mesh0.ny) #"flat" array to take 2D intensity data
+            arI0 = array.array('f', [0]*mesh0.nx*mesh0.ny) #"flat" array to take 2D intensity data
             srwl.CalcIntFromElecField(arI0, srw_wavefront, 6, INTENSITY_TYPE_MULTI_ELECTRON, 3, eArray[ie], 0, 0) # 6 is for total polarizarion; 0=H, 1=V
 
             data = numpy.ndarray(buffer=arI0, shape=(mesh0.ny, mesh0.nx),dtype=arI0.typecode)

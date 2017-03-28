@@ -92,10 +92,10 @@ def git_version():
     return GIT_REVISION
 
 
-def write_version_py(filename='wofry/version.py'):
+def write_version_py(filename='wofrysrw/version.py'):
     # Copied from numpy setup.py
     cnt = """
-# THIS FILE IS GENERATED FROM wofry SETUP.PY
+# THIS FILE IS GENERATED FROM wofrysrw SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
 full_version = '%(full_version)s'
@@ -109,9 +109,9 @@ if not release:
     FULLVERSION = VERSION
     if os.path.exists('.git'):
         GIT_REVISION = git_version()
-    elif os.path.exists('wofry/version.py'):
+    elif os.path.exists('wofrysrw/version.py'):
         # must be a source distribution, use existing version file
-        version = imp.load_source("wofry.version", "wofry/version.py")
+        version = imp.load_source("wofrysrw.version", "wofrysrw/version.py")
         GIT_REVISION = version.git_revision
     else:
         GIT_REVISION = "Unknown"
@@ -130,7 +130,7 @@ if not release:
 
 
 PACKAGES = [
-    "wofry",
+    "wofrysrw",
 ]
 
 PACKAGE_DATA = {

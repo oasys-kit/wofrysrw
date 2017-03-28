@@ -28,12 +28,12 @@ wf_parameters = SourceWavefrontParameters(photon_energy_min = 13000,
                                           photon_energy_points=1,
                                           h_slit_gap = 15e-3,
                                           v_slit_gap = 2e-3,
-                                          h_slit_points=100,
-                                          v_slit_points=10,
-                                          distance = 10.0)#,
-                                          #srw_precision_parameters=SRWPrecisionParameters(sr_method=2,
-                                          #                                                relative_precision=0.01,
-                                          #                                                sampling_factor_for_adjusting_nx_ny=0.2))
+                                          h_slit_points=1000,
+                                          v_slit_points=100,
+                                          distance = 10.0,
+                                          srw_precision_parameters=SRWPrecisionParameters(sr_method=2,
+                                                                                          relative_precision=0.001,
+                                                                                          sampling_factor_for_adjusting_nx_ny=0.2))
 
 e, h, v, i = wiggler.get_radiation(wiggler.get_SRW_Wavefront(wf_parameters))
 

@@ -26,14 +26,14 @@ print(wiggler.get_electron_beam().get_electron_beam_geometrical_properties().to_
 wf_parameters = SourceWavefrontParameters(photon_energy_min = 13000,
                                           photon_energy_max = 13000,
                                           photon_energy_points=1,
-                                          h_slit_gap = 1.5e-3,
-                                          v_slit_gap = 0.2e-3,
+                                          h_slit_gap = 15e-3,
+                                          v_slit_gap = 2e-3,
                                           h_slit_points=100,
                                           v_slit_points=10,
-                                          distance = 2.0,
-                                          srw_precision_parameters=SRWPrecisionParameters(sr_method=2,
-                                                                                          relative_precision=0.01,
-                                                                                          sampling_factor_for_adjusting_nx_ny=0.2))
+                                          distance = 10.0)#,
+                                          #srw_precision_parameters=SRWPrecisionParameters(sr_method=2,
+                                          #                                                relative_precision=0.01,
+                                          #                                                sampling_factor_for_adjusting_nx_ny=0.2))
 
 e, h, v, i = wiggler.get_radiation(wiggler.get_SRW_Wavefront(wf_parameters))
 

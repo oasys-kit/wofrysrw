@@ -1,15 +1,12 @@
 import numpy
 
-from srwlib import srwl, array, SRWLMagFldU, SRWLMagFldH, SRWLMagFldC, SRWLPartBeam, SRWLStokes
+from srwlib import srwl, SRWLStokes
 
 from wofrysrw.storage_ring.srw_light_source import SRWLightSource, PhotonSourceProperties, SourceWavefrontParameters
 from wofrysrw.storage_ring.magnetic_structures.srw_undulator import SRWUndulator
-from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
 
 import scipy.constants as codata
-codata_mee = (codata.m_e * codata.c**2 / codata.e) * 1e-6 # electron mass energy equivalent in MeV
 m2ev = codata.c * codata.h / codata.e      # lambda(m)  = m2eV / energy(eV)
-cte = codata.e/(2*numpy.pi*codata.electron_mass*codata.c)
 
 class SRWUndulatorLightSource(SRWLightSource):
 
@@ -28,17 +25,15 @@ class SRWUndulatorLightSource(SRWLightSource):
                  period_length = 0.0,
                  number_of_periods = 1):
 
-        __electron_beam = SRWElectronBeam(energy_in_GeV=electron_energy_in_GeV,
-                                          energy_spread=electron_energy_spread,
-                                          current=ring_current,
-                                          electrons_per_bunch=electrons_per_bunch)
-
-        __electron_beam.set_moments_from_electron_beam_geometrical_properties(SRWElectronBeamGeometricalProperties(electron_beam_size_h=electron_beam_size_h,
-                                                                                                                   electron_beam_divergence_h=(emittance/electron_beam_size_h),
-                                                                                                                   electron_beam_size_v=electron_beam_size_v,
-                                                                                                                   electron_beam_divergence_v=(coupling_costant*emittance/electron_beam_size_v)))
         super().__init__(name,
-                         electron_beam=__electron_beam,
+                         electron_energy_in_GeV = electron_energy_in_GeV,
+                         electron_energy_spread = electron_energy_spread,
+                         ring_current = ring_current,
+                         electrons_per_bunch = electrons_per_bunch,
+                         electron_beam_size_h=electron_beam_size_h,
+                         electron_beam_size_v=electron_beam_size_v,
+                         emittance=emittance,
+                         coupling_costant=coupling_costant,
                          magnetic_structure=SRWUndulator(K_vertical,
                                                          K_horizontal,
                                                          period_length,
@@ -47,21 +42,18 @@ class SRWUndulatorLightSource(SRWLightSource):
     def get_length(self):
         return self._magnetic_structure._period_length*self._magnetic_structure._number_of_periods
 
-    def get_gamma(self):
-        return self._electron_beam._energy_in_GeV / (codata_mee * 1e-3)
-
     def get_resonance_wavelength(self):
         return (1 + (self._magnetic_structure._K_vertical**2 + self._magnetic_structure._K_horizontal**2) / 2.0) / 2 / self.get_gamma()**2 * self._magnetic_structure._period_length
 
     def get_resonance_energy(self):
         return m2ev / self.get_resonance_wavelength()
 
-    # calculate sizes of the photon undulator beam
-    # see formulas 25 & 30 in Elleaume (Onaki & Elleaume)
     def get_photon_source_properties(self, harmonic):
         wavelength = m2ev/(harmonic*self.get_resonance_energy())
         undulator_length = self.get_length()
 
+        # calculate sizes of the photon undulator beam
+        # see formulas 25 & 30 in Elleaume (Onaki & Elleaume)
         s_phot = 2.740/(4e0*numpy.pi)*numpy.sqrt(undulator_length*wavelength)
         sp_phot = 0.69*numpy.sqrt(wavelength/undulator_length)
 

@@ -81,3 +81,5 @@ plot_contour(p,h,v,title="%s SRW, total power = %g"%("Micro XRD", total_power),x
              contour_levels=numpy.linspace(0,numpy.max([p.max()]), 100), cmap=None,cbar=1,cbar_title="Power density [$W/mm^2$]",show=1)
 
 plot_surface(p,h,v,  title="%s SRW, total power = %g"%("Micro XRD", total_power),xtitle="H [mm]",ytitle="V [mm]",show=1)
+
+

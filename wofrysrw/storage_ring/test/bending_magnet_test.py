@@ -31,7 +31,7 @@ wf_parameters = SourceWavefrontParameters(photon_energy_min = 13000,
                                           distance = 10.0,
                                           srw_precision_parameters=SRWPrecisionParameters(relative_precision=0.001))
 
-e, h, v, i = bm.get_radiation(bm.get_SRW_Wavefront(wf_parameters))
+e, h, v, i = bm.get_flux_per_unit_surface(bm.get_SRW_Wavefront(wf_parameters))
 
 
 plot_contour(i[int(int(e.size/2))],h*1e3,v*1e3,title="%s SRW; E=%g eV"%("MCX",e[int(e.size/2)]),xtitle="H [mm]",ytitle="V [mm]",plot_points=0,

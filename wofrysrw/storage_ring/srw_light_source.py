@@ -216,9 +216,29 @@ class SRWLightSource(LightSource):
 
         return wfr
 
-    def get_flux_per_unit_surface(self, srw_wavefront, multi_electron=True):
+
+    def get_intensity_from_electric_field(self,
+                                          output_array,
+                                          srw_wavefront,
+                                          flux_calculation_parameters = FluxCalculationParameters()):
+        srwl.CalcIntFromElecField(output_array,
+                                  srw_wavefront,
+                                  flux_calculation_parameters._polarization_component_to_be_extracted,
+                                  flux_calculation_parameters._calculation_type,
+                                  flux_calculation_parameters._type_of_dependence,
+                                  flux_calculation_parameters._fixed_input_photon_energy_or_time,
+                                  flux_calculation_parameters._fixed_horizontal_position,
+                                  flux_calculation_parameters._fixed_vertical_position)
+
+        return output_array
+
+
+    def get_flux_per_unit_surface(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
+
         flux_calculation_parameters=FluxCalculationParameters(calculation_type                  = 1 if multi_electron else 0,
                                                               type_of_dependence                = 3)
+
+        srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
 
         h_array=numpy.linspace(srw_wavefront.mesh.xStart, srw_wavefront.mesh.xFin, srw_wavefront.mesh.nx)
         v_array=numpy.linspace(srw_wavefront.mesh.yStart, srw_wavefront.mesh.yFin, srw_wavefront.mesh.ny)
@@ -240,9 +260,12 @@ class SRWLightSource(LightSource):
         
         return (e_array, h_array, v_array, flux_per_unit_surface_array)
 
-    def get_spectral_flux(self, srw_wavefront, multi_electron=True):
+    def get_spectral_flux(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
+
         flux_calculation_parameters=FluxCalculationParameters(calculation_type   = 1 if multi_electron else 0,
                                                               type_of_dependence = 0)
+
+        srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
 
         output_array = array.array('f', [0]*srw_wavefront.mesh.ne)
 
@@ -261,18 +284,6 @@ class SRWLightSource(LightSource):
         return (energy_array, spectral_flux_array)
 
 
-    def get_intensity_from_electric_field(self, output_array, srw_wavefront,  flux_calculation_parameters=FluxCalculationParameters()):
-    
-        srwl.CalcIntFromElecField(output_array, 
-                                  srw_wavefront, 
-                                  flux_calculation_parameters._polarization_component_to_be_extracted, 
-                                  flux_calculation_parameters._calculation_type, 
-                                  flux_calculation_parameters._type_of_dependence, 
-                                  flux_calculation_parameters._fixed_input_photon_energy_or_time, 
-                                  flux_calculation_parameters._fixed_horizontal_position, 
-                                  flux_calculation_parameters._fixed_vertical_position) 
-
-        return output_array
 
     def get_power_density(self,
                           source_wavefront_parameters = SourceWavefrontParameters(),

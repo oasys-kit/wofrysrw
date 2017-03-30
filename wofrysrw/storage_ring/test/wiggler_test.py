@@ -34,7 +34,7 @@ wf_parameters = SourceWavefrontParameters(photon_energy_min = 13000,
                                                                                                       number_of_points_for_trajectory_calculation=20000,
                                                                                                       sampling_factor_for_adjusting_nx_ny=-1))
 
-e, h, v, i = wiggler.get_flux_per_unit_surface(wiggler.get_SRW_Wavefront(wf_parameters))
+e, h, v, i = wiggler.get_flux_per_unit_surface(source_wavefront_parameters=wf_parameters)
 
 
 plot_contour(i[int(int(e.size/2))],h*1e3,v*1e3,title="%s SRW; E=%g eV"%("XRD1",e[int(e.size/2)]),xtitle="H [mm]",ytitle="V [mm]",plot_points=0,

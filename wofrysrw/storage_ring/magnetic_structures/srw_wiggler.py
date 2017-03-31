@@ -38,7 +38,7 @@ class SRWWiggler(Wiggler, SRWMagneticStructureDecorator):
                                 _ny=1,
                                 _nz=n_points,
                                 _rz=self._period_length,
-                                _nRep=self._number_of_periods,
+                                _nRep=int(self._number_of_periods),
                                 _interp=1)
         else:
             magnetic_fields = []
@@ -51,4 +51,4 @@ class SRWWiggler(Wiggler, SRWMagneticStructureDecorator):
 
             return SRWLMagFldU(magnetic_fields,
                                self._period_length,
-                               self._number_of_periods)
+                               int(self._number_of_periods))

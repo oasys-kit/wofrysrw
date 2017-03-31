@@ -26,15 +26,15 @@ wf_parameters = SourceWavefrontParameters(photon_energy_min = 13000,
                                           photon_energy_points=1,
                                           h_slit_gap = 10e-3,
                                           v_slit_gap = 2e-3,
-                                          h_slit_points=2000,
-                                          v_slit_points=250,
+                                          h_slit_points=500,
+                                          v_slit_points=50,
                                           distance = 10.0,
                                           wavefront_precision_parameters=WavefrontPrecisionParameters(sr_method=2,
                                                                                                       relative_precision=0.01,
                                                                                                       number_of_points_for_trajectory_calculation=20000,
                                                                                                       sampling_factor_for_adjusting_nx_ny=-1))
 
-e, h, v, i = wiggler.get_flux_per_unit_surface(source_wavefront_parameters=wf_parameters)
+e, h, v, i = wiggler.get_flux_per_unit_surface(source_wavefront_parameters=wf_parameters, multi_electron=False)
 
 
 plot_contour(i[int(int(e.size/2))],h*1e3,v*1e3,title="%s SRW; E=%g eV"%("XRD1",e[int(e.size/2)]),xtitle="H [mm]",ytitle="V [mm]",plot_points=0,

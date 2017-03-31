@@ -1,6 +1,6 @@
 import numpy
 
-from srwlib import srwl, SRWLStokes
+from srwlib import srwl
 
 from wofrysrw.storage_ring.srw_light_source import SRWLightSource, PhotonSourceProperties, SourceWavefrontParameters
 from wofrysrw.storage_ring.magnetic_structures.srw_undulator import SRWUndulator

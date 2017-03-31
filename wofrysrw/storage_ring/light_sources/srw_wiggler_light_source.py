@@ -33,6 +33,8 @@ class SRWWigglerLightSource(SRWLightSource):
                                                        period_length,
                                                        number_of_periods))
 
+        self._electron_beam.set_drift_distance(-1.1*self.get_length()/2)
+
     def get_length(self):
         return self._magnetic_structure._period_length*self._magnetic_structure._number_of_periods
 

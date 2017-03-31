@@ -5,6 +5,7 @@ from srwlib import srwl, SRWLRadMesh, SRWLStokes
 
 from syned.storage_ring.light_source import LightSource
 
+from wofry.elements.decorators import WOLightSourceDecorator
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
@@ -98,6 +99,15 @@ class SourceWavefrontParameters(object):
 
         return stk
 
+class PolarizationComponent:
+    LINEAR_HORIZONTAL  = 0
+    LINEAR_VERTICAL    = 1
+    LINEAR_45_DEGREES  = 2
+    LINEAR_135_DEGREES = 3
+    CIRCULAR_RIGHT     = 4
+    CIRCULAR_LEFT      = 5
+    TOTAL              = 6
+
 '''
 :param polarization_component_to_be_extracted:
                =0 -Linear Horizontal;
@@ -173,7 +183,7 @@ class PhotonSourceProperties(object):
 
         return info
 
-class SRWLightSource(LightSource):
+class SRWLightSource(LightSource, WOLightSourceDecorator):
     def __init__(self,
                  name="Undefined",
                  electron_energy_in_GeV = 1.0,
@@ -203,8 +213,11 @@ class SRWLightSource(LightSource):
     def get_photon_source_properties(self):
         return NotImplementedError("must be implemented in subclasses")
 
-    def get_SRW_Wavefront(self, source_wavefront_parameters = SourceWavefrontParameters()):
+    # from Wofry Decorator
+    def get_wavefront(self, wavefront_parameters):
+        return self.get_SRW_Wavefront(source_wavefront_parameters=wavefront_parameters).toGenericWavefront()
 
+    def get_SRW_Wavefront(self, source_wavefront_parameters = SourceWavefrontParameters()):
         mesh = source_wavefront_parameters.to_SRWRadMesh()
 
         wfr = SRWWavefront()
@@ -235,7 +248,7 @@ class SRWLightSource(LightSource):
 
     def get_flux_per_unit_surface(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
 
-        flux_calculation_parameters=FluxCalculationParameters(calculation_type                  = 1 if multi_electron else 0,
+        flux_calculation_parameters=FluxCalculationParameters(calculation_type                  = 1 if multi_electron==True else 0,
                                                               type_of_dependence                = 3)
 
         srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)

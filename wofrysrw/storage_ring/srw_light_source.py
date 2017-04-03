@@ -10,8 +10,6 @@ from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
-
-
 class WavefrontPrecisionParameters(object):
     def __init__(self,
                  sr_method = 1,  #SR calculation method: 0- "manual", 1- "auto-undulator", 2- "auto-wiggler"

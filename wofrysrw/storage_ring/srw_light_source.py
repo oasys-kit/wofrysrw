@@ -188,8 +188,8 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
                  electron_energy_spread = 0.0,
                  ring_current = 0.1,
                  electrons_per_bunch = 400,
-                 electron_beam_size_h=0.0,
-                 electron_beam_size_v=0.0,
+                 electron_beam_size_h=1e-5,
+                 electron_beam_size_v=1e-5,
                  emittance=0.0,
                  coupling_costant=0.0,
                  magnetic_structure=SRWMagneticStructure()):

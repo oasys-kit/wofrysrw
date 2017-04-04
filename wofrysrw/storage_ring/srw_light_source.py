@@ -327,7 +327,7 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
 
     @classmethod
     def get_total_power_from_power_density(cls, h_array, v_array, power_density_matrix):
-        area = numpy.abs(h_array[1]-h_array[0])*numpy.abs(v_array[1]-v_array[0])
+        area = (numpy.abs(h_array[1]-h_array[0])*numpy.abs(v_array[1]-v_array[0]))*1e6
         total_power = 0
         for i in range(0, len(h_array)):
             for j in range(0, len(v_array)):

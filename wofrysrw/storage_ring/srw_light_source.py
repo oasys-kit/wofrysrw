@@ -223,7 +223,10 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
         wfr.mesh = mesh
         wfr.partBeam = self._electron_beam.to_SRWLPartBeam()
 
-        srwl.CalcElecFieldSR(wfr, 0, self._magnetic_structure.get_SRWLMagFldC(), source_wavefront_parameters._wavefront_precision_parameters.to_SRW_array())
+        srwl.CalcElecFieldSR(wfr,
+                             0,
+                             self._magnetic_structure.get_SRWLMagFldC(),
+                             source_wavefront_parameters._wavefront_precision_parameters.to_SRW_array())
 
         return wfr
 

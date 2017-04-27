@@ -36,7 +36,7 @@ class SRWUndulatorLightSource(SRWLightSource):
                  electron_energy_in_GeV = 1.0,
                  electron_energy_spread = 0.0,
                  ring_current = 0.1,
-                 electrons_per_bunch = 400,
+                 number_of_bunches = 400,
                  electron_beam_size_h=1e-5,
                  electron_beam_size_v=1e-5,
                  emittance=0.0,
@@ -50,7 +50,7 @@ class SRWUndulatorLightSource(SRWLightSource):
                          electron_energy_in_GeV = electron_energy_in_GeV,
                          electron_energy_spread = electron_energy_spread,
                          ring_current = ring_current,
-                         electrons_per_bunch = electrons_per_bunch,
+                         number_of_bunches = number_of_bunches,
                          electron_beam_size_h=electron_beam_size_h,
                          electron_beam_size_v=electron_beam_size_v,
                          emittance=emittance,
@@ -64,7 +64,7 @@ class SRWUndulatorLightSource(SRWLightSource):
         return self._magnetic_structure._period_length*self._magnetic_structure._number_of_periods
 
     def get_resonance_wavelength(self):
-        return (1 + (self._magnetic_structure._K_vertical**2 + self._magnetic_structure._K_horizontal**2) / 2.0) / 2 / self.get_gamma()**2 * self._magnetic_structure._period_length
+        return self._magnetic_structure.resonance_wavelength(self._electron_beam.gamma())
 
     def get_resonance_energy(self):
         return m2ev / self.get_resonance_wavelength()

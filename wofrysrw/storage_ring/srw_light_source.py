@@ -187,7 +187,7 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
                  electron_energy_in_GeV = 1.0,
                  electron_energy_spread = 0.0,
                  ring_current = 0.1,
-                 electrons_per_bunch = 400,
+                 number_of_bunches = 400,
                  electron_beam_size_h=1e-5,
                  electron_beam_size_v=1e-5,
                  emittance=0.0,
@@ -196,7 +196,7 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
         electron_beam = SRWElectronBeam(energy_in_GeV=electron_energy_in_GeV,
                                         energy_spread=electron_energy_spread,
                                         current=ring_current,
-                                        electrons_per_bunch=electrons_per_bunch)
+                                        number_of_bunches=number_of_bunches)
 
         electron_beam.set_moments_from_electron_beam_geometrical_properties(SRWElectronBeamGeometricalProperties(electron_beam_size_h=electron_beam_size_h,
                                                                                                                  electron_beam_divergence_h=(emittance/electron_beam_size_h),

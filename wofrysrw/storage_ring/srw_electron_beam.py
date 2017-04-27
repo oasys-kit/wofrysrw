@@ -10,7 +10,7 @@ class SRWElectronBeamDecorator():
         pass
 
     @classmethod
-    def from_SRWLPartBeam(cls, srw_part_beam, electrons_per_bunch = 400):
+    def from_SRWLPartBeam(cls, srw_part_beam, number_of_bunches = 400):
         pass
 
 class SRWElectronBeamGeometricalProperties(object):
@@ -37,7 +37,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
                  energy_in_GeV = 1.0,
                  energy_spread = 0.0,
                  current = 0.1,
-                 electrons_per_bunch = 400,
+                 number_of_bunches = 400,
                  moment_xx=0.0,
                  moment_xxp=0.0,
                  moment_xpxp=0.0,
@@ -45,7 +45,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
                  moment_yyp=0.0,
                  moment_ypyp=0.0,
                  drift_distance=0.0):
-        super().__init__(energy_in_GeV, energy_spread, current, electrons_per_bunch, moment_xx, moment_xxp, moment_xpxp, moment_yy, moment_yyp, moment_ypyp)
+        super().__init__(energy_in_GeV, energy_spread, current, number_of_bunches, moment_xx, moment_xxp, moment_xpxp, moment_yy, moment_yyp, moment_ypyp)
 
         self._drift_distance = drift_distance
 
@@ -90,10 +90,10 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
         return srw_electron_beam
 
     @classmethod
-    def from_SRWLPartBeam(cls, srw_part_beam, electrons_per_bunch = 400):
+    def from_SRWLPartBeam(cls, srw_part_beam, number_of_bunches = 400):
         srw_electron_beam = SRWElectronBeam(energy_spread = numpy.sqrt(srw_part_beam.arStatMom2[10]),
                                             current = srw_part_beam.Iavg,
-                                            electrons_per_bunch = electrons_per_bunch,
+                                            number_of_bunches = number_of_bunches,
                                             moment_xx  = srw_part_beam.arStatMom2[0],
                                             moment_xxp = srw_part_beam.arStatMom2[1],
                                             moment_xpxp= srw_part_beam.arStatMom2[2],

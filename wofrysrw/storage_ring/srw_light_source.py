@@ -190,8 +190,8 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
                  number_of_bunches = 400,
                  electron_beam_size_h=1e-5,
                  electron_beam_size_v=1e-5,
-                 emittance=0.0,
-                 coupling_costant=0.0,
+                 electron_beam_divergence_h=0.0,
+                 electron_beam_divergence_v=0.0,
                  magnetic_structure=SRWMagneticStructure()):
         electron_beam = SRWElectronBeam(energy_in_GeV=electron_energy_in_GeV,
                                         energy_spread=electron_energy_spread,
@@ -199,9 +199,9 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
                                         number_of_bunches=number_of_bunches)
 
         electron_beam.set_moments_from_electron_beam_geometrical_properties(SRWElectronBeamGeometricalProperties(electron_beam_size_h=electron_beam_size_h,
-                                                                                                                 electron_beam_divergence_h=(emittance/electron_beam_size_h),
+                                                                                                                 electron_beam_divergence_h=electron_beam_divergence_h,
                                                                                                                  electron_beam_size_v=electron_beam_size_v,
-                                                                                                                 electron_beam_divergence_v=(coupling_costant*emittance/electron_beam_size_v)))
+                                                                                                                 electron_beam_divergence_v=electron_beam_divergence_v))
 
         LightSource.__init__(self, name, electron_beam, magnetic_structure)
 

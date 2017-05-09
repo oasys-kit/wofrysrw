@@ -230,7 +230,6 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
 
         return wfr
 
-
     def get_intensity_from_electric_field(self,
                                           output_array,
                                           srw_wavefront,

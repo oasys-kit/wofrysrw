@@ -2,7 +2,9 @@ from srwlib import *
 
 import numpy
 import scipy.constants as codata
-angstroms_to_eV = codata.h*codata.c/codata.e*1e10
+
+m_to_eV = codata.h*codata.c/codata.e
+#angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 
 from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
 from wofry.propagator.decorators import WavefrontDecorator
@@ -39,22 +41,26 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                          _ny=_ny,
                          _zStart=_zStart,
                          _partBeam=_partBeam)
-        if (_eFin + _eStart) == 0:
-            self._wavelength = 0.0
+
+
+    def get_wavelength(self):
+        if (self.mesh.eFin + self.mesh.eStart) == 0:
+            return 0.0
         else:
-            self._wavelength = angstroms_to_eV/((_eFin+_eStart)*0.5*1e10)
+            return m_to_eV/((self.mesh.eFin + self.mesh.eStart)*0.5)
 
     def toGenericWavefront(self):
         wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
                                                                        self.mesh.xFin,
                                                                        self.mesh.yStart,
                                                                        self.mesh.yFin,
-                                                                       number_of_points=(self.mesh.nx,self.mesh.ny),
-                                                                       wavelength=self._wavelength)
+                                                                       number_of_points=(self.mesh.nx, self.mesh.ny),
+                                                                       wavelength=self.get_wavelength())
 
-        amplitude = SRWEFieldAsNumpy(self)
-        amplitude = amplitude[0,:,:,0]
-        wavefront.set_complex_amplitude(amplitude)
+        print("Shape", wavefront.size())
+        print("WL", m_to_eV, wavefront.get_wavelength(), wavefront.get_photon_energy())
+
+        wavefront.set_complex_amplitude(SRWEFieldAsNumpy(swrwf=self)[0, :, :, 0])
 
         return wavefront
 
@@ -66,8 +72,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                              wavefront.get_coordinate_y()[0],
                                              wavefront.get_coordinate_y()[-1],
                                              numpy.zeros_like(wavefront.get_complex_amplitude()),
-                                             angstroms_to_eV/(wavefront.get_wavelength()*1e10),
-                                             angstroms_to_eV/(wavefront.get_wavelength()*1e10),
+                                             m_to_eV*wavefront.get_wavelength(),
+                                             m_to_eV*wavefront.get_wavelength()*1e10,
                                              1,
                                              1.0,
                                              1.0,

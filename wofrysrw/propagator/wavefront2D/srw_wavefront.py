@@ -57,9 +57,6 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                        number_of_points=(self.mesh.nx, self.mesh.ny),
                                                                        wavelength=self.get_wavelength())
 
-        print("Shape", wavefront.size())
-        print("WL", m_to_eV, wavefront.get_wavelength(), wavefront.get_photon_energy())
-
         wavefront.set_complex_amplitude(SRWEFieldAsNumpy(swrwf=self)[0, :, :, 0])
 
         return wavefront
@@ -124,7 +121,7 @@ def SRWEFieldAsNumpy(swrwf):
     x_polarization = SRWArrayToNumpy(swrwf.arEx, dim_x, dim_y, number_energies)
     y_polarization = SRWArrayToNumpy(swrwf.arEy, dim_x, dim_y, number_energies)
 
-    e_field = numpy.concatenate((x_polarization,y_polarization), 3)
+    e_field = numpy.concatenate((x_polarization, y_polarization), 3)
 
     return e_field
 

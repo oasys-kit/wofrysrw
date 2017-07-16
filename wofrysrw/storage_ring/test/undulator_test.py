@@ -40,7 +40,7 @@ wf_parameters = SourceWavefrontParameters(photon_energy_min = resonance_energy*h
                                           v_slit_points=51,
                                           distance = 10.0)
 
-e, h, v, i = undulator.get_flux_per_unit_surface(source_wavefront_parameters=wf_parameters)
+e, h, v, i = undulator.get_intensity(source_wavefront_parameters=wf_parameters)
 
 plot_contour(i[int(e.size/2)],h*1e3,v*1e3,title="%s SRW; E=%g eV"%("MicroXRD",e[int(e.size/2)]),xtitle="H [mm]",ytitle="V [mm]",plot_points=0,
              contour_levels=numpy.linspace(0, i.max(), 20), cmap=None, cbar=1, cbar_title="Intensity [ph/s/.1%bw/mm^2]",show=1)

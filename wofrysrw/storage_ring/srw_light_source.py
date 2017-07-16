@@ -83,16 +83,16 @@ class SourceWavefrontParameters(object):
     def to_SRWRadMesh(self):
         return SRWLRadMesh(self._photon_energy_min,
                            self._photon_energy_max,
-                           self._photon_energy_points,
-                           -self._h_slit_gap/2, self._h_slit_gap/2, self._h_slit_points,
-                           -self._v_slit_gap/2, self._v_slit_gap/2, self._v_slit_points,
+                           int(self._photon_energy_points),
+                           -self._h_slit_gap/2, self._h_slit_gap/2, int(self._h_slit_points),
+                           -self._v_slit_gap/2, self._v_slit_gap/2, int(self._v_slit_points),
                            self._distance)
 
     def to_SRWLStokes(self):
         stk = SRWLStokes()
-        stk.allocate(self._photon_energy_points,
-                     self._h_slit_points,
-                     self._v_slit_points)
+        stk.allocate(int(self._photon_energy_points),
+                     int(self._h_slit_points),
+                     int(self._v_slit_points))
         stk.mesh = self.to_SRWRadMesh()
 
         return stk
@@ -230,7 +230,8 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
 
         return wfr
 
-    def get_intensity_from_electric_field(self,
+    @classmethod
+    def get_intensity_from_electric_field(cls,
                                           output_array,
                                           srw_wavefront,
                                           flux_calculation_parameters = FluxCalculationParameters()):
@@ -246,7 +247,7 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
         return output_array
 
 
-    def get_flux_per_unit_surface(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
+    def get_intensity(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
 
         flux_calculation_parameters=FluxCalculationParameters(calculation_type                  = 1 if multi_electron==True else 0,
                                                               type_of_dependence                = 3)
@@ -257,21 +258,21 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
         v_array=numpy.linspace(srw_wavefront.mesh.yStart, srw_wavefront.mesh.yFin, srw_wavefront.mesh.ny)
         e_array=numpy.linspace(srw_wavefront.mesh.eStart, srw_wavefront.mesh.eFin, srw_wavefront.mesh.ne)
 
-        flux_per_unit_surface_array = numpy.zeros((e_array.size, h_array.size, v_array.size))
+        intensity_array = numpy.zeros((e_array.size, h_array.size, v_array.size))
 
         for ie in range(e_array.size):
             output_array = array.array('f', [0]*srw_wavefront.mesh.nx*srw_wavefront.mesh.ny) #"flat" array to take 2D intensity data
 
             flux_calculation_parameters._fixed_input_photon_energy_or_time = e_array[ie]
-            self.get_intensity_from_electric_field(output_array, srw_wavefront, flux_calculation_parameters)
+            SRWLightSource.get_intensity_from_electric_field(output_array, srw_wavefront, flux_calculation_parameters)
 
             data = numpy.ndarray(buffer=output_array, shape=(srw_wavefront.mesh.ny, srw_wavefront.mesh.nx),dtype=output_array.typecode)
 
             for ix in range(h_array.size):
                 for iy in range(v_array.size):
-                    flux_per_unit_surface_array[ie,ix,iy,] = data[iy,ix]
+                    intensity_array[ie, ix, iy] = data[iy, ix]
         
-        return (e_array, h_array, v_array, flux_per_unit_surface_array)
+        return (e_array, h_array, v_array, intensity_array)
 
     def get_spectral_flux(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
 
@@ -296,7 +297,16 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
 
         return (energy_array, spectral_flux_array)
 
+    @classmethod
+    def get_flux_from_spectral_flux(cls, energy_array, spectral_flux_array):
+        flux_array = numpy.zeros(energy_array.size)
 
+        de = energy_array[1] - energy_array[0]
+
+        for ie in range(energy_array.size):
+            flux_array[ie] = spectral_flux_array[ie] * de
+
+        return flux_array
 
     def get_power_density(self,
                           source_wavefront_parameters = SourceWavefrontParameters(),

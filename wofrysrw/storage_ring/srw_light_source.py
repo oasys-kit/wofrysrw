@@ -274,9 +274,9 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
         
         return (e_array, h_array, v_array, intensity_array)
 
-    def get_spectral_flux(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
+    def get_flux(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
 
-        flux_calculation_parameters=FluxCalculationParameters(calculation_type   = 1 if multi_electron else 0,
+        flux_calculation_parameters=FluxCalculationParameters(calculation_type   = 3 if multi_electron else 2,
                                                               type_of_dependence = 0)
 
         srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
@@ -296,17 +296,6 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
             spectral_flux_array[ie] = data[ie]
 
         return (energy_array, spectral_flux_array)
-
-    @classmethod
-    def get_flux_from_spectral_flux(cls, energy_array, spectral_flux_array):
-        flux_array = numpy.zeros(energy_array.size)
-
-        de = energy_array[1] - energy_array[0]
-
-        for ie in range(energy_array.size):
-            flux_array[ie] = spectral_flux_array[ie] * de
-
-        return flux_array
 
     def get_power_density(self,
                           source_wavefront_parameters = SourceWavefrontParameters(),

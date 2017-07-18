@@ -5,7 +5,7 @@ from srwlib import srwl, SRWLRadMesh, SRWLStokes
 
 from syned.storage_ring.light_source import LightSource
 
-from wofry.elements.decorators import WOLightSourceDecorator
+from wofry.beamline.decorators import WOLightSourceDecorator
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront

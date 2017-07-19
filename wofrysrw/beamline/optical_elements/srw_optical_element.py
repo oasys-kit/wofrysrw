@@ -1,15 +1,9 @@
 
-import numpy
-
-from syned.beamline.optical_elements.absorbers.slit import Slit
-from syned.beamline.shape import BoundaryShape, Rectangle, Ellipse
-
 from wofry.beamline.decorators import WOOpticalElementDecorator
 
 from wofrysrw.beamline.srw_beamline import SRWWavefrontPropagationParameters
 
-import srwlib as srwl
-from srwlib import SRWLOptA, SRWLOptC
+from srwlib import SRWLOptC, srwl
 
 
 class SRWOpticalElement(WOOpticalElementDecorator):
@@ -27,9 +21,9 @@ class SRWOpticalElement(WOOpticalElementDecorator):
                 raise ValueError("SRW Wavefront Propagation Parameters not present")
 
         optBL = SRWLOptC([self.toSRWLOpt()],
-                         [srw_wavefront_propagation_parameters.to_SRW_array()]) #"Beamline" - Container of Optical Elements (together with the corresponding wavefront propagation instructions)
+                         srw_wavefront_propagation_parameters.to_SRW_array()) #"Beamline" - Container of Optical Elements (together with the corresponding wavefront propagation instructions)
 
-        srwl.PropagElecField(wavefront, optBL)
+        #srwl.PropagElecField(wavefront, optBL)
 
         return wavefront
 

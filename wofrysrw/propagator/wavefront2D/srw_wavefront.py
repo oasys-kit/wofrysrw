@@ -6,6 +6,8 @@ import scipy.constants as codata
 m_to_eV = codata.h*codata.c/codata.e
 #angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 
+from wofry.propagator.wavefront import WavefrontDimension
+
 from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
 from wofry.propagator.decorators import WavefrontDecorator
 
@@ -49,6 +51,9 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         else:
             return m_to_eV/((self.mesh.eFin + self.mesh.eStart)*0.5)
 
+    def get_dimension(self):
+        return WavefrontDimension.TWO
+
     def toGenericWavefront(self):
         wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
                                                                        self.mesh.xFin,
@@ -57,7 +62,7 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                        number_of_points=(self.mesh.nx, self.mesh.ny),
                                                                        wavelength=self.get_wavelength())
 
-        wavefront.set_complex_amplitude(SRWEFieldAsNumpy(swrwf=self)[0, :, :, 0])
+        wavefront.set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[0, :, :, 0])
 
         return wavefront
 
@@ -79,26 +84,38 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                              1e-3)
     @classmethod
     def decorateSRWWF(self, srwwf):
+        dim_x = srwwf.mesh.nx
+        dim_y = srwwf.mesh.ny
+        number_energies = srwwf.mesh.ne
+
+        x_polarization = SRWArrayToNumpy(srwwf.arEx, dim_x, dim_y, number_energies)
+        y_polarization = SRWArrayToNumpy(srwwf.arEy, dim_x, dim_y, number_energies)
+
         wavefront = SRWWavefrontFromElectricField(horizontal_start=srwwf.mesh.xStart,
                                                   horizontal_end=srwwf.mesh.xFin,
-                                                  horizontal_efield=srwwf.arEx,
+                                                  horizontal_efield=x_polarization,
                                                   vertical_start=srwwf.mesh.yStart,
                                                   vertical_end=srwwf.mesh.yFin,
-                                                  vertical_efield=srwwf.arEy,
+                                                  vertical_efield=y_polarization,
                                                   energy_min=srwwf.mesh.eStart,
                                                   energy_max=srwwf.mesh.eFin,
                                                   energy_points=srwwf.mesh.ne,
                                                   z=srwwf.mesh.zStart,
-                                                  Rx=srwwf.mesh.Rx,
-                                                  dRx=srwwf.mesh.dRx,
-                                                  Ry=srwwf.mesh.Ry,
-                                                  dRy=srwwf.mesh.dRy)
+                                                  Rx=srwwf.Rx,
+                                                  dRx=srwwf.dRx,
+                                                  Ry=srwwf.Ry,
+                                                  dRy=srwwf.dRy)
 
 
         wavefront._typeE=srwwf.numTypeElFld
         wavefront._partBeam=srwwf.partBeam
 
         return wavefront
+
+
+
+    def duplicate(self):
+        return SRWWavefront.decorateSRWWF(self)
 
     # ------------------------------------------------------------------
     # ------------------------------------------------------------------
@@ -107,19 +124,19 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
     # ------------------------------------------------------------------
     # ------------------------------------------------------------------
 
-def SRWEFieldAsNumpy(swrwf):
+def SRWEFieldAsNumpy(srwwf):
     """
     Extracts electrical field from a SRWWavefront
     :param srw_wavefront: SRWWavefront to extract electrical field from.
     :return: 4D numpy array: [energy, horizontal, vertical, polarisation={0:horizontal, 1: vertical}]
     """
 
-    dim_x = swrwf.mesh.nx
-    dim_y = swrwf.mesh.ny
-    number_energies = swrwf.mesh.ne
+    dim_x = srwwf.mesh.nx
+    dim_y = srwwf.mesh.ny
+    number_energies = srwwf.mesh.ne
 
-    x_polarization = SRWArrayToNumpy(swrwf.arEx, dim_x, dim_y, number_energies)
-    y_polarization = SRWArrayToNumpy(swrwf.arEy, dim_x, dim_y, number_energies)
+    x_polarization = SRWArrayToNumpy(srwwf.arEx, dim_x, dim_y, number_energies)
+    y_polarization = SRWArrayToNumpy(srwwf.arEy, dim_x, dim_y, number_energies)
 
     e_field = numpy.concatenate((x_polarization, y_polarization), 3)
 

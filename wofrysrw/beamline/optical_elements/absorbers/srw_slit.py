@@ -4,15 +4,16 @@ import numpy
 from syned.beamline.optical_elements.absorbers.slit import Slit
 from syned.beamline.shape import BoundaryShape, Rectangle, Ellipse
 
-from wofry.beamline.decorators import WOOpticalElementDecorator
+from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 
 from srwlib import SRWLOptA
 
-class SRWSlit(Slit, WOOpticalElementDecorator):
+
+class SRWSlit(Slit, SRWOpticalElement):
     def __init__(self, name="Undefined", boundary_shape=BoundaryShape()):
         Slit.__init__(self, name=name, boundary_shape=boundary_shape)
 
-    def applyOpticalElement(self, wavefront):
+    def applySRWOpticalElement(self, wavefront, parameters=None):
         boundaries = self._boundary_shape.get_boundaries()
 
         if isinstance(self._boundary_shape, Rectangle):
@@ -28,9 +29,7 @@ class SRWSlit(Slit, WOOpticalElementDecorator):
         else:
             raise ValueError("Wrong Boundary Shape type")
 
-        return wavefront
-
-    def toSRWLOptA(self):
+    def toSRWLOpt(self):
         boundaries = self._boundary_shape.get_boundaries()
 
         Dx = numpy.abs(boundaries[1]-boundaries[0])
@@ -55,22 +54,22 @@ class SRWSlit(Slit, WOOpticalElementDecorator):
 
 
     @classmethod
-    def fromSRWLOptA(cls, srwlopta=SRWLOptA()):
-        if not isinstance(srwlopta, SRWLOptA):
+    def fromSRWLOpt(cls, srwlopt=SRWLOptA()):
+        if not isinstance(srwlopt, SRWLOptA):
             raise ValueError("SRW object is not a SRWLOptA object")
         
-        if not srwlopta.ap_or_ob == 'a':
+        if not srwlopt.ap_or_ob == 'a':
             raise ValueError("SRW object is an obstruction")
 
-        if srwlopta.shape == 'r':
-            boundary_shape = Rectangle(x_left=srwlopta.x - 0.5*srwlopta.Dx,
-                                       x_right=srwlopta.x + 0.5*srwlopta.Dx,
-                                       y_bottom=srwlopta.y - 0.5*srwlopta.Dy,
-                                       y_top=srwlopta.y + 0.5*srwlopta.Dy)
-        elif srwlopta.shape == 'c':
-            boundary_shape = Ellipse(min_ax_left=srwlopta.x - 0.5*srwlopta.Dx,
-                                     min_ax_right=srwlopta.x + 0.5*srwlopta.Dx,
-                                     maj_ax_bottom=srwlopta.y - 0.5*srwlopta.Dy,
-                                     maj_ax_top=srwlopta.y + 0.5*srwlopta.Dy)
+        if srwlopt.shape == 'r':
+            boundary_shape = Rectangle(x_left=srwlopt.x - 0.5 * srwlopt.Dx,
+                                       x_right=srwlopt.x + 0.5 * srwlopt.Dx,
+                                       y_bottom=srwlopt.y - 0.5 * srwlopt.Dy,
+                                       y_top=srwlopt.y + 0.5 * srwlopt.Dy)
+        elif srwlopt.shape == 'c':
+            boundary_shape = Ellipse(min_ax_left=srwlopt.x - 0.5 * srwlopt.Dx,
+                                     min_ax_right=srwlopt.x + 0.5 * srwlopt.Dx,
+                                     maj_ax_bottom=srwlopt.y - 0.5 * srwlopt.Dy,
+                                     maj_ax_top=srwlopt.y + 0.5 * srwlopt.Dy)
 
         return Slit(boundary_shape=boundary_shape)

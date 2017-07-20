@@ -1,6 +1,3 @@
-
-import numpy
-
 from syned.beamline.optical_elements.absorbers.slit import Slit
 from syned.beamline.shape import BoundaryShape, Rectangle, Ellipse
 
@@ -29,19 +26,19 @@ class SRWSlit(Slit, SRWOpticalElement):
             shape = 'c'
 
         return SRWLOptA(_shape=shape,
-                        _ap_or_ob='a',
+                        _ap_or_ob=self.get_srw_ap_or_ob(),
                         _Dx=Dx,
                         _Dy=Dy,
                         _x=x,
                         _y=y)
 
-    @classmethod
-    def fromSRWLOpt(cls, srwlopt=SRWLOptA()):
+
+    def fromSRWLOpt(self, srwlopt=SRWLOptA()):
         if not isinstance(srwlopt, SRWLOptA):
             raise ValueError("SRW object is not a SRWLOptA object")
         
-        if not srwlopt.ap_or_ob == 'a':
-            raise ValueError("SRW object is an obstruction")
+        if not srwlopt.ap_or_ob == self.get_srw_ap_or_ob():
+            raise ValueError("SRW object not compatible")
 
         if srwlopt.shape == 'r':
             boundary_shape = Rectangle(x_left=srwlopt.x - 0.5 * srwlopt.Dx,
@@ -54,4 +51,7 @@ class SRWSlit(Slit, SRWOpticalElement):
                                      maj_ax_bottom=srwlopt.y - 0.5 * srwlopt.Dy,
                                      maj_ax_top=srwlopt.y + 0.5 * srwlopt.Dy)
 
-        return Slit(boundary_shape=boundary_shape)
+        self.__init__(boundary_shape=boundary_shape)
+
+    def get_srw_ap_or_ob(self):
+        raise NotImplementedError()

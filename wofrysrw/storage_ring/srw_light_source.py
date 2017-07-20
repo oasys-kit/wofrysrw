@@ -108,18 +108,6 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
 
         return wfr
 
-    def get_intensity(self, source_wavefront_parameters = WavefrontParameters(), multi_electron=True):
-        
-        srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
-        
-        return srw_wavefront.get_intensity(multi_electron=multi_electron)
-
-    def get_flux(self, source_wavefront_parameters = WavefrontParameters(), multi_electron=True):
-
-        srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
-
-        return srw_wavefront.get_flux(multi_electron=multi_electron)
-
     def get_power_density(self,
                           source_wavefront_parameters = WavefrontParameters(),
                           power_density_precision_parameters = PowerDensityPrecisionParameters()):

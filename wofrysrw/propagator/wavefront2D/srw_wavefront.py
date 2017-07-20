@@ -6,7 +6,6 @@ import array
 import scipy.constants as codata
 
 m_to_eV = codata.h*codata.c/codata.e
-#angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 
 from wofry.propagator.wavefront import WavefrontDimension
 
@@ -350,42 +349,13 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
                                                                   type_of_dependence = TypeOfDependence.VS_XY)
 
-        mesh = copy.deepcopy(self.mesh)
+        return self.get_2D_intensity_distribution(type='f', flux_calculation_parameters=flux_calculation_parameters)
 
-        h_array=numpy.linspace(mesh.xStart, mesh.xFin, mesh.nx)
-        v_array=numpy.linspace(mesh.yStart, mesh.yFin, mesh.ny)
-        e_array=numpy.linspace(mesh.eStart, mesh.eFin, mesh.ne)
+    def get_phase(self):
+        flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_PHASE,
+                                                              type_of_dependence = TypeOfDependence.VS_XY)
 
-        intensity_array = numpy.zeros((e_array.size, h_array.size, v_array.size))
-
-        for ie in range(e_array.size):
-            output_array = array.array('f', [0]*mesh.nx*mesh.ny) #"flat" array to take 2D intensity data
-
-            flux_calculation_parameters._fixed_input_photon_energy_or_time = e_array[ie]
-
-            SRWWavefront.get_intensity_from_electric_field(output_array, self, flux_calculation_parameters)
-
-            tot_len = int(mesh.ny*mesh.nx)
-            len_output_array = len(output_array)
-
-            if len_output_array > tot_len:
-                output_array = numpy.array(output_array[0:tot_len])
-            elif len_output_array < tot_len:
-                aux_array = array('d', [0]*len_output_array)
-                for i in range(len_output_array): aux_array[i] = output_array[i]
-                output_array = numpy.array(array.array(aux_array))
-            else:
-                output_array = numpy.array(output_array)
-
-            output_array = output_array.reshape(mesh.ny, mesh.nx)
-
-            for ix in range(mesh.nx):
-                for iy in range(mesh.ny):
-                    intensity_array[ie, ix, iy] = output_array[iy, ix]
-
-        print(intensity_array[0, int(mesh.nx/2), int(mesh.ny/2)])
-
-        return (e_array, h_array, v_array, intensity_array)
+        return self.get_2D_intensity_distribution(type='d', flux_calculation_parameters=flux_calculation_parameters)
 
     def get_flux(self, multi_electron=True):
         if multi_electron:
@@ -411,13 +381,42 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
         return (energy_array, spectral_flux_array)
 
-    #TODO: must be defined
-    def get_power_density(self):
-        hArray = numpy.zeros(self.mesh.nx)
-        vArray = numpy.zeros(self.mesh.ny)
-        powerArray = numpy.zeros((self.mesh.nx,self.mesh.ny))
+    def get_2D_intensity_distribution(self, type='f', flux_calculation_parameters=FluxCalculationParameters()):
+        mesh = copy.deepcopy(self.mesh)
 
-        return (hArray, vArray, powerArray)
+        h_array = numpy.linspace(mesh.xStart, mesh.xFin, mesh.nx)
+        v_array = numpy.linspace(mesh.yStart, mesh.yFin, mesh.ny)
+        e_array = numpy.linspace(mesh.eStart, mesh.eFin, mesh.ne)
+
+        intensity_array = numpy.zeros((e_array.size, h_array.size, v_array.size))
+
+        for ie in range(e_array.size):
+            output_array = array.array(type, [0] * mesh.nx * mesh.ny)  # "flat" array to take 2D intensity data
+
+            flux_calculation_parameters._fixed_input_photon_energy_or_time = e_array[ie]
+
+            SRWWavefront.get_intensity_from_electric_field(output_array, self, flux_calculation_parameters)
+
+            # FROM UTI_PLOT in SRW
+            tot_len = int(mesh.ny * mesh.nx)
+            len_output_array = len(output_array)
+
+            if len_output_array > tot_len:
+                output_array = numpy.array(output_array[0:tot_len])
+            elif len_output_array < tot_len:
+                aux_array = array('d', [0] * len_output_array)
+                for i in range(len_output_array): aux_array[i] = output_array[i]
+                output_array = numpy.array(array.array(aux_array))
+            else:
+                output_array = numpy.array(output_array)
+
+            output_array = output_array.reshape(mesh.ny, mesh.nx)
+
+            for ix in range(mesh.nx):
+                for iy in range(mesh.ny):
+                    intensity_array[ie, ix, iy] = output_array[iy, ix]
+
+        return (e_array, h_array, v_array, intensity_array)
 
     @classmethod
     def get_intensity_from_electric_field(cls,

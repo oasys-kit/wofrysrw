@@ -95,7 +95,7 @@ class WavefrontPropagationParameters(object):
     def __init__(self,
                  auto_resize_before_propagation                         = 0,
                  auto_resize_after_propagation                          = 0,
-                 relative_prevision_for_propagation_with_autoresizing   = 1.0,
+                 relative_precision_for_propagation_with_autoresizing   = 1.0,
                  allow_semianalytical_treatment_of_quadratic_phase_term = 0,
                  do_any_resizing_on_fourier_side_using_fft              = 0,
                  horizontal_range_modification_factor_at_resizing       = 1.0,
@@ -107,7 +107,7 @@ class WavefrontPropagationParameters(object):
                  new_vertical_wavefront_center_position_after_shift     = 0):
             self._auto_resize_before_propagation                         = auto_resize_before_propagation
             self._auto_resize_after_propagation                          = auto_resize_after_propagation
-            self._relative_prevision_for_propagation_with_autoresizing   = relative_prevision_for_propagation_with_autoresizing
+            self._relative_precision_for_propagation_with_autoresizing   = relative_precision_for_propagation_with_autoresizing
             self._allow_semianalytical_treatment_of_quadratic_phase_term = allow_semianalytical_treatment_of_quadratic_phase_term
             self._do_any_resizing_on_fourier_side_using_fft              = do_any_resizing_on_fourier_side_using_fft
             self._horizontal_range_modification_factor_at_resizing       = horizontal_range_modification_factor_at_resizing
@@ -121,7 +121,7 @@ class WavefrontPropagationParameters(object):
     def to_SRW_array(self):
         return [int(self._auto_resize_before_propagation),
                 int(self._auto_resize_after_propagation),
-                float(self._relative_prevision_for_propagation_with_autoresizing),
+                float(self._relative_precision_for_propagation_with_autoresizing),
                 int(self._allow_semianalytical_treatment_of_quadratic_phase_term),
                 int(self._do_any_resizing_on_fourier_side_using_fft),
                 float(self._horizontal_range_modification_factor_at_resizing),

@@ -1,42 +1,13 @@
 import numpy
-import array
 
-from srwlib import srwl, SRWLRadMesh, SRWLStokes
+from srwlib import srwl
 
 from syned.storage_ring.light_source import LightSource
 
 from wofry.beamline.decorators import WOLightSourceDecorator
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
-from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
-
-class WavefrontPrecisionParameters(object):
-    def __init__(self,
-                 sr_method = 1,  #SR calculation method: 0- "manual", 1- "auto-undulator", 2- "auto-wiggler"
-                 relative_precision = 0.01, # relative precision
-                 start_integration_longitudinal_position = 0, # longitudinal position to start integration (effective if < zEndInteg)
-                 end_integration_longitudinal_position = 0, # longitudinal position to finish integration (effective if > zStartInteg)
-                 number_of_points_for_trajectory_calculation = 50000, #Number of points for trajectory calculation
-                 use_terminating_terms = 1, # Use "terminating terms" (i.e. asymptotic expansions at zStartInteg and zEndInteg) or not (1 or 0 respectively)
-                 sampling_factor_for_adjusting_nx_ny = 0.0 # sampling factor for adjusting nx, ny (effective if > 0)
-                 ):
-        self._sr_method = sr_method
-        self._relative_precision = relative_precision
-        self._start_integration_longitudinal_position = start_integration_longitudinal_position
-        self._end_integration_longitudinal_position = end_integration_longitudinal_position
-        self._number_of_points_for_trajectory_calculation = number_of_points_for_trajectory_calculation
-        self._use_terminating_terms = use_terminating_terms
-        self._sampling_factor_for_adjusting_nx_ny = sampling_factor_for_adjusting_nx_ny
-
-    def to_SRW_array(self):
-        return [int(self._sr_method),
-                float(self._relative_precision),
-                float(self._start_integration_longitudinal_position),
-                float(self._end_integration_longitudinal_position),
-                int(self._number_of_points_for_trajectory_calculation),
-                int(self._use_terminating_terms),
-                float(self._sampling_factor_for_adjusting_nx_ny)]
-
+from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront, WavefrontParameters
 
 class PowerDensityPrecisionParameters(object):
     def __init__(self,
@@ -58,99 +29,6 @@ class PowerDensityPrecisionParameters(object):
                 float(self._initial_longitudinal_position),
                 float(self._final_longitudinal_position),
                 int(self._number_of_points_for_trajectory_calculation)]
-
-class SourceWavefrontParameters(object):
-    def __init__(self, 
-                 photon_energy_min = 100,
-                 photon_energy_max = 10100,
-                 photon_energy_points = 51,
-                 h_slit_gap = 0,
-                 h_slit_points = 1,
-                 v_slit_gap = 0,
-                 v_slit_points = 1,
-                 distance = 10.0,
-                 wavefront_precision_parameters=WavefrontPrecisionParameters()):
-        self._photon_energy_min         = photon_energy_min
-        self._photon_energy_max         = photon_energy_max
-        self._photon_energy_points      = photon_energy_points
-        self._h_slit_gap                = h_slit_gap
-        self._h_slit_points             = h_slit_points
-        self._v_slit_gap                = v_slit_gap
-        self._v_slit_points             = v_slit_points
-        self._distance                  = distance
-        self._wavefront_precision_parameters  = wavefront_precision_parameters
-
-    def to_SRWRadMesh(self):
-        return SRWLRadMesh(self._photon_energy_min,
-                           self._photon_energy_max,
-                           int(self._photon_energy_points),
-                           -self._h_slit_gap/2, self._h_slit_gap/2, int(self._h_slit_points),
-                           -self._v_slit_gap/2, self._v_slit_gap/2, int(self._v_slit_points),
-                           self._distance)
-
-    def to_SRWLStokes(self):
-        stk = SRWLStokes()
-        stk.allocate(int(self._photon_energy_points),
-                     int(self._h_slit_points),
-                     int(self._v_slit_points))
-        stk.mesh = self.to_SRWRadMesh()
-
-        return stk
-
-class PolarizationComponent:
-    LINEAR_HORIZONTAL  = 0
-    LINEAR_VERTICAL    = 1
-    LINEAR_45_DEGREES  = 2
-    LINEAR_135_DEGREES = 3
-    CIRCULAR_RIGHT     = 4
-    CIRCULAR_LEFT      = 5
-    TOTAL              = 6
-
-'''
-:param polarization_component_to_be_extracted:
-               =0 -Linear Horizontal;
-               =1 -Linear Vertical;
-               =2 -Linear 45 degrees;
-               =3 -Linear 135 degrees;
-               =4 -Circular Right;
-               =5 -Circular Left;
-               =6 -Total
-:param calculation_type:
-               =0 -"Single-Electron" Intensity;
-               =1 -"Multi-Electron" Intensity;
-               =2 -"Single-Electron" Flux;
-               =3 -"Multi-Electron" Flux;
-               =4 -"Single-Electron" Radiation Phase;
-               =5 -Re(E): Real part of Single-Electron Electric Field;
-               =6 -Im(E): Imaginary part of Single-Electron Electric Field;
-               =7 -"Single-Electron" Intensity, integrated over Time or Photon Energy (i.e. Fluence)
-:param type_of_dependence: 
-               =0 -vs e (photon energy or time);
-               =1 -vs x (horizontal position or angle);
-               =2 -vs y (vertical position or angle);
-               =3 -vs x&y (horizontal and vertical positions or angles);
-               =4 -vs e&x (photon energy or time and horizontal position or angle);
-               =5 -vs e&y (photon energy or time and vertical position or angle);
-               =6 -vs e&x&y (photon energy or time, horizontal and vertical positions or angles);
-:param fixed_input_photon_energy_or_time: input photon energy [eV] or time [s] to keep fixed (to be taken into account for dependences vs x, y, x&y)
-:param fixed_horizontal_position: input horizontal position [m] to keep fixed (to be taken into account for dependences vs e, y, e&y)
-:param fixed_vertical_position: input vertical position [m] to keep fixed (to be taken into account for dependences vs e, x, e&x)
-'''
-class FluxCalculationParameters(object):
-    def __init__(self,
-                 polarization_component_to_be_extracted=6,
-                 calculation_type=0,
-                 type_of_dependence=0,
-                 fixed_input_photon_energy_or_time = 0.0,
-                 fixed_horizontal_position = 0.0,
-                 fixed_vertical_position = 0.0):
-    
-        self._polarization_component_to_be_extracted = polarization_component_to_be_extracted
-        self._calculation_type                       = calculation_type                      
-        self._type_of_dependence                     = type_of_dependence                    
-        self._fixed_input_photon_energy_or_time      = fixed_input_photon_energy_or_time     
-        self._fixed_horizontal_position              = fixed_horizontal_position             
-        self._fixed_vertical_position                = fixed_vertical_position                
 
 class PhotonSourceProperties(object):
 
@@ -215,7 +93,7 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
     def get_wavefront(self, wavefront_parameters):
         return self.get_SRW_Wavefront(source_wavefront_parameters=wavefront_parameters).toGenericWavefront()
 
-    def get_SRW_Wavefront(self, source_wavefront_parameters = SourceWavefrontParameters()):
+    def get_SRW_Wavefront(self, source_wavefront_parameters = WavefrontParameters()):
         mesh = source_wavefront_parameters.to_SRWRadMesh()
 
         wfr = SRWWavefront()
@@ -230,75 +108,20 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
 
         return wfr
 
-    @classmethod
-    def get_intensity_from_electric_field(cls,
-                                          output_array,
-                                          srw_wavefront,
-                                          flux_calculation_parameters = FluxCalculationParameters()):
-        srwl.CalcIntFromElecField(output_array,
-                                  srw_wavefront,
-                                  flux_calculation_parameters._polarization_component_to_be_extracted,
-                                  flux_calculation_parameters._calculation_type,
-                                  flux_calculation_parameters._type_of_dependence,
-                                  flux_calculation_parameters._fixed_input_photon_energy_or_time,
-                                  flux_calculation_parameters._fixed_horizontal_position,
-                                  flux_calculation_parameters._fixed_vertical_position)
+    def get_intensity(self, source_wavefront_parameters = WavefrontParameters(), multi_electron=True):
+        
+        srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
+        
+        return srw_wavefront.get_intensity(multi_electron=multi_electron)
 
-        return output_array
-
-
-    def get_intensity(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
-
-        flux_calculation_parameters=FluxCalculationParameters(calculation_type                  = 1 if multi_electron==True else 0,
-                                                              type_of_dependence                = 3)
+    def get_flux(self, source_wavefront_parameters = WavefrontParameters(), multi_electron=True):
 
         srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
 
-        h_array=numpy.linspace(srw_wavefront.mesh.xStart, srw_wavefront.mesh.xFin, srw_wavefront.mesh.nx)
-        v_array=numpy.linspace(srw_wavefront.mesh.yStart, srw_wavefront.mesh.yFin, srw_wavefront.mesh.ny)
-        e_array=numpy.linspace(srw_wavefront.mesh.eStart, srw_wavefront.mesh.eFin, srw_wavefront.mesh.ne)
-
-        intensity_array = numpy.zeros((e_array.size, h_array.size, v_array.size))
-
-        for ie in range(e_array.size):
-            output_array = array.array('f', [0]*srw_wavefront.mesh.nx*srw_wavefront.mesh.ny) #"flat" array to take 2D intensity data
-
-            flux_calculation_parameters._fixed_input_photon_energy_or_time = e_array[ie]
-            SRWLightSource.get_intensity_from_electric_field(output_array, srw_wavefront, flux_calculation_parameters)
-
-            data = numpy.ndarray(buffer=output_array, shape=(srw_wavefront.mesh.ny, srw_wavefront.mesh.nx),dtype=output_array.typecode)
-
-            for ix in range(h_array.size):
-                for iy in range(v_array.size):
-                    intensity_array[ie, ix, iy] = data[iy, ix]
-        
-        return (e_array, h_array, v_array, intensity_array)
-
-    def get_flux(self, source_wavefront_parameters = SourceWavefrontParameters(), multi_electron=True):
-
-        flux_calculation_parameters=FluxCalculationParameters(calculation_type   = 3 if multi_electron else 2,
-                                                              type_of_dependence = 0)
-
-        srw_wavefront = self.get_SRW_Wavefront(source_wavefront_parameters)
-
-        output_array = array.array('f', [0]*srw_wavefront.mesh.ne)
-
-        self.get_intensity_from_electric_field(output_array, srw_wavefront, flux_calculation_parameters)
-        
-        data = numpy.ndarray(buffer=output_array, shape=srw_wavefront.mesh.ne, dtype=output_array.typecode)
-
-        energy_array=numpy.linspace(srw_wavefront.mesh.eStart,
-                                    srw_wavefront.mesh.eFin,
-                                    srw_wavefront.mesh.ne)
-        spectral_flux_array = numpy.zeros(energy_array.size)
-
-        for ie in range(energy_array.size):
-            spectral_flux_array[ie] = data[ie]
-
-        return (energy_array, spectral_flux_array)
+        return srw_wavefront.get_flux(multi_electron=multi_electron)
 
     def get_power_density(self,
-                          source_wavefront_parameters = SourceWavefrontParameters(),
+                          source_wavefront_parameters = WavefrontParameters(),
                           power_density_precision_parameters = PowerDensityPrecisionParameters()):
 
         stkP = source_wavefront_parameters.to_SRWLStokes()

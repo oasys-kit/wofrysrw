@@ -2,7 +2,8 @@ import numpy
 
 from srwlib import srwl
 
-from wofrysrw.storage_ring.srw_light_source import SRWLightSource, PhotonSourceProperties, SourceWavefrontParameters
+from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontParameters
+from wofrysrw.storage_ring.srw_light_source import SRWLightSource, PhotonSourceProperties
 from wofrysrw.storage_ring.magnetic_structures.srw_undulator import SRWUndulator
 
 import scipy.constants as codata
@@ -97,7 +98,7 @@ class SRWUndulatorLightSource(SRWLightSource):
                                       diffraction_limit=dls)
 
     def get_undulator_flux(self,
-                           source_wavefront_parameters = SourceWavefrontParameters(),
+                           source_wavefront_parameters = WavefrontParameters(),
                            flux_precision_parameters = FluxPrecisionParameters()):
 
         stkF = source_wavefront_parameters.to_SRWLStokes()

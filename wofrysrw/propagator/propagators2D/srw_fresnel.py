@@ -12,7 +12,7 @@ angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
 from wofry.propagator.propagator import Propagator2D
 
-from wofrysrw.beamline.srw_beamline import SRWWavefrontPropagationParameters
+from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
 class FresnelSRW(Propagator2D):
@@ -34,11 +34,11 @@ class FresnelSRW(Propagator2D):
         if not SRWLIB_AVAILABLE: raise ImportError("SRW is not available")
 
         if not parameters.has_additional_parameter("srw_drift_wavefront_propagation_parameters"):
-            srw_wavefront_propagation_parameters = SRWWavefrontPropagationParameters()
+            wavefront_propagation_parameters = WavefrontPropagationParameters()
         else:
-            srw_wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_wavefront_propagation_parameters")
+            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_wavefront_propagation_parameters")
 
-            if not isinstance(srw_wavefront_propagation_parameters, SRWWavefrontPropagationParameters):
+            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
                 raise ValueError("SRW Wavefront Propagation Parameters not present")
 
         is_generic_wavefront = isinstance(wavefront, GenericWavefront2D)
@@ -53,7 +53,7 @@ class FresnelSRW(Propagator2D):
         #
 
         optBL = SRWLOptC([SRWLOptD(propagation_distance)], # drift space
-                         srw_wavefront_propagation_parameters.to_SRW_array()) #"Beamline" - Container of Optical Elements (together with the corresponding wavefront propagation instructions)
+                         [wavefront_propagation_parameters.to_SRW_array()])
 
         srwl.PropagElecField(wavefront, optBL)
 

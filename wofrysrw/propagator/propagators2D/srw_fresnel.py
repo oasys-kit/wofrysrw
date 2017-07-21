@@ -15,6 +15,8 @@ from wofry.propagator.propagator import Propagator2D
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
+from PyQt5.QtWidgets import QMessageBox
+
 class FresnelSRW(Propagator2D):
 
     HANDLER_NAME = "FRESNEL_SRW"
@@ -55,7 +57,10 @@ class FresnelSRW(Propagator2D):
         optBL = SRWLOptC([SRWLOptD(propagation_distance)], # drift space
                          [wavefront_propagation_parameters.to_SRW_array()])
 
+
         srwl.PropagElecField(wavefront, optBL)
+
+        #QMessageBox.warning(None, "3", "3", QMessageBox.Ok)
 
         if is_generic_wavefront:
             return wavefront.toGenericWavefront()

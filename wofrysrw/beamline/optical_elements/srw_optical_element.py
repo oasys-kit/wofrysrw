@@ -25,9 +25,6 @@ class SRWOpticalElement(WOOpticalElementDecorator):
 
         return wavefront
 
-    def applySRWOpticalElement(self, wavefront, parameters=None):
-        raise NotImplementedError("")
-
     def toSRWLOpt(self):
         raise NotImplementedError("")
 

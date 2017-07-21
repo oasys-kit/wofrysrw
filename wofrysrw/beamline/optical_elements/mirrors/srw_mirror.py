@@ -92,13 +92,13 @@ class SRWMirror(Mirror, SRWOpticalElement):
         return wavefront
 
     def toSRWLOpt(self):
-        if self.orientation_of_reflection_plane == Orientation.HORIZONTAL:
+        if self.orientation_of_reflection_plane == Orientation.VERTICAL:
             nvx = numpy.cos(self.grazing_angle)
             nvy = 0
             nvz = -numpy.sin(self.grazing_angle)
             tvx = -numpy.sin(self.grazing_angle)
             tvy = 0
-        elif self.orientation_of_reflection_plane == Orientation.VERTICAL:
+        elif self.orientation_of_reflection_plane == Orientation.HORIZONTAL:
             nvx = 0
             nvy = numpy.cos(self.grazing_angle)
             nvz = -numpy.sin(self.grazing_angle)

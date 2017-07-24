@@ -62,25 +62,8 @@ class PhotonSourceProperties(object):
 class SRWLightSource(LightSource, WOLightSourceDecorator):
     def __init__(self,
                  name="Undefined",
-                 electron_energy_in_GeV = 1.0,
-                 electron_energy_spread = 0.0,
-                 ring_current = 0.1,
-                 number_of_bunches = 400,
-                 electron_beam_size_h=1e-5,
-                 electron_beam_size_v=1e-5,
-                 electron_beam_divergence_h=0.0,
-                 electron_beam_divergence_v=0.0,
+                 electron_beam=SRWElectronBeam(),
                  magnetic_structure=SRWMagneticStructure()):
-        electron_beam = SRWElectronBeam(energy_in_GeV=electron_energy_in_GeV,
-                                        energy_spread=electron_energy_spread,
-                                        current=ring_current,
-                                        number_of_bunches=number_of_bunches)
-
-        electron_beam.set_moments_from_electron_beam_geometrical_properties(SRWElectronBeamGeometricalProperties(electron_beam_size_h=electron_beam_size_h,
-                                                                                                                 electron_beam_divergence_h=electron_beam_divergence_h,
-                                                                                                                 electron_beam_size_v=electron_beam_size_v,
-                                                                                                                 electron_beam_divergence_v=electron_beam_divergence_v))
-
         LightSource.__init__(self, name, electron_beam, magnetic_structure)
 
     def get_gamma(self):

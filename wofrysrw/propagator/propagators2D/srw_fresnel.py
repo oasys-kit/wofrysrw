@@ -1,11 +1,3 @@
-# TODO: REMOVE THIS!!!!
-try:
-    from srwlib import *
-    SRWLIB_AVAILABLE = True
-except:
-    SRWLIB_AVAILABLE = False
-    print("SRW is not available")
-
 import scipy.constants as codata
 angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 
@@ -15,7 +7,7 @@ from wofry.propagator.propagator import Propagator2D
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
-from PyQt5.QtWidgets import QMessageBox
+from srwlib import *
 
 class FresnelSRW(Propagator2D):
 
@@ -33,8 +25,6 @@ class FresnelSRW(Propagator2D):
     """
 
     def do_specific_progation(self, wavefront, propagation_distance, parameters):
-        if not SRWLIB_AVAILABLE: raise ImportError("SRW is not available")
-
         if not parameters.has_additional_parameter("srw_drift_wavefront_propagation_parameters"):
             wavefront_propagation_parameters = WavefrontPropagationParameters()
         else:
@@ -59,8 +49,6 @@ class FresnelSRW(Propagator2D):
 
 
         srwl.PropagElecField(wavefront, optBL)
-
-        #QMessageBox.warning(None, "3", "3", QMessageBox.Ok)
 
         if is_generic_wavefront:
             return wavefront.toGenericWavefront()

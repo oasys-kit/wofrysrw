@@ -2,8 +2,10 @@ import numpy
 
 from srwlib import srwl
 
+
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontParameters
 from wofrysrw.storage_ring.srw_light_source import SRWLightSource, PhotonSourceProperties
+from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam
 from wofrysrw.storage_ring.magnetic_structures.srw_undulator import SRWUndulator
 
 import scipy.constants as codata
@@ -34,32 +36,12 @@ class SRWUndulatorLightSource(SRWLightSource):
 
     def __init__(self,
                  name="Undefined",
-                 electron_energy_in_GeV = 1.0,
-                 electron_energy_spread = 0.0,
-                 ring_current = 0.1,
-                 number_of_bunches = 400,
-                 electron_beam_size_h=1e-5,
-                 electron_beam_size_v=1e-5,
-                 electron_beam_divergence_h=0.0,
-                 electron_beam_divergence_v=0.0,
-                 K_vertical = 0.0,
-                 K_horizontal = 0.0,
-                 period_length = 0.0,
-                 number_of_periods = 1):
+                 electron_beam=SRWElectronBeam(),
+                 undulator_magnetic_structure=SRWUndulator()):
 
         super().__init__(name,
-                         electron_energy_in_GeV = electron_energy_in_GeV,
-                         electron_energy_spread = electron_energy_spread,
-                         ring_current = ring_current,
-                         number_of_bunches = number_of_bunches,
-                         electron_beam_size_h=electron_beam_size_h,
-                         electron_beam_size_v=electron_beam_size_v,
-                         electron_beam_divergence_h=electron_beam_divergence_h,
-                         electron_beam_divergence_v=electron_beam_divergence_v,
-                         magnetic_structure=SRWUndulator(K_vertical,
-                                                         K_horizontal,
-                                                         period_length,
-                                                         number_of_periods))
+                         electron_beam=electron_beam,
+                         magnetic_structure=undulator_magnetic_structure)
 
     def get_length(self):
         return self._magnetic_structure._period_length*self._magnetic_structure._number_of_periods

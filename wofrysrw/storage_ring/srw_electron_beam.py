@@ -32,7 +32,6 @@ class SRWElectronBeamGeometricalProperties(object):
         return info
 
 class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
-
     def __init__(self,
                  energy_in_GeV = 1.0,
                  energy_spread = 0.0,
@@ -50,21 +49,21 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
         self._drift_distance = drift_distance
 
     def set_moments_from_electron_beam_geometrical_properties(self, electron_beam_geometrical_properties = SRWElectronBeamGeometricalProperties()):
-        self._moment_xx = electron_beam_geometrical_properties._electron_beam_size_h**2 #<(x-<x>)^2>
-        self._moment_xxp = 0 #<(x-<x>)(x'-<x'>)>
-        self._moment_xpxp = electron_beam_geometrical_properties._electron_beam_divergence_h**2 #<(x'-<x'>)^2>
-        self._moment_yy = electron_beam_geometrical_properties._electron_beam_size_v**2 #<(y-<y>)^2>
-        self._moment_yyp = 0 #<(y-<y>)(y'-<y'>)>
-        self._moment_ypyp = electron_beam_geometrical_properties._electron_beam_divergence_v**2 #<(y'-<y'>)^2>
+        self.set_sigmas_all(sigma_x=electron_beam_geometrical_properties._electron_beam_size_h,
+                            sigma_xp=electron_beam_geometrical_properties._electron_beam_divergence_h,
+                            sigma_y=electron_beam_geometrical_properties._electron_beam_size_v,
+                            sigma_yp=electron_beam_geometrical_properties._electron_beam_divergence_v)
 
     def set_drift_distance(self, drift_distance):
         self._drift_distance = drift_distance
 
     def get_electron_beam_geometrical_properties(self):
-        return SRWElectronBeamGeometricalProperties(electron_beam_size_h=numpy.sqrt(self._moment_xx),
-                                                    electron_beam_divergence_h=numpy.sqrt(self._moment_xpxp),
-                                                    electron_beam_size_v=numpy.sqrt(self._moment_yy),
-                                                    electron_beam_divergence_v=numpy.sqrt(self._moment_ypyp))
+        x, xp, y, yp = self.get_sigmas_all()
+
+        return SRWElectronBeamGeometricalProperties(electron_beam_size_h=x,
+                                                    electron_beam_divergence_h=xp,
+                                                    electron_beam_size_v=y,
+                                                    electron_beam_divergence_v=yp)
     def to_SRWLPartBeam(self):
         srw_electron_beam = SRWLPartBeam()
         srw_electron_beam.Iavg = self._current

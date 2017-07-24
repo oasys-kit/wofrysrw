@@ -309,19 +309,19 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
     def duplicate(self):
         wavefront = SRWWavefront(_arEx=copy.deepcopy(self.arEx),
-                         _arEy=copy.deepcopy(self.arEy),
-                         _typeE=self.numTypeElFld,
-                         _eStart=self.mesh.eStart,
-                         _eFin=self.mesh.eFin,
-                         _ne=self.mesh.ne,
-                         _xStart=self.mesh.xStart,
-                         _xFin=self.mesh.xFin,
-                         _nx=self.mesh.nx,
-                         _yStart=self.mesh.yStart,
-                         _yFin=self.mesh.yFin,
-                         _ny=self.mesh.ny,
-                         _zStart=self.mesh.zStart,
-                         _partBeam=self.partBeam)
+                                 _arEy=copy.deepcopy(self.arEy),
+                                 _typeE=self.numTypeElFld,
+                                 _eStart=self.mesh.eStart,
+                                 _eFin=self.mesh.eFin,
+                                 _ne=self.mesh.ne,
+                                 _xStart=self.mesh.xStart,
+                                 _xFin=self.mesh.xFin,
+                                 _nx=self.mesh.nx,
+                                 _yStart=self.mesh.yStart,
+                                 _yFin=self.mesh.yFin,
+                                 _ny=self.mesh.ny,
+                                 _zStart=self.mesh.zStart,
+                                 _partBeam=self.partBeam)
 
         wavefront.mesh = copy.deepcopy(self.mesh)
         wavefront.Rx  = self.Rx

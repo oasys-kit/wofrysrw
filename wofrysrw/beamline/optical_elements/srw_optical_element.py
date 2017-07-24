@@ -6,7 +6,15 @@ from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationPa
 from srwlib import SRWLOptC, srwl
 
 
-class SRWOpticalElement(WOOpticalElementDecorator):
+class SRWOpticalElementDecorator:
+    def toSRWLOpt(self):
+        raise NotImplementedError("")
+
+    @classmethod
+    def fromSRWLOpt(cls, srwlopt=None):
+        raise NotImplementedError("")
+
+class SRWOpticalElement(SRWOpticalElementDecorator, WOOpticalElementDecorator):
 
     def applyOpticalElement(self, wavefront, parameters=None):
 
@@ -25,9 +33,3 @@ class SRWOpticalElement(WOOpticalElementDecorator):
 
         return wavefront
 
-    def toSRWLOpt(self):
-        raise NotImplementedError("")
-
-    @classmethod
-    def fromSRWLOpt(cls, srwlopt=None):
-        raise NotImplementedError("")

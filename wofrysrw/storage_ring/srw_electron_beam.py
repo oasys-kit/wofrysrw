@@ -66,7 +66,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
                                                     electron_beam_divergence_v=yp)
     def to_SRWLPartBeam(self):
         srw_electron_beam = SRWLPartBeam()
-        srw_electron_beam.Iavg = self._current
+        srw_electron_beam.Iavg           = self._current
         srw_electron_beam.partStatMom1.x = 0.0
         srw_electron_beam.partStatMom1.y = 0.0
 

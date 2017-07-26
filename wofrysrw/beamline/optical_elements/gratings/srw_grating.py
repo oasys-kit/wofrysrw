@@ -6,7 +6,8 @@ from syned.beamline.shape import Ellipsoid, Rectangle, Plane
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 
-from srwlib import SRWLOptC, srwl, SRWLOptMir, SRWLOptG, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
+from srwlib import SRWLOptC, SRWLOptMir, SRWLOptG
+from srwlib import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
 
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, TreatInputOutput, ApertureShape, SimulationMethod
 
@@ -16,7 +17,7 @@ class SRWGrating(Grating, SRWOpticalElement):
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
-                 orientation_of_reflection_plane    = Orientation.HORIZONTAL,
+                 orientation_of_reflection_plane    = Orientation.UP,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0,
@@ -25,7 +26,8 @@ class SRWGrating(Grating, SRWOpticalElement):
                  grooving_density_1                 =0.0, # groove density polynomial coefficient a1 [lines/mm^2]
                  grooving_density_2                 =0.0, # groove density polynomial coefficient a2 [lines/mm^3]
                  grooving_density_3                 =0.0, # groove density polynomial coefficient a3 [lines/mm^4]
-                 grooving_density_4                 =0.0  # groove density polynomial coefficient a4 [lines/mm^5]
+                 grooving_density_4                 =0.0, # groove density polynomial coefficient a4 [lines/mm^5]
+                 grooving_angle                     = 0.0 # angle between the grove direction and the sagittal direction of the substrate
                  ):
 
         Grating.__init__(self,
@@ -53,6 +55,7 @@ class SRWGrating(Grating, SRWOpticalElement):
         self.grooving_density_2 = grooving_density_2
         self.grooving_density_3 = grooving_density_3
         self.grooving_density_4 = grooving_density_4
+        self.grooving_angle     = grooving_angle
 
     def applyOpticalElement(self, wavefront, parameters=None):
         if not parameters.has_additional_parameter("srw_oe_wavefront_propagation_parameters"):
@@ -97,7 +100,6 @@ class SRWGrating(Grating, SRWOpticalElement):
             optical_elements.append(optTrEr)
             propagation_parameters.append(WavefrontPropagationParameters().to_SRW_array())
 
-
         grating = SRWLOptG(_mirSub=substrate_mirror,
                            _m=self.diffraction_order,
                            _grDen =self.grooving_density_0,
@@ -105,9 +107,12 @@ class SRWGrating(Grating, SRWOpticalElement):
                            _grDen2=self.grooving_density_2,
                            _grDen3=self.grooving_density_3,
                            _grDen4=self.grooving_density_4,
-                           _grAng=self.grazing_angle)
+                           _grAng=self.grooving_angle)
 
         optical_elements.append(grating)
+
+        print("Grating GR", grating.m, grating.grDen, grating.grDen1,grating.grDen2,grating.grDen3)
+
         propagation_parameters.append(wavefront_propagation_parameters.to_SRW_array())
 
         optBL = SRWLOptC(optical_elements, propagation_parameters)
@@ -117,13 +122,25 @@ class SRWGrating(Grating, SRWOpticalElement):
         return wavefront
 
     def get_substrate_mirror(self):
-        if self.orientation_of_reflection_plane == Orientation.VERTICAL:
+        if self.orientation_of_reflection_plane == Orientation.LEFT:
             nvx = numpy.cos(self.grazing_angle)
             nvy = 0
             nvz = -numpy.sin(self.grazing_angle)
             tvx = -numpy.sin(self.grazing_angle)
             tvy = 0
-        elif self.orientation_of_reflection_plane == Orientation.HORIZONTAL:
+        elif self.orientation_of_reflection_plane == Orientation.RIGHT:
+            nvx = numpy.cos(self.grazing_angle)
+            nvy = 0
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = numpy.sin(self.grazing_angle)
+            tvy = 0
+        elif self.orientation_of_reflection_plane == Orientation.UP:
+            nvx = 0
+            nvy = numpy.cos(self.grazing_angle)
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = 0
+            tvy = numpy.sin(self.grazing_angle)
+        elif self.orientation_of_reflection_plane == Orientation.DOWN:
             nvx = 0
             nvy = numpy.cos(self.grazing_angle)
             nvz = -numpy.sin(self.grazing_angle)

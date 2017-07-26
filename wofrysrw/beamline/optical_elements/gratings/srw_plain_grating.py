@@ -10,7 +10,7 @@ class SRWPlaneGrating(SRWGrating, SRWOpticalElement):
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
-                 orientation_of_reflection_plane    = Orientation.HORIZONTAL,
+                 orientation_of_reflection_plane    = Orientation.UP,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0,

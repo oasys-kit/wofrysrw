@@ -129,3 +129,45 @@ class SRWLightSource(LightSource, WOLightSourceDecorator):
                 total_power += power_density_matrix[i, j]*area
 
         return total_power
+
+    '''
+        print("PRIMA ------------------------------")
+
+        print(wfr.partBeam.Iavg)
+        print(wfr.partBeam.partStatMom1.x)
+        print(wfr.partBeam.partStatMom1.y)
+        print(wfr.partBeam.partStatMom1.z)
+        print(wfr.partBeam.partStatMom1.xp)
+        print(wfr.partBeam.partStatMom1.yp)
+        print(wfr.partBeam.partStatMom1.gamma)
+
+        print(wfr.partBeam.arStatMom2[0])
+        print(wfr.partBeam.arStatMom2[1])
+        print(wfr.partBeam.arStatMom2[2])
+        print(wfr.partBeam.arStatMom2[3])
+        print(wfr.partBeam.arStatMom2[4])
+        print(wfr.partBeam.arStatMom2[5])
+        print(wfr.partBeam.arStatMom2[10])
+
+        print(wfr.mesh.ne)
+        print(wfr.mesh.nx)
+        print(wfr.mesh.ny)
+
+        print(wfr.mesh.xStart)
+        print(wfr.mesh.xFin)
+        print(wfr.mesh.yStart)
+        print(wfr.mesh.yFin)
+        print(wfr.mesh.eStart)
+        print(wfr.mesh.eFin)
+
+        print(len(self._magnetic_structure.get_SRWLMagFldC().arMagFld))
+        print(len(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm))
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].per)
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].nPer)
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].n      )
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].h_or_v )
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].B      )
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].ph     )
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].s      )
+        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].a      )
+    '''

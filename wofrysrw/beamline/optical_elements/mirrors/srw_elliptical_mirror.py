@@ -9,7 +9,7 @@ class SRWEllipticalMirror(SRWMirror, SRWOpticalElement):
                  tangential_size                            = 1.2,
                  sagittal_size                              = 0.01,
                  grazing_angle                              = 0.003,
-                 orientation_of_reflection_plane            = Orientation.HORIZONTAL,
+                 orientation_of_reflection_plane            = Orientation.UP,
                  distance_from_first_focus_to_mirror_center =1,
                  distance_from_mirror_center_to_second_focus=1,
                  height_profile_data_file                   = "mirror.dat",

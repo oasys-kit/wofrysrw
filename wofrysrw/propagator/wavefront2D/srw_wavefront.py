@@ -133,6 +133,26 @@ class WavefrontPropagationParameters(object):
                 float(self._new_vertical_wavefront_center_position_after_shift)]
 
 
+class WavefrontPropagationOptionalParameters:
+    def __init__(self,
+                 orientation_of_the_output_optical_axis_vector_x=0.0,
+                 orientation_of_the_output_optical_axis_vector_y=0.0,
+                 orientation_of_the_output_optical_axis_vector_z=0.0,
+                 orientation_of_the_horizontal_base_vector_x    =0.0,
+                 orientation_of_the_horizontal_base_vector_y    =0.0):
+        self.orientation_of_the_output_optical_axis_vector_x=orientation_of_the_output_optical_axis_vector_x
+        self.orientation_of_the_output_optical_axis_vector_y=orientation_of_the_output_optical_axis_vector_y
+        self.orientation_of_the_output_optical_axis_vector_z=orientation_of_the_output_optical_axis_vector_z
+        self.orientation_of_the_horizontal_base_vector_x    =orientation_of_the_horizontal_base_vector_x
+        self.orientation_of_the_horizontal_base_vector_y    =orientation_of_the_horizontal_base_vector_y
+
+    def append_to_srw_array(self, srw_array=[]):
+        srw_array.append(self.orientation_of_the_output_optical_axis_vector_x)
+        srw_array.append(self.orientation_of_the_output_optical_axis_vector_y)
+        srw_array.append(self.orientation_of_the_output_optical_axis_vector_z)
+        srw_array.append(self.orientation_of_the_horizontal_base_vector_x    )
+        srw_array.append(self.orientation_of_the_horizontal_base_vector_y    )
+
 class PolarizationComponent:
     LINEAR_HORIZONTAL  = 0
     LINEAR_VERTICAL    = 1

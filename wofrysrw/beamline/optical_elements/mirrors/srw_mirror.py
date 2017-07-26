@@ -6,11 +6,14 @@ from syned.beamline.shape import Ellipsoid, Rectangle, Plane
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 
-from srwlib import SRWLOptC, srwl, SRWLOptMir, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
+from srwlib import SRWLOptC, SRWLOptMir
+from srwlib import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
 
 class Orientation:
-    HORIZONTAL = 0
-    VERTICAL = 1
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 class ApertureShape:
     RECTANGULAR = 'r'
@@ -35,7 +38,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
-                 orientation_of_reflection_plane    = Orientation.HORIZONTAL,
+                 orientation_of_reflection_plane    = Orientation.UP,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0):
@@ -43,8 +46,8 @@ class SRWMirror(Mirror, SRWOpticalElement):
 
         Mirror.__init__(self,
                         name=name,
-                        boundary_shape=Rectangle(x_left=-0.5*(sagittal_size),
-                                                 x_right=0.5*(sagittal_size),
+                        boundary_shape=Rectangle(x_left=-0.5*sagittal_size,
+                                                 x_right=0.5*sagittal_size,
                                                  y_bottom=-0.5*tangential_size,
                                                  y_top=0.5*tangential_size),
                         surface_shape=Plane())
@@ -92,13 +95,25 @@ class SRWMirror(Mirror, SRWOpticalElement):
         return wavefront
 
     def toSRWLOpt(self):
-        if self.orientation_of_reflection_plane == Orientation.VERTICAL:
+        if self.orientation_of_reflection_plane == Orientation.LEFT:
             nvx = numpy.cos(self.grazing_angle)
             nvy = 0
             nvz = -numpy.sin(self.grazing_angle)
             tvx = -numpy.sin(self.grazing_angle)
             tvy = 0
-        elif self.orientation_of_reflection_plane == Orientation.HORIZONTAL:
+        elif self.orientation_of_reflection_plane == Orientation.RIGHT:
+            nvx = numpy.cos(self.grazing_angle)
+            nvy = 0
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = numpy.sin(self.grazing_angle)
+            tvy = 0
+        elif self.orientation_of_reflection_plane == Orientation.UP:
+            nvx = 0
+            nvy = numpy.cos(self.grazing_angle)
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = 0
+            tvy = numpy.sin(self.grazing_angle)
+        elif self.orientation_of_reflection_plane == Orientation.DOWN:
             nvx = 0
             nvy = numpy.cos(self.grazing_angle)
             nvz = -numpy.sin(self.grazing_angle)
@@ -124,11 +139,11 @@ class SRWMirror(Mirror, SRWOpticalElement):
             raise ValueError("SRW object is not a SRWLOptMir object")
 
         if srwlopt.tvx != 0.0:
-            orientation_of_reflection_plane = Orientation.HORIZONTAL
-            grazing_angle = -numpy.arctan(srwlopt.nvz/srwlopt.nvx)
+            orientation_of_reflection_plane = Orientation.LEFT if srwlopt.tvx < 0 else Orientation.RIGHT
+            grazing_angle = abs(numpy.arctan(srwlopt.nvz/srwlopt.nvx))
         else:
-            orientation_of_reflection_plane = Orientation.VERTICAL
-            grazing_angle = -numpy.arctan(srwlopt.nvz/srwlopt.nvy)
+            orientation_of_reflection_plane = Orientation.DOWN if srwlopt.tvy < 0 else Orientation.UP
+            grazing_angle = abs(numpy.arctan(srwlopt.nvz/srwlopt.nvy))
 
         self.__init__(tangential_size                 = srwlopt.dt,
                       sagittal_size                   = srwlopt.ds,

@@ -16,7 +16,7 @@ class SRWOpticalElementDecorator:
 
 class SRWOpticalElement(SRWOpticalElementDecorator, WOOpticalElementDecorator):
 
-    def applyOpticalElement(self, wavefront, parameters=None):
+    def applyOpticalElement(self, wavefront=None, parameters=None):
 
         if not parameters.has_additional_parameter("srw_oe_wavefront_propagation_parameters"):
             wavefront_propagation_parameters = WavefrontPropagationParameters()

@@ -4,7 +4,7 @@ angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
 from wofry.propagator.propagator import Propagator2D
 
-from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
+from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
 from srwlib import *
@@ -33,6 +33,17 @@ class FresnelSRW(Propagator2D):
             if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
                 raise ValueError("SRW Wavefront Propagation Parameters not present")
 
+        srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
+
+        if parameters.has_additional_parameter("srw_drift_wavefront_propagation_optional_parameters"):
+            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_wavefront_propagation_optional_parameters")
+
+            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationOptionalParameters):
+                raise ValueError("SRW Wavefront Propagation Optional Parameters are inconsistent")
+
+            wavefront_propagation_optional_parameters.append_to_srw_array(srw_parameters_array)
+
+
         is_generic_wavefront = isinstance(wavefront, GenericWavefront2D)
 
         if is_generic_wavefront:
@@ -45,7 +56,7 @@ class FresnelSRW(Propagator2D):
         #
 
         optBL = SRWLOptC([SRWLOptD(propagation_distance)], # drift space
-                         [wavefront_propagation_parameters.to_SRW_array()])
+                         [srw_parameters_array])
 
 
         srwl.PropagElecField(wavefront, optBL)

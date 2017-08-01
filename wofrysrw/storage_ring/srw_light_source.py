@@ -4,7 +4,7 @@ from srwlib import srwl
 
 from syned.storage_ring.light_source import LightSource
 
-from wofry.beamline.decorators import WOLightSourceDecorator
+from wofry.beamline.decorators import LightSourceDecorator
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront, WavefrontParameters
@@ -59,7 +59,7 @@ class PhotonSourceProperties(object):
 
         return info
 
-class SRWLightSource(LightSource, WOLightSourceDecorator):
+class SRWLightSource(LightSource, LightSourceDecorator):
     def __init__(self,
                  name="Undefined",
                  electron_beam=SRWElectronBeam(),

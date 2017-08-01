@@ -1,5 +1,5 @@
 
-from wofry.beamline.decorators import WOOpticalElementDecorator
+from wofry.beamline.decorators import OpticalElementDecorator
 
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 
@@ -14,7 +14,7 @@ class SRWOpticalElementDecorator:
     def fromSRWLOpt(cls, srwlopt=None):
         raise NotImplementedError("")
 
-class SRWOpticalElement(SRWOpticalElementDecorator, WOOpticalElementDecorator):
+class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
 
     def applyOpticalElement(self, wavefront=None, parameters=None):
 

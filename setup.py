@@ -60,7 +60,6 @@ SETUP_REQUIRES = (
     'setuptools',
 )
 
-
 # Return the git revision as a string
 def git_version():
     """Return the git revision as a string.
@@ -133,7 +132,6 @@ PACKAGES = [
 
 PACKAGE_DATA = {
 }
-
 
 def setup_package():
     write_version_py()

@@ -1,8 +1,7 @@
-from srwlib import *
+from srwlib import srwl, SRWLWfr, SRWLRadMesh, SRWLStokes, array as srw_array
 
 import copy
 import numpy
-import array
 import scipy.constants as codata
 
 m_to_eV = codata.h*codata.c/codata.e
@@ -385,7 +384,7 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_FLUX,
                                                                   type_of_dependence = TypeOfDependence.VS_E)
 
-        output_array = array.array('f', [0]*self.mesh.ne)
+        output_array = srw_array('f', [0]*self.mesh.ne)
 
         SRWWavefront.get_intensity_from_electric_field(output_array, self, flux_calculation_parameters)
         
@@ -411,7 +410,7 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         intensity_array = numpy.zeros((e_array.size, h_array.size, v_array.size))
 
         for ie in range(e_array.size):
-            output_array = array.array(type, [0] * mesh.nx * mesh.ny)  # "flat" array to take 2D intensity data
+            output_array = srw_array(type, [0] * mesh.nx * mesh.ny)  # "flat" array to take 2D intensity data
 
             flux_calculation_parameters._fixed_input_photon_energy_or_time = e_array[ie]
 
@@ -424,9 +423,9 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
             if len_output_array > tot_len:
                 output_array = numpy.array(output_array[0:tot_len])
             elif len_output_array < tot_len:
-                aux_array = array('d', [0] * len_output_array)
+                aux_array = srw_array('d', [0] * len_output_array)
                 for i in range(len_output_array): aux_array[i] = output_array[i]
-                output_array = numpy.array(array.array(aux_array))
+                output_array = numpy.array(srw_array(aux_array))
             else:
                 output_array = numpy.array(output_array)
 
@@ -559,7 +558,7 @@ def numpyArrayToSRWArray(numpy_array):
         tmp[2*i] = r_horizontal_field[i]
         tmp[2*i+1] = i_horizontal_field[i]
 
-    return array('f', tmp)
+    return srw_array('f', tmp)
 
 def SRWArrayToNumpy(srw_array, dim_x, dim_y, number_energies):
     """

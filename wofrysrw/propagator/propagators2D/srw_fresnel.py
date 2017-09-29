@@ -9,6 +9,8 @@ from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
 from srwlib import *
 
+from PyQt5.QtWidgets import QMessageBox
+
 class FresnelSRW(Propagator2D):
 
     HANDLER_NAME = "FRESNEL_SRW"
@@ -24,19 +26,26 @@ class FresnelSRW(Propagator2D):
     :return:
     """
 
-    def do_specific_progation(self, wavefront, propagation_distance, parameters):
-        if not parameters.has_additional_parameter("srw_drift_wavefront_propagation_parameters"):
+
+    def do_specific_progation_before(self, wavefront, propagation_distance, parameters):
+        return self.do_specific_progation(wavefront, propagation_distance, parameters, prefix="before")
+
+    def do_specific_progation_after(self, wavefront, propagation_distance, parameters):
+        return self.do_specific_progation(wavefront, propagation_distance, parameters, prefix="after")
+
+    def do_specific_progation(self, wavefront, propagation_distance, parameters, prefix="after"):
+        if not parameters.has_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_parameters"):
             wavefront_propagation_parameters = WavefrontPropagationParameters()
         else:
-            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_wavefront_propagation_parameters")
+            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_parameters")
 
             if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
                 raise ValueError("SRW Wavefront Propagation Parameters not present")
 
         srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
 
-        if parameters.has_additional_parameter("srw_drift_wavefront_propagation_optional_parameters"):
-            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_wavefront_propagation_optional_parameters")
+        if parameters.has_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_optional_parameters"):
+            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_optional_parameters")
 
             if not isinstance(wavefront_propagation_parameters, WavefrontPropagationOptionalParameters):
                 raise ValueError("SRW Wavefront Propagation Optional Parameters are inconsistent")
@@ -57,7 +66,6 @@ class FresnelSRW(Propagator2D):
 
         optBL = SRWLOptC([SRWLOptD(propagation_distance)], # drift space
                          [srw_parameters_array])
-
 
         srwl.PropagElecField(wavefront, optBL)
 

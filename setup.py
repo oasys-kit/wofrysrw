@@ -11,7 +11,7 @@ except AttributeError:
 
 NAME = 'wofrysrw'
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 ISRELEASED = False
 
 DESCRIPTION = 'WOFRY (Wave Optics FRamework in pYthon) for SRW library'
@@ -53,7 +53,8 @@ INSTALL_REQUIRES = (
     'numpy',
     'scipy',
     'syned',
-    'wofry'
+    'wofry',
+    'oasys1-srwlib'
 )
 
 SETUP_REQUIRES = (

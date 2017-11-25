@@ -31,7 +31,6 @@ class SRWSphericalMirror(SRWMirror, SRWOpticalElement):
         return SRWLOptMirSph(_size_tang=self.tangential_size,
                             _size_sag=self.sagittal_size,
                             _r=self.radius,
-                            _ang_graz=self.grazing_angle,
                             _ap_shape=ApertureShape.RECTANGULAR,
                             _sim_meth=SimulationMethod.THICK,
                             _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER,

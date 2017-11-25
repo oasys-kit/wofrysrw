@@ -34,7 +34,6 @@ class SRWToroidalMirror(SRWMirror, SRWOpticalElement):
                             _size_sag=self.sagittal_size,
                             _rt=self.tangential_radius,
                             _rs=self.sagittal_radius,
-                            _ang_graz=self.grazing_angle,
                             _ap_shape=ApertureShape.RECTANGULAR,
                             _sim_meth=SimulationMethod.THICK,
                             _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER,

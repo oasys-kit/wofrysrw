@@ -66,6 +66,11 @@ class SRWMirror(Mirror, SRWOpticalElement):
 
         if not self.height_profile_data_file is None:
 
+            if self.orientation_of_reflection_plane == Orientation.LEFT or self.orientation_of_reflection_plane == Orientation.RIGHT:
+                dim = 'x'
+            elif self.orientation_of_reflection_plane == Orientation.UP or self.orientation_of_reflection_plane == Orientation.DOWN:
+                dim = 'y'
+
             if self.height_profile_data_file_dimension == 1:
                 height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
                                                               _str_sep='\t',
@@ -74,7 +79,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
 
                 optTrEr = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data,
                                                         _ang=self.grazing_angle,
-                                                        _dim='y',
+                                                        _dim=dim,
                                                         _amp_coef=self.height_amplification_coefficient)
             elif self.height_profile_data_file_dimension == 2:
                 height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
@@ -84,7 +89,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
 
                 optTrEr = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data,
                                                         _ang=self.grazing_angle,
-                                                        _dim='y',
+                                                        _dim=dim,
                                                         _amp_coef=self.height_amplification_coefficient)
 
             optBL = SRWLOptC([optTrEr],

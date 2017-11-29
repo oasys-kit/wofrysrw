@@ -82,9 +82,8 @@ class SRWMirror(Mirror, SRWOpticalElement):
                                                         _dim=dim,
                                                         _amp_coef=self.height_amplification_coefficient)
             elif self.height_profile_data_file_dimension == 2:
-                height_profile_data = self.read_surf_height_2d_file(self.height_profile_data_file)
-
-                print ("DIO CANE", height_profile_data)
+                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
+                                                              _str_sep='\t')
 
                 optTrEr = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data,
                                                         _ang=self.grazing_angle,
@@ -154,28 +153,3 @@ class SRWMirror(Mirror, SRWOpticalElement):
                       grazing_angle                   = grazing_angle,
                       orientation_of_reflection_plane = orientation_of_reflection_plane,
                       height_profile_data_file        = None)
-
-    @classmethod
-    def read_surf_height_2d_file(cls, height_profile_data_file, str_sep='\t'):
-
-        buffer = open(height_profile_data_file, "r")
-
-        rows = buffer.readlines()
-
-        height_profile_data = []
-
-        for row in rows:
-            values = row.split(sep=str_sep)
-
-            print(values)
-
-            data = []
-            for value in values:
-                try:
-                    data.append(float(value))
-                except:
-                    pass
-
-            height_profile_data.append(data)
-
-        return height_profile_data

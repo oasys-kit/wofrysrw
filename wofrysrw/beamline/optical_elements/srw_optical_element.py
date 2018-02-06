@@ -1,3 +1,4 @@
+import numpy
 
 from wofry.beamline.decorators import OpticalElementDecorator
 
@@ -5,6 +6,11 @@ from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationPa
 
 from srwlib import SRWLOptC, srwl
 
+class Orientation:
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 class SRWOpticalElementDecorator:
     def toSRWLOpt(self):
@@ -43,3 +49,30 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
 
         return wavefront
 
+    def get_orientation_vectors(self):
+        if self.orientation_of_reflection_plane == Orientation.LEFT:
+            nvx = numpy.cos(self.grazing_angle)
+            nvy = 0
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = numpy.sin(self.grazing_angle)
+            tvy = 0
+        elif self.orientation_of_reflection_plane == Orientation.RIGHT:
+            nvx = numpy.cos(self.grazing_angle)
+            nvy = 0
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = -numpy.sin(self.grazing_angle)
+            tvy = 0
+        elif self.orientation_of_reflection_plane == Orientation.UP:
+            nvx = 0
+            nvy = numpy.cos(self.grazing_angle)
+            nvz = -numpy.sin(self.grazing_angle)
+            tvx = 0
+            tvy = numpy.sin(self.grazing_angle)
+        elif self.orientation_of_reflection_plane == Orientation.DOWN:
+            nvx = 0
+            nvy = -numpy.cos(self.grazing_angle)
+            nvz = numpy.sin(self.grazing_angle)
+            tvx = 0
+            tvy = numpy.sin(self.grazing_angle)
+
+        return nvx, nvy, nvz, tvx, tvy

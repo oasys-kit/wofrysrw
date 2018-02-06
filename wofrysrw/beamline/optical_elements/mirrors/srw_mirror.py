@@ -3,17 +3,12 @@ import numpy
 from syned.beamline.optical_elements.mirrors.mirror import Mirror
 from syned.beamline.shape import Rectangle, Plane
 
-from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
+from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement, Orientation
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 
 from srwlib import SRWLOptC, SRWLOptMir
 from srwlib import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
 
-class Orientation:
-    UP = 0
-    DOWN = 1
-    LEFT = 2
-    RIGHT = 3
 
 class ApertureShape:
     RECTANGULAR = 'r'
@@ -98,30 +93,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
         return wavefront
 
     def toSRWLOpt(self):
-        if self.orientation_of_reflection_plane == Orientation.LEFT:
-            nvx = numpy.cos(self.grazing_angle)
-            nvy = 0
-            nvz = -numpy.sin(self.grazing_angle)
-            tvx = -numpy.sin(self.grazing_angle)
-            tvy = 0
-        elif self.orientation_of_reflection_plane == Orientation.RIGHT:
-            nvx = -numpy.cos(self.grazing_angle)
-            nvy = 0
-            nvz = numpy.sin(self.grazing_angle)
-            tvx = numpy.sin(self.grazing_angle)
-            tvy = 0
-        elif self.orientation_of_reflection_plane == Orientation.UP:
-            nvx = 0
-            nvy = numpy.cos(self.grazing_angle)
-            nvz = -numpy.sin(self.grazing_angle)
-            tvx = 0
-            tvy = -numpy.sin(self.grazing_angle)
-        elif self.orientation_of_reflection_plane == Orientation.DOWN:
-            nvx = 0
-            nvy = -numpy.cos(self.grazing_angle)
-            nvz = numpy.sin(self.grazing_angle)
-            tvx = 0
-            tvy = -numpy.sin(self.grazing_angle)
+        nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
 
         return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy)
 

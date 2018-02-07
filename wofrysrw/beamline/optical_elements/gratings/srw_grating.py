@@ -66,39 +66,7 @@ class SRWGrating(Grating, SRWOpticalElement):
             if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
                 raise ValueError("SRW Wavefront Propagation Parameters not present")
 
-        #TODO: ADD PARAMETERS OF SUBSTRATE?
-
         substrate_mirror = self.get_substrate_mirror()
-
-        optical_elements = [substrate_mirror]
-        propagation_parameters = [WavefrontPropagationParameters().to_SRW_array()] #TODO: ADD PARAMETERS OF SUBSTRATE?
-
-        if not self.height_profile_data_file is None:
-
-            if self.height_profile_data_file_dimension == 1:
-                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
-                                                              _str_sep='\t',
-                                                              _i_col_start=0,
-                                                              _i_col_end=1)
-
-                optTrEr = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data,
-                                                        _ang=self.grazing_angle,
-                                                        _dim='y',
-                                                        _amp_coef=self.height_amplification_coefficient)
-            elif self.height_profile_data_file_dimension == 2:
-                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
-                                                              _str_sep='\t',
-                                                              _i_col_start=0,
-                                                              _i_col_end=2)
-
-                optTrEr = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data,
-                                                        _ang=self.grazing_angle,
-                                                        _dim='y',
-                                                        _amp_coef=self.height_amplification_coefficient)
-
-
-            optical_elements.append(optTrEr)
-            propagation_parameters.append(WavefrontPropagationParameters().to_SRW_array())
 
         grating = SRWLOptG(_mirSub=substrate_mirror,
                            _m=self.diffraction_order,
@@ -109,11 +77,8 @@ class SRWGrating(Grating, SRWOpticalElement):
                            _grDen4=self.grooving_density_4,
                            _grAng=self.grooving_angle)
 
-        optical_elements.append(grating)
-
-        print("Grating GR", grating.m, grating.grDen, grating.grDen1,grating.grDen2,grating.grDen3)
-
-        propagation_parameters.append(wavefront_propagation_parameters.to_SRW_array())
+        optical_elements = [grating]
+        propagation_parameters = [wavefront_propagation_parameters.to_SRW_array()]
 
         optBL = SRWLOptC(optical_elements, propagation_parameters)
 

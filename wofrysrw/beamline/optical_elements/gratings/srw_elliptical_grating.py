@@ -1,6 +1,7 @@
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, ApertureShape, SimulationMethod, TreatInputOutput
 from wofrysrw.beamline.optical_elements.gratings.srw_grating import SRWGrating
+from syned.beamline.shape import Ellipsoid
 
 from srwlib import SRWLOptMirEl
 
@@ -41,6 +42,9 @@ class SRWEllipticalGrating(SRWGrating, SRWOpticalElement):
 
         self.distance_from_first_focus_to_mirror_center  = distance_from_first_focus_to_mirror_center
         self.distance_from_mirror_center_to_second_focus = distance_from_mirror_center_to_second_focus
+
+    def get_shape(self):
+        return Ellipsoid()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
         return SRWLOptMirEl(_size_tang=self.tangential_size,

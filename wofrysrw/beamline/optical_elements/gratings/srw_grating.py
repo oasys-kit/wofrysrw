@@ -36,7 +36,7 @@ class SRWGrating(Grating, SRWOpticalElement):
                                                  x_right=0.5*(sagittal_size),
                                                  y_bottom=-0.5*tangential_size,
                                                  y_top=0.5*tangential_size),
-                        surface_shape=Plane(),
+                        surface_shape=self.get_shape(),
                         ruling=grooving_density_0*1e3)
 
         self.tangential_size                                  = tangential_size
@@ -56,6 +56,9 @@ class SRWGrating(Grating, SRWOpticalElement):
         self.grooving_density_3 = grooving_density_3
         self.grooving_density_4 = grooving_density_4
         self.grooving_angle     = grooving_angle
+
+    def get_shape(self):
+        raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront, parameters=None):
         if not parameters.has_additional_parameter("srw_oe_wavefront_propagation_parameters"):

@@ -1,5 +1,6 @@
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, ApertureShape, SimulationMethod, TreatInputOutput
+from syned.beamline.shape import Plane
 
 from srwlib import SRWLOptMirPl
 
@@ -23,6 +24,8 @@ class SRWPlaneMirror(SRWMirror, SRWOpticalElement):
                          height_profile_data_file_dimension=height_profile_data_file_dimension,
                          height_amplification_coefficient=height_amplification_coefficient)
 
+    def get_shape(self):
+        return Plane()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
         return SRWLOptMirPl(_size_tang=self.tangential_size,

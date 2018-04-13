@@ -1,5 +1,6 @@
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, ApertureShape, SimulationMethod, TreatInputOutput
+from syned.beamline.shape import Ellipsoid
 
 from srwlib import SRWLOptMirEl
 
@@ -28,6 +29,8 @@ class SRWEllipticalMirror(SRWMirror, SRWOpticalElement):
         self.distance_from_first_focus_to_mirror_center  = distance_from_first_focus_to_mirror_center
         self.distance_from_mirror_center_to_second_focus = distance_from_mirror_center_to_second_focus
 
+    def get_shape(self):
+        return Ellipsoid()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
         return SRWLOptMirEl(_size_tang=self.tangential_size,

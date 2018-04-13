@@ -1,5 +1,6 @@
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, ApertureShape, SimulationMethod, TreatInputOutput
+from syned.beamline.shape import Sphere
 
 from srwlib import SRWLOptMirSph
 
@@ -26,6 +27,8 @@ class SRWSphericalMirror(SRWMirror, SRWOpticalElement):
 
         self.radius  = radius
 
+    def get_shape(self):
+        return Sphere()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
         return SRWLOptMirSph(_size_tang=self.tangential_size,

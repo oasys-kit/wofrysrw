@@ -1,6 +1,7 @@
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, ApertureShape, SimulationMethod, TreatInputOutput
 from wofrysrw.beamline.optical_elements.gratings.srw_grating import SRWGrating
+from syned.beamline.shape import Plane
 
 from srwlib import SRWLOptMirPl
 
@@ -35,6 +36,9 @@ class SRWPlaneGrating(SRWGrating, SRWOpticalElement):
                          grooving_density_2=grooving_density_2,
                          grooving_density_3=grooving_density_3,
                          grooving_density_4=grooving_density_4)
+
+    def get_shape(self):
+        return Plane()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
         return SRWLOptMirPl(_size_tang=self.tangential_size,

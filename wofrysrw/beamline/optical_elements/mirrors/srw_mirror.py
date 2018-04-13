@@ -45,7 +45,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
                                                  x_right=0.5*sagittal_size,
                                                  y_bottom=-0.5*tangential_size,
                                                  y_top=0.5*tangential_size),
-                        surface_shape=Plane())
+                        surface_shape=self.get_shape())
 
         self.tangential_size                                  = tangential_size
         self.sagittal_size                                    = sagittal_size
@@ -55,6 +55,9 @@ class SRWMirror(Mirror, SRWOpticalElement):
         self.height_profile_data_file = height_profile_data_file
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
         self.height_amplification_coefficient = height_amplification_coefficient
+
+    def get_shape(self):
+        raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront, parameters=None):
         wavefront = super().applyOpticalElement(wavefront, parameters)

@@ -1,5 +1,6 @@
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, ApertureShape, SimulationMethod, TreatInputOutput
+from syned.beamline.shape import Toroidal
 
 from srwlib import SRWLOptMirTor
 
@@ -28,6 +29,8 @@ class SRWToroidalMirror(SRWMirror, SRWOpticalElement):
         self.tangential_radius  = tangential_radius
         self.sagittal_radius = sagittal_radius
 
+    def get_shape(self):
+        return Toroidal()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
         return SRWLOptMirTor(_size_tang=self.tangential_size,

@@ -10,6 +10,7 @@ from wofry.propagator.wavefront import WavefrontDimension
 
 from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
 from wofry.propagator.decorators import WavefrontDecorator
+from wofry.propagator.polarization import Polarization
 
 class WavefrontPrecisionParameters(object):
     def __init__(self,
@@ -242,6 +243,7 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                  _ny=0,
                  _zStart=0,
                  _partBeam=None):
+
         SRWLWfr.__init__(self,
                          _arEx=_arEx,
                          _arEy=_arEy,
@@ -274,28 +276,48 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                        self.mesh.yStart,
                                                                        self.mesh.yFin,
                                                                        number_of_points=(self.mesh.nx, self.mesh.ny),
-                                                                       wavelength=self.get_wavelength())
+                                                                       wavelength=self.get_wavelength(),
+                                                                       polarization=Polarization.TOTAL)
 
-        wavefront.set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[0, :, :, 0])
+        wavefront.set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[0, :, :, 0],
+                                        SRWEFieldAsNumpy(srwwf=self)[0, :, :, 1])
 
         return wavefront
 
     @classmethod
     def fromGenericWavefront(cls, wavefront):
-        return SRWWavefrontFromElectricField(wavefront.get_coordinate_x()[0],
-                                             wavefront.get_coordinate_x()[-1],
-                                             wavefront.get_complex_amplitude(),
-                                             wavefront.get_coordinate_y()[0],
-                                             wavefront.get_coordinate_y()[-1],
-                                             numpy.zeros_like(wavefront.get_complex_amplitude()),
-                                             m_to_eV*wavefront.get_wavelength(),
-                                             m_to_eV*wavefront.get_wavelength()*1e10,
-                                             1,
-                                             1.0,
-                                             1.0,
-                                             1e-3,
-                                             1.0,
-                                             1e-3)
+
+        if wavefront.is_polarized():
+            return SRWWavefrontFromElectricField(horizontal_start  = wavefront.get_coordinate_x()[0],
+                                                 horizontal_end    = wavefront.get_coordinate_x()[-1],
+                                                 horizontal_efield = wavefront.get_complex_amplitude(polarization=Polarization.SIGMA),
+                                                 vertical_start    = wavefront.get_coordinate_y()[0],
+                                                 vertical_end      = wavefront.get_coordinate_y()[-1],
+                                                 vertical_efield   = wavefront.get_complex_amplitude(polarization=Polarization.PI),
+                                                 energy_min        = wavefront.get_photon_energy(),
+                                                 energy_max        = wavefront.get_photon_energy(),
+                                                 energy_points     = 1,
+                                                 z                 = 0.0,
+                                                 Rx                = 1e5,
+                                                 dRx               = 1.0,
+                                                 Ry                = 1e5,
+                                                 dRy               = 1.0)
+        else:
+            return SRWWavefrontFromElectricField(horizontal_start  = wavefront.get_coordinate_x()[0],
+                                                 horizontal_end    = wavefront.get_coordinate_x()[-1],
+                                                 horizontal_efield = wavefront.get_complex_amplitude(polarization=Polarization.SIGMA),
+                                                 vertical_start    = wavefront.get_coordinate_y()[0],
+                                                 vertical_end      = wavefront.get_coordinate_y()[-1],
+                                                 vertical_efield   = numpy.zeros_like(wavefront.get_complex_amplitude()),
+                                                 energy_min        = wavefront.get_photon_energy(),
+                                                 energy_max        = wavefront.get_photon_energy(),
+                                                 energy_points     = 1,
+                                                 z                 = 0.0,
+                                                 Rx                = 1e5,
+                                                 dRx               = 1.0,
+                                                 Ry                = 1e5,
+                                                 dRy               = 1.0)
+
     @classmethod
     def decorateSRWWF(self, srwwf):
         dim_x = srwwf.mesh.nx
@@ -324,7 +346,12 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         wavefront.numTypeElFld=srwwf.numTypeElFld
         wavefront.partBeam=srwwf.partBeam
 
+        # debug srio@esrf.eu: added these fields as they are not correctly pased
+        wavefront.mesh.nx = dim_x
+        wavefront.mesh.ny = dim_y
+
         return wavefront
+
 
     def duplicate(self):
         wavefront = SRWWavefront(_arEx=copy.deepcopy(self.arEx),
@@ -582,3 +609,4 @@ def SRWArrayToNumpy(srw_array, dim_x, dim_y, number_energies):
     e = e.swapaxes(0, 2)
 
     return e.copy()
+

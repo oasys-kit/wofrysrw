@@ -74,16 +74,16 @@ class SRWGrating(Grating, SRWOpticalElement):
 
     def get_output_orientation_vectors(self, photon_energy):
         deflection_angle = self.get_deflection_angle(photon_energy)
-        tangent = 1 if not self.invert_tangent_component else -1
+        tangent = 1.0 if not self.invert_tangent_component else -1.0
 
         if self.orientation_of_reflection_plane == Orientation.UP:
-            return 0,  numpy.sin(deflection_angle),  numpy.cos(deflection_angle),  0,  tangent
+            return 0,  numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
         elif self.orientation_of_reflection_plane == Orientation.DOWN:
-            return 0,  -numpy.sin(deflection_angle),  numpy.cos(deflection_angle),  0,  tangent
+            return 0,  -numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
         elif self.orientation_of_reflection_plane == Orientation.LEFT:
-            return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle),  tangent,  0
+            return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
         elif self.orientation_of_reflection_plane == Orientation.RIGHT:
-            return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle),  tangent,  0
+            return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
 
     def get_shape(self):
         raise NotImplementedError()

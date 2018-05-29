@@ -50,15 +50,21 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
         return wavefront
 
     def getXY(self):
-        if isinstance(self.boundary_shape, Rectangle) or isinstance(self.boundary_shape, Ellipse):
-            x_left, x_right, y_bottom, y_top = self.boundary_shape.get_boundaries()
+        boundary_shape = self.get_boundary_shape()
 
-            return x_right-x_left, y_top-y_bottom
+        if not boundary_shape is None:
+            if isinstance(boundary_shape, Rectangle) or isinstance(boundary_shape, Ellipse):
+                x_left, x_right, y_bottom, y_top = boundary_shape.get_boundaries()
 
-        elif isinstance(self.boundary_shape, Circle):
-            radius, x_center, y_center = self.boundary_shape.get_boundaries()
+                return x_left + 0.5*(x_right-x_left), \
+                       y_bottom + 0.5*(y_top-y_bottom)
 
-            return x_center, y_center
+            elif isinstance(boundary_shape, Circle):
+                radius, x_center, y_center = boundary_shape.get_boundaries()
+
+                return x_center, y_center
+        else:
+            return 0.0, 0.0
 
     def get_orientation_vectors(self):
         sign = (-1 if self.invert_tangent_component else 1)

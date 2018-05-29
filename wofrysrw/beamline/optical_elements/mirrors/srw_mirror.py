@@ -32,6 +32,8 @@ class SRWMirror(Mirror, SRWOpticalElement):
                  name                               = "Undefined",
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
+                 vertical_position_of_mirror_center = 0.0,
+                 horizontal_position_of_mirror_center = 0.0,
                  grazing_angle                      = 0.003,
                  orientation_of_reflection_plane    = Orientation.UP,
                  invert_tangent_component           = False,
@@ -42,10 +44,10 @@ class SRWMirror(Mirror, SRWOpticalElement):
 
         Mirror.__init__(self,
                         name=name,
-                        boundary_shape=Rectangle(x_left=-0.5*sagittal_size,
-                                                 x_right=0.5*sagittal_size,
-                                                 y_bottom=-0.5*tangential_size,
-                                                 y_top=0.5*tangential_size),
+                        boundary_shape=Rectangle(x_left=horizontal_position_of_mirror_center - 0.5*sagittal_size,
+                                                 x_right=horizontal_position_of_mirror_center + 0.5*sagittal_size,
+                                                 y_bottom=vertical_position_of_mirror_center - 0.5*tangential_size,
+                                                 y_top=vertical_position_of_mirror_center + 0.5*tangential_size),
                         surface_shape=self.get_shape())
 
         self.tangential_size                                  = tangential_size
@@ -101,15 +103,15 @@ class SRWMirror(Mirror, SRWOpticalElement):
         nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
         x, y = self.getXY()
 
-        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y)
-
-    def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y):
-        mirror = SRWLOptMir()
-
-        if isinstance(self.boundary_shape, Rectangle):
+        if isinstance(self.get_boundary_shape(), Rectangle):
             ap_shape = ApertureShape.RECTANGULAR
-        elif isinstance(self.boundary_shape, Ellipse) or  isinstance(self.boundary_shape, Circle):
+        elif isinstance(self.get_boundary_shape(), Ellipse) or isinstance(self.get_boundary_shape(), Circle):
             ap_shape = ApertureShape.ELLIPTIC
+
+        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+
+    def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
+        mirror = SRWLOptMir()
 
         mirror.set_dim_sim_meth(_size_tang=self.tangential_size,
                                 _size_sag=self.sagittal_size,

@@ -1,7 +1,7 @@
 import numpy
 
 from syned.beamline.optical_elements.gratings.grating import Grating
-from syned.beamline.shape import Ellipsoid, Rectangle, Plane
+from syned.beamline.shape import Ellipse, Rectangle, Circle
 
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
@@ -18,6 +18,7 @@ class SRWGrating(Grating, SRWOpticalElement):
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
                  orientation_of_reflection_plane    = Orientation.UP,
+                 invert_tangent_component           = False,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0,
@@ -43,6 +44,7 @@ class SRWGrating(Grating, SRWOpticalElement):
         self.sagittal_size                                    = sagittal_size
         self.grazing_angle                                    = grazing_angle
         self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
+        self.invert_tangent_component                         = invert_tangent_component
 
         self.height_profile_data_file = height_profile_data_file
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
@@ -56,6 +58,30 @@ class SRWGrating(Grating, SRWOpticalElement):
         self.grooving_density_3 = grooving_density_3
         self.grooving_density_4 = grooving_density_4
         self.grooving_angle     = grooving_angle
+
+    def get_alpha_angle(self):
+        return self.grazing_angle
+
+    def get_beta_angle(self, photon_energy):
+        wavelength = 1.239842e-3/photon_energy # in mm
+
+        return numpy.asin(wavelength*self.grooving_density_0 - numpy.cos(self.get_alpha_angle())) # Grating Output Angle
+
+    def get_deflection_angle(self, photon_energy):
+        return self.get_alpha_angle() + self.get_beta_angle(photon_energy) + 1.57079632679 # Grating Deflection Angle
+
+    def get_output_orientation_vectors(self, photon_energy):
+        deflection_angle = self.get_deflection_angle(photon_energy)
+        tangent = 1 if not self.invert_tangent_component else -1
+
+        if self.orientation_of_reflection_plane == Orientation.UP:
+            return 0,  -numpy.sin(deflection_angle),  numpy.cos(deflection_angle),  0,  tangent
+        elif self.orientation_of_reflection_plane == Orientation.DOWN:
+            return 0,  numpy.sin(deflection_angle),  numpy.cos(deflection_angle),  0,  tangent
+        elif self.orientation_of_reflection_plane == Orientation.LEFT:
+            return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle),  tangent,  0
+        elif self.orientation_of_reflection_plane == Orientation.RIGHT:
+            return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle),  tangent,  0
 
     def get_shape(self):
         raise NotImplementedError()
@@ -80,8 +106,43 @@ class SRWGrating(Grating, SRWOpticalElement):
                            _grDen4=self.grooving_density_4,
                            _grAng=self.grooving_angle)
 
+        wavefront_propagation_parameters.to_SRW_array()
+
         optical_elements = [grating]
         propagation_parameters = [wavefront_propagation_parameters.to_SRW_array()]
+
+        if not self.height_profile_data_file is None:
+
+            if self.orientation_of_reflection_plane == Orientation.LEFT or self.orientation_of_reflection_plane == Orientation.RIGHT:
+                dim = 'x'
+            elif self.orientation_of_reflection_plane == Orientation.UP or self.orientation_of_reflection_plane == Orientation.DOWN:
+                dim = 'y'
+
+            if self.height_profile_data_file_dimension == 1:
+                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
+                                                              _str_sep='\t',
+                                                              _i_col_start=0,
+                                                              _i_col_end=1)
+
+                optTrEr = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data,
+                                                        _ang=self.grazing_angle,
+                                                        _ang_r=self.get_deflection_angle(wavefront.get_photon_energy()),
+                                                        _dim=dim,
+                                                        _amp_coef=self.height_amplification_coefficient)
+
+            elif self.height_profile_data_file_dimension == 2:
+                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
+                                                              _str_sep='\t')
+
+                optTrEr = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data,
+                                                        _ang=self.grazing_angle,
+                                                        _ang_r=self.get_deflection_angle(wavefront.get_photon_energy()),
+                                                        _dim=dim,
+                                                        _amp_coef=self.height_amplification_coefficient)
+
+            optical_elements.append([optTrEr])
+            propagation_parameters.append([WavefrontPropagationParameters().to_SRW_array()])
+
 
         optBL = SRWLOptC(optical_elements, propagation_parameters)
 
@@ -91,17 +152,29 @@ class SRWGrating(Grating, SRWOpticalElement):
 
     def get_substrate_mirror(self):
         nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
+        x, y = self.getXY()
 
-        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy)
+        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y)
 
-    def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
-        return SRWLOptMir(_size_tang=self.tangential_size,
-                          _size_sag=self.sagittal_size,
-                          _ap_shape=ApertureShape.RECTANGULAR,
-                          _sim_meth=SimulationMethod.THICK,
-                          _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER,
-                          _nvx=nvx,
+    def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y):
+        mirror = SRWLOptMir()
+
+        if isinstance(self.boundary_shape, Rectangle):
+            ap_shape = ApertureShape.RECTANGULAR
+        elif isinstance(self.boundary_shape, Ellipse) or  isinstance(self.boundary_shape, Circle):
+            ap_shape = ApertureShape.ELLIPTIC
+
+        mirror.set_dim_sim_meth(_size_tang=self.tangential_size,
+                                _size_sag=self.sagittal_size,
+                                _ap_shape=ap_shape,
+                                _sim_meth=SimulationMethod.THICK,
+                                _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER)
+        mirror.set_orient(_nvx=nvx,
                           _nvy=nvy,
                           _nvz=nvz,
                           _tvx=tvx,
-                          _tvy=tvy)
+                          _tvy=tvy,
+                          _x = x,
+                          _y = y)
+
+        return mirror

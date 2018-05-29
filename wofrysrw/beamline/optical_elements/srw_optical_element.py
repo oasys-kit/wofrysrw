@@ -1,7 +1,7 @@
 import numpy
 
+from syned.beamline.shape import Ellipse, Rectangle, Circle
 from wofry.beamline.decorators import OpticalElementDecorator
-
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 
 from srwlib import SRWLOptC, srwl
@@ -49,30 +49,43 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
 
         return wavefront
 
+    def getXY(self):
+        if isinstance(self.boundary_shape, Rectangle) or isinstance(self.boundary_shape, Ellipse):
+            x_left, x_right, y_bottom, y_top = self.boundary_shape.get_boundaries()
+
+            return x_right-x_left, y_top-y_bottom
+
+        elif isinstance(self.boundary_shape, Circle):
+            radius, x_center, y_center = self.boundary_shape.get_boundaries()
+
+            return x_center, y_center
+
     def get_orientation_vectors(self):
+        sign = (-1 if self.invert_tangent_component else 1)
+
         if self.orientation_of_reflection_plane == Orientation.LEFT:
             nvx = -numpy.cos(self.grazing_angle)
             nvy = 0
             nvz = -numpy.sin(self.grazing_angle)
-            tvx = numpy.sin(self.grazing_angle)
+            tvx = sign*numpy.sin(self.grazing_angle)
             tvy = 0
         elif self.orientation_of_reflection_plane == Orientation.RIGHT:
             nvx = numpy.cos(self.grazing_angle)
             nvy = 0
             nvz = -numpy.sin(self.grazing_angle)
-            tvx = -numpy.sin(self.grazing_angle)
+            tvx = -sign*numpy.sin(self.grazing_angle)
             tvy = 0
         elif self.orientation_of_reflection_plane == Orientation.UP:
             nvx = 0
             nvy = numpy.cos(self.grazing_angle)
             nvz = -numpy.sin(self.grazing_angle)
             tvx = 0
-            tvy = numpy.sin(self.grazing_angle)
+            tvy = -sign*numpy.sin(self.grazing_angle)
         elif self.orientation_of_reflection_plane == Orientation.DOWN:
             nvx = 0
             nvy = -numpy.cos(self.grazing_angle)
             nvz = -numpy.sin(self.grazing_angle)
             tvx = 0
-            tvy = -numpy.sin(self.grazing_angle)
+            tvy = -sign*numpy.sin(self.grazing_angle)
 
         return nvx, nvy, nvz, tvx, tvy

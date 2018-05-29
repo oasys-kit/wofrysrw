@@ -1,7 +1,7 @@
 import numpy
 
 from syned.beamline.optical_elements.mirrors.mirror import Mirror
-from syned.beamline.shape import Rectangle, Plane
+from syned.beamline.shape import Rectangle, Ellipse, Circle
 
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement, Orientation
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
@@ -34,6 +34,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
                  orientation_of_reflection_plane    = Orientation.UP,
+                 invert_tangent_component           = False,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0):
@@ -51,6 +52,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
         self.sagittal_size                                    = sagittal_size
         self.grazing_angle                                    = grazing_angle
         self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
+        self.invert_tangent_component                         = invert_tangent_component
 
         self.height_profile_data_file = height_profile_data_file
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
@@ -97,34 +99,53 @@ class SRWMirror(Mirror, SRWOpticalElement):
 
     def toSRWLOpt(self):
         nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
+        x, y = self.getXY()
 
-        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy)
+        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y)
 
-    def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy):
-        return SRWLOptMir(_size_tang=self.tangential_size,
-                          _size_sag=self.sagittal_size,
-                          _ap_shape=ApertureShape.RECTANGULAR,
-                          _sim_meth=SimulationMethod.THICK,
-                          _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER,
-                          _nvx=nvx,
+    def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y):
+        mirror = SRWLOptMir()
+
+        if isinstance(self.boundary_shape, Rectangle):
+            ap_shape = ApertureShape.RECTANGULAR
+        elif isinstance(self.boundary_shape, Ellipse) or  isinstance(self.boundary_shape, Circle):
+            ap_shape = ApertureShape.ELLIPTIC
+
+        mirror.set_dim_sim_meth(_size_tang=self.tangential_size,
+                                _size_sag=self.sagittal_size,
+                                _ap_shape=ap_shape,
+                                _sim_meth=SimulationMethod.THICK,
+                                _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER)
+        mirror.set_orient(_nvx=nvx,
                           _nvy=nvy,
                           _nvz=nvz,
                           _tvx=tvx,
-                          _tvy=tvy)
+                          _tvy=tvy,
+                          _x = x,
+                          _y = y)
+
+        return mirror
 
     def fromSRWLOpt(self, srwlopt=SRWLOptMir()):
         if not isinstance(srwlopt, SRWLOptMir):
             raise ValueError("SRW object is not a SRWLOptMir object")
 
         if srwlopt.tvx != 0.0:
-            orientation_of_reflection_plane = Orientation.LEFT if srwlopt.tvx < 0 else Orientation.RIGHT
+            orientation_of_reflection_plane = Orientation.LEFT if srwlopt.nvx < 0 else Orientation.RIGHT
             grazing_angle = abs(numpy.arctan(srwlopt.nvz/srwlopt.nvx))
-        else:
-            orientation_of_reflection_plane = Orientation.DOWN if srwlopt.tvy < 0 else Orientation.UP
+            if orientation_of_reflection_plane == Orientation.LEFT: invert_tangent_component = numpy.sign(srwlopt.nvz) == numpy.sign(srwlopt.tvx)
+            else: invert_tangent_component = numpy.sign(srwlopt.nvz) != numpy.sign(srwlopt.tvx)
+        elif srwlopt.tvy != 0.0:
+            orientation_of_reflection_plane = Orientation.DOWN if srwlopt.nvy < 0 else Orientation.UP
             grazing_angle = abs(numpy.arctan(srwlopt.nvz/srwlopt.nvy))
+            if orientation_of_reflection_plane == Orientation.UP: invert_tangent_component = numpy.sign(srwlopt.nvy) == numpy.sign(srwlopt.tvy)
+            else: invert_tangent_component = numpy.sign(srwlopt.nvy) != numpy.sign(srwlopt.tvy)
+        else:
+            raise ValueError("Tangential orientation angles (tvx/tvy) are both 0.0!")
 
         self.__init__(tangential_size                 = srwlopt.dt,
                       sagittal_size                   = srwlopt.ds,
                       grazing_angle                   = grazing_angle,
                       orientation_of_reflection_plane = orientation_of_reflection_plane,
+                      invert_tangent_component        = invert_tangent_component,
                       height_profile_data_file        = None)

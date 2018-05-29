@@ -265,6 +265,12 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         else:
             return m_to_eV/((self.mesh.eFin + self.mesh.eStart)*0.5)
 
+    def get_photon_energy(self):
+        if (self.mesh.eFin + self.mesh.eStart) == 0:
+            return 0.0
+        else:
+            return (self.mesh.eFin + self.mesh.eStart)*0.5
+
     def get_dimension(self):
         return WavefrontDimension.TWO
 

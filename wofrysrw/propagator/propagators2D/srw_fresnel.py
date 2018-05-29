@@ -11,6 +11,8 @@ from srwlib import *
 
 from PyQt5.QtWidgets import QMessageBox
 
+SRW_APPLICATION = "SRW"
+
 class FresnelSRW(Propagator2D):
 
     HANDLER_NAME = "FRESNEL_SRW"

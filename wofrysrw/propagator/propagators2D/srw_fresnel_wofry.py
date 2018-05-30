@@ -9,13 +9,9 @@ from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
 from srwlib import *
 
-from PyQt5.QtWidgets import QMessageBox
+class FresnelSRWWofry(Propagator2D):
 
-SRW_APPLICATION = "SRW"
-
-class FresnelSRW(Propagator2D):
-
-    HANDLER_NAME = "FRESNEL_SRW"
+    HANDLER_NAME = "FRESNEL_SRW_WOFRY"
 
     def get_handler_name(self):
         return self.HANDLER_NAME

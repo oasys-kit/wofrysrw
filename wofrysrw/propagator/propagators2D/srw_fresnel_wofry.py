@@ -32,25 +32,6 @@ class FresnelSRWWofry(Propagator2D):
         return self.do_specific_progation(wavefront, propagation_distance, parameters, prefix="after")
 
     def do_specific_progation(self, wavefront, propagation_distance, parameters, prefix="after"):
-        if not parameters.has_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_parameters"):
-            wavefront_propagation_parameters = WavefrontPropagationParameters()
-        else:
-            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_parameters")
-
-            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
-                raise ValueError("SRW Wavefront Propagation Parameters not present")
-
-        srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
-
-        if parameters.has_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_optional_parameters"):
-            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_optional_parameters")
-
-            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationOptionalParameters):
-                raise ValueError("SRW Wavefront Propagation Optional Parameters are inconsistent")
-
-            wavefront_propagation_optional_parameters.append_to_srw_array(srw_parameters_array)
-
-
         is_generic_wavefront = isinstance(wavefront, GenericWavefront2D)
 
         if is_generic_wavefront:
@@ -63,7 +44,7 @@ class FresnelSRWWofry(Propagator2D):
         #
 
         optBL = SRWLOptC([SRWLOptD(propagation_distance)], # drift space
-                         [srw_parameters_array])
+                         [self.__get_drift_wavefront_propagation_parameters(parameters, prefix)])
 
         srwl.PropagElecField(wavefront, optBL)
 
@@ -71,3 +52,24 @@ class FresnelSRWWofry(Propagator2D):
             return wavefront.toGenericWavefront()
         else:
             return wavefront
+
+    def __get_drift_wavefront_propagation_parameters(self, parameters, where="before"):
+        if not parameters.has_additional_parameter("srw_drift_" + where + "_wavefront_propagation_parameters"):
+            wavefront_propagation_parameters = WavefrontPropagationParameters()
+        else:
+            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_" + where + "_wavefront_propagation_parameters")
+
+            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
+                raise ValueError("SRW Wavefront Propagation Parameters not present")
+
+        srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
+
+        if parameters.has_additional_parameter("srw_drift_" + where + "_wavefront_propagation_optional_parameters"):
+            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_" + where + "_wavefront_propagation_optional_parameters")
+
+            if not isinstance(wavefront_propagation_optional_parameters, WavefrontPropagationOptionalParameters):
+                raise ValueError("SRW Wavefront Propagation Optional Parameters are inconsistent")
+
+            wavefront_propagation_optional_parameters.append_to_srw_array(srw_parameters_array)
+
+        return srw_parameters_array

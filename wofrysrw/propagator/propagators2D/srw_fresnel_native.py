@@ -2,10 +2,12 @@ import scipy.constants as codata
 angstroms_to_eV = codata.h*codata.c/codata.e*1e10
 
 from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
-from wofry.propagator.propagator import Propagator2D
+from wofry.propagator.propagator import PropagationManager, PropagationParameters, Propagator2D
 
+from wofrysrw.beamline.srw_beamline import Where
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
+from wofrysrw.propagator.propagators2D.srw_propagation_mode import SRWPropagationMode
 
 from srwlib import *
 
@@ -28,32 +30,8 @@ class FresnelSRWNative(Propagator2D):
     :return:
     """
 
-
-    def do_specific_progation_before(self, wavefront, propagation_distance, parameters):
-        return self.do_specific_progation(wavefront, propagation_distance, parameters, prefix="before")
-
-    def do_specific_progation_after(self, wavefront, propagation_distance, parameters):
-        return self.do_specific_progation(wavefront, propagation_distance, parameters, prefix="after")
-
-    def do_specific_progation(self, wavefront, propagation_distance, parameters, prefix="after"):
-        if not parameters.has_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_parameters"):
-            wavefront_propagation_parameters = WavefrontPropagationParameters()
-        else:
-            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_parameters")
-
-            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
-                raise ValueError("SRW Wavefront Propagation Parameters not present")
-
-        srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
-
-        if parameters.has_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_optional_parameters"):
-            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_" + prefix + "_wavefront_propagation_optional_parameters")
-
-            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationOptionalParameters):
-                raise ValueError("SRW Wavefront Propagation Optional Parameters are inconsistent")
-
-            wavefront_propagation_optional_parameters.append_to_srw_array(srw_parameters_array)
-
+    def do_propagation(self, parameters=PropagationParameters()):
+        wavefront = parameters.get_wavefront()
 
         is_generic_wavefront = isinstance(wavefront, GenericWavefront2D)
 
@@ -62,16 +40,89 @@ class FresnelSRWNative(Propagator2D):
         else:
             if not isinstance(wavefront, SRWWavefront): raise ValueError("wavefront cannot be managed by this propagator")
 
-        #
-        # propagation (simple wavefront drift
-        #
+        srw_oe_array = []
+        srw_pp_array = []
 
-        optBL = SRWLOptC([SRWLOptD(propagation_distance)], # drift space
-                         [srw_parameters_array])
+        propagation_mode = PropagationManager.Instance().get_propagation_mode(SRW_APPLICATION)
 
-        srwl.PropagElecField(wavefront, optBL)
+        if propagation_mode == SRWPropagationMode.STEP_BY_STEP:
+            self.add_optical_element(parameters, 0, srw_oe_array, srw_pp_array)
+        elif propagation_mode == SRWPropagationMode.WHOLE_BEAMLINE:
+            srw_beamline = parameters.get_additional_parameter("working_beamline")
+
+            for index in range(srw_beamline.get_beamline_elements_number()):
+                self.add_optical_element_from_beamline(srw_beamline, index, srw_oe_array, srw_pp_array)
+        else:
+            raise ValueError("Propagation Mode not supported by this Propagator")
+
+        if len(srw_oe_array) > 0:
+            optBL = SRWLOptC(srw_oe_array, srw_pp_array)
+            srwl.PropagElecField(wavefront, optBL)
 
         if is_generic_wavefront:
             return wavefront.toGenericWavefront()
         else:
             return wavefront
+
+    ########################################################
+    # WHOLE BEAMLINE
+
+    def add_optical_element_from_beamline(self, srw_beamline, index, srw_oe_array, srw_pp_array):
+        optical_element = srw_beamline.get_beamline_element_at(index).get_optical_element()
+        coordinates = srw_beamline.get_beamline_element_at(index).get_coordinates()
+
+        if coordinates.p() != 0.0:
+            srw_oe_array.append(SRWLOptD(coordinates.p()))
+            srw_pp_array.append(self.__get_drift_wavefront_propagation_parameters_from_beamline(srw_beamline, index, Where.DRIFT_BEFORE))
+
+        optical_element.add_to_srw_native_array(srw_oe_array, srw_pp_array, srw_beamline.get_wavefront_propagation_parameters_at(index, Where.OE))
+
+        if coordinates.q() != 0.0:
+            srw_oe_array.append(SRWLOptD(coordinates.q()))
+            srw_pp_array.append(self.__get_drift_wavefront_propagation_parameters_from_beamline(srw_beamline, index, Where.DRIFT_AFTER))
+
+    ########################################################
+    # ELEMENT BY ELEMENT
+
+    def __get_drift_wavefront_propagation_parameters_from_beamline(self, srw_beamline, index, where=Where.DRIFT_BEFORE):
+        wavefront_propagation_parameters, wavefront_propagation_optional_parameters = srw_beamline.get_wavefront_propagation_parameters_at(index, where)
+
+        srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
+        if not wavefront_propagation_optional_parameters is None: wavefront_propagation_optional_parameters.append_to_srw_array(srw_parameters_array)
+
+        return srw_parameters_array
+
+    def __get_drift_wavefront_propagation_parameters(self, parameters, where=Where.DRIFT_BEFORE):
+        if not parameters.has_additional_parameter("srw_drift_" + where + "_wavefront_propagation_parameters"):
+            wavefront_propagation_parameters = WavefrontPropagationParameters()
+        else:
+            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_drift_" + where + "_wavefront_propagation_parameters")
+
+            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
+                raise ValueError("SRW Wavefront Propagation Parameters not present")
+
+        srw_parameters_array = wavefront_propagation_parameters.to_SRW_array()
+
+        if parameters.has_additional_parameter("srw_drift_" + where + "_wavefront_propagation_optional_parameters"):
+            wavefront_propagation_optional_parameters = parameters.get_additional_parameter("srw_drift_" + where + "_wavefront_propagation_optional_parameters")
+
+            if not isinstance(wavefront_propagation_optional_parameters, WavefrontPropagationOptionalParameters):
+                raise ValueError("SRW Wavefront Propagation Optional Parameters are inconsistent")
+
+            wavefront_propagation_optional_parameters.append_to_srw_array(srw_parameters_array)
+
+        return srw_parameters_array
+
+    def add_optical_element(self, parameters, index, srw_oe_array, srw_pp_array):
+        optical_element = parameters.get_PropagationElements().get_propagation_element(index).get_optical_element()
+        coordinates = parameters.get_PropagationElements().get_propagation_element(index).get_coordinates()
+
+        if coordinates.p() != 0.0:
+            srw_oe_array.append(SRWLOptD(coordinates.p()))
+            srw_pp_array.append(self.__get_drift_wavefront_propagation_parameters(parameters, Where.DRIFT_BEFORE))
+
+        optical_element.add_to_srw_native_array(srw_oe_array, srw_pp_array, parameters)
+
+        if coordinates.q() != 0.0:
+            srw_oe_array.append(SRWLOptD(coordinates.q()))
+            srw_pp_array.append(self.__get_drift_wavefront_propagation_parameters(parameters, Where.DRIFT_AFTER))

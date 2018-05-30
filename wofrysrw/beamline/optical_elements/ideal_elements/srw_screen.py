@@ -6,5 +6,8 @@ class SRWScreen(Screen, SRWOpticalElement):
     def __init__(self, name="Undefined"):
         Screen.__init__(self, name=name)
 
-    def applyOpticalElement(self, wavefront, parameters=None):
+    def applyOpticalElement(self, wavefront=None, parameters=None):
         return wavefront
+
+    def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
+        pass

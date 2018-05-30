@@ -88,69 +88,27 @@ class SRWGrating(Grating, SRWOpticalElement):
     def get_shape(self):
         raise NotImplementedError()
 
-    def applyOpticalElement(self, wavefront, parameters=None):
-        if not parameters.has_additional_parameter("srw_oe_wavefront_propagation_parameters"):
-            wavefront_propagation_parameters = WavefrontPropagationParameters()
-        else:
-            wavefront_propagation_parameters = parameters.get_additional_parameter("srw_oe_wavefront_propagation_parameters")
-
-            if not isinstance(wavefront_propagation_parameters, WavefrontPropagationParameters):
-                raise ValueError("SRW Wavefront Propagation Parameters not present")
-
-        substrate_mirror = self.get_substrate_mirror()
-
-        grating = SRWLOptG(_mirSub=substrate_mirror,
-                           _m=self.diffraction_order,
-                           _grDen =self.grooving_density_0,
-                           _grDen1=self.grooving_density_1,
-                           _grDen2=self.grooving_density_2,
-                           _grDen3=self.grooving_density_3,
-                           _grDen4=self.grooving_density_4,
-                           _grAng=self.grooving_angle)
-
-        wavefront_propagation_parameters.to_SRW_array()
-
-        optical_elements = [grating]
-        propagation_parameters = [wavefront_propagation_parameters.to_SRW_array()]
+    def applyOpticalElement(self, wavefront=None, parameters=None):
+        optical_elements = [self.toSRWLOpt()]
+        propagation_parameters = [self.get_srw_wavefront_propagation_parameter()]
 
         if not self.height_profile_data_file is None:
-
-            if self.orientation_of_reflection_plane == Orientation.LEFT or self.orientation_of_reflection_plane == Orientation.RIGHT:
-                dim = 'x'
-            elif self.orientation_of_reflection_plane == Orientation.UP or self.orientation_of_reflection_plane == Orientation.DOWN:
-                dim = 'y'
-
-            if self.height_profile_data_file_dimension == 1:
-                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
-                                                              _str_sep='\t',
-                                                              _i_col_start=0,
-                                                              _i_col_end=1)
-
-                optTrEr = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data,
-                                                        _ang=self.grazing_angle,
-                                                        _ang_r=self.get_deflection_angle(wavefront.get_photon_energy()),
-                                                        _dim=dim,
-                                                        _amp_coef=self.height_amplification_coefficient)
-
-            elif self.height_profile_data_file_dimension == 2:
-                height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
-                                                              _str_sep='\t')
-
-                optTrEr = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data,
-                                                        _ang=self.grazing_angle,
-                                                        _ang_r=self.get_deflection_angle(wavefront.get_photon_energy()),
-                                                        _dim=dim,
-                                                        _amp_coef=self.height_amplification_coefficient)
-
-            optical_elements.append([optTrEr])
-            propagation_parameters.append([WavefrontPropagationParameters().to_SRW_array()])
-
+            optical_elements.append(self.get_optTrEr(wavefront))
+            propagation_parameters.append(WavefrontPropagationParameters().to_SRW_array())
 
         optBL = SRWLOptC(optical_elements, propagation_parameters)
 
         srwl.PropagElecField(wavefront, optBL)
 
         return wavefront
+
+    def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
+        oe_array.append(self.toSRWLOpt())
+        pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters))
+
+        if not self.height_profile_data_file is None:
+            oe_array.append(self.get_optTrEr(wavefront))
+            pp_array.append(WavefrontPropagationParameters().to_SRW_array())
 
     def get_substrate_mirror(self):
         nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
@@ -162,6 +120,22 @@ class SRWGrating(Grating, SRWOpticalElement):
             ap_shape = ApertureShape.ELLIPTIC
 
         return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+
+
+    def toSRWLOpt(self):
+        substrate_mirror = self.get_substrate_mirror()
+
+        grating = SRWLOptG(_mirSub=substrate_mirror,
+                           _m=self.diffraction_order,
+                           _grDen =self.grooving_density_0,
+                           _grDen1=self.grooving_density_1,
+                           _grDen2=self.grooving_density_2,
+                           _grDen3=self.grooving_density_3,
+                           _grDen4=self.grooving_density_4,
+                           _grAng=self.grooving_angle)
+
+        return grating
+
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         mirror = SRWLOptMir()
@@ -180,3 +154,33 @@ class SRWGrating(Grating, SRWOpticalElement):
                           _y = y)
 
         return mirror
+
+    def get_optTrEr(self, wavefront):
+        if self.orientation_of_reflection_plane == Orientation.LEFT or self.orientation_of_reflection_plane == Orientation.RIGHT:
+            dim = 'x'
+        elif self.orientation_of_reflection_plane == Orientation.UP or self.orientation_of_reflection_plane == Orientation.DOWN:
+            dim = 'y'
+
+        if self.height_profile_data_file_dimension == 1:
+            height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
+                                                          _str_sep='\t',
+                                                          _i_col_start=0,
+                                                          _i_col_end=1)
+
+            optTrEr = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data,
+                                                    _ang=self.grazing_angle,
+                                                    _ang_r=self.get_deflection_angle(wavefront.get_photon_energy()),
+                                                    _dim=dim,
+                                                    _amp_coef=self.height_amplification_coefficient)
+
+        elif self.height_profile_data_file_dimension == 2:
+            height_profile_data = srwl_uti_read_data_cols(self.height_profile_data_file,
+                                                          _str_sep='\t')
+
+            optTrEr = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data,
+                                                    _ang=self.grazing_angle,
+                                                    _ang_r=self.get_deflection_angle(wavefront.get_photon_energy()),
+                                                    _dim=dim,
+                                                    _amp_coef=self.height_amplification_coefficient)
+
+        return optTrEr

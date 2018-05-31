@@ -201,7 +201,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
                 dim = 'y'
 
             if self.height_profile_data_file_dimension == 1:
-                text_code += "height_profile_data = srwl_uti_read_data_cols(" + self.height_profile_data_file + "," + "\n"
+                text_code += "height_profile_data = srwl_uti_read_data_cols('" + self.height_profile_data_file + "'," + "\n"
                 text_code += "                                              _str_sep='\\t'," + "\n"
                 text_code += "                                              _i_col_start=0," + "\n"
                 text_code += "                                              _i_col_end=1)" + "\n"
@@ -212,7 +212,7 @@ class SRWMirror(Mirror, SRWOpticalElement):
                 text_code += "                                                        _amp_coef="+ str(self.height_amplification_coefficient) + ")" + "\n"
 
             elif self.height_profile_data_file_dimension == 2:
-                text_code += "height_profile_data = srwl_uti_read_data_cols(" + self.height_profile_data_file + "," + "\n"
+                text_code += "height_profile_data = srwl_uti_read_data_cols('" + self.height_profile_data_file + "'," + "\n"
                 text_code += "                                              _str_sep='\\t')" + "\n"
 
                 text_code += "optTrEr_" + oe_name + " = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data," + "\n"

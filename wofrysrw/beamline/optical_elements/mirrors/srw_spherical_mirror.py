@@ -54,3 +54,20 @@ class SRWSphericalMirror(SRWMirror, SRWOpticalElement):
         super().fromSRWLOpt(srwlopt)
 
         self.radius = srwlopt.rad
+
+    def to_python_code_aux(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
+        text_code  = "SRWLOptMirSph(_size_tang=" + str(self.tangential_size) +"," + "\n"
+        text_code += "                   _size_sag=" + str(self.sagittal_size) +"," + "\n"
+        text_code += "                   _r=" + str(self.radius) +"," + "\n"
+        text_code += "                   _ap_shape='" + str(ap_shape) +"'," + "\n"
+        text_code += "                   _sim_meth=" + str(SimulationMethod.THICK) +"," + "\n"
+        text_code += "                   _treat_in_out=" + str(TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER) +"," + "\n"
+        text_code += "                   _nvx=" + str(nvx) +"," + "\n"
+        text_code += "                   _nvy=" + str(nvy) +"," + "\n"
+        text_code += "                   _nvz=" + str(nvz) +"," + "\n"
+        text_code += "                   _tvx=" + str(tvx) +"," + "\n"
+        text_code += "                   _tvy=" + str(tvy) +"," + "\n"
+        text_code += "                   _x=" + str(x) +"," + "\n"
+        text_code += "                   _y=" + str(y) +")" + "\n"
+
+        return text_code

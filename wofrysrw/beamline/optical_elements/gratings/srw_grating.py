@@ -184,3 +184,76 @@ class SRWGrating(Grating, SRWOpticalElement):
                                                     _amp_coef=self.height_amplification_coefficient)
 
         return optTrEr
+
+
+
+    def to_python_code(self, data=None):
+        oe_name = data[0]
+        wavefront = data[1]
+
+        nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
+        x, y = self.getXY()
+
+        if isinstance(self.get_boundary_shape(), Rectangle):
+            ap_shape = ApertureShape.RECTANGULAR
+        elif isinstance(self.get_boundary_shape(), Ellipse) or isinstance(self.get_boundary_shape(), Circle):
+            ap_shape = ApertureShape.ELLIPTIC
+
+        text_code = self.to_python_code_aux(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+
+        text_code += "substrate_mirror.set_dim_sim_meth(_size_tang=" + str(self.tangential_size) + "," + "\n"
+        text_code += "                                  _size_sag=" + str(self.sagittal_size) + "," + "\n"
+        text_code += "                                  _ap_shape='" + str(ap_shape) + "'," + "\n"
+        text_code += "                                  _sim_meth=" + str(SimulationMethod.THICK) + "," + "\n"
+        text_code += "                                  _treat_in_out=" + str(TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER) + ")" + "\n"
+
+        text_code += "substrate_mirror.set_orient(_nvx=" + str(nvx) + "," + "\n"
+        text_code += "                            _nvy=" + str(nvy) + "," + "\n"
+        text_code += "                            _nvz=" + str(nvz) + "," + "\n"
+        text_code += "                            _tvx=" + str(tvx) + "," + "\n"
+        text_code += "                            _tvy=" + str(tvy) + "," + "\n"
+        text_code += "                            _x=" + str(x) + "," + "\n"
+        text_code += "                            _y=" + str(y) + ")" + "\n"
+
+        text_code += "\n"
+
+        text_code += oe_name + "="+ "SRWLOptG(_mirSub=substrate_mirror" + "," + "\n"
+        text_code += "            _m="     + str(self.diffraction_order) + "," + "\n"
+        text_code += "            _grDen=" + str(self.grooving_density_0) + "," + "\n"
+        text_code += "            _grDen1="+ str(self.grooving_density_1) + "," + "\n"
+        text_code += "            _grDen2="+ str(self.grooving_density_2) + "," + "\n"
+        text_code += "            _grDen3="+ str(self.grooving_density_3) + "," + "\n"
+        text_code += "            _grDen4="+ str(self.grooving_density_4) + "," + "\n"
+        text_code += "            _grAng= "+ str(self.grooving_angle) + ")" + "\n"
+
+        if not self.height_profile_data_file is None:
+            text_code += "\n"
+
+            if self.orientation_of_reflection_plane == Orientation.LEFT or self.orientation_of_reflection_plane == Orientation.RIGHT:
+                dim = 'x'
+            elif self.orientation_of_reflection_plane == Orientation.UP or self.orientation_of_reflection_plane == Orientation.DOWN:
+                dim = 'y'
+
+            if self.height_profile_data_file_dimension == 1:
+                text_code += "height_profile_data = srwl_uti_read_data_cols(" + self.height_profile_data_file + "," + "\n"
+                text_code += "                                              _str_sep='\\t'," + "\n"
+                text_code += "                                              _i_col_start=0," + "\n"
+                text_code += "                                              _i_col_end=1)" + "\n"
+
+                text_code += "optTrEr_" + oe_name + " = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data," + "\n"
+                text_code += "                                                        _ang="+ str(self.grazing_angle) + "," + "\n"
+                text_code += "                                                        _ang_r="+ str(self.get_deflection_angle(wavefront.get_photon_energy())) + "," + "\n"
+                text_code += "                                                        _dim='"+ dim + "'," + "\n"
+                text_code += "                                                        _amp_coef="+ str(self.height_amplification_coefficient) + ")" + "\n"
+
+            elif self.height_profile_data_file_dimension == 2:
+                text_code += "height_profile_data = srwl_uti_read_data_cols(" + self.height_profile_data_file + "," + "\n"
+                text_code += "                                              _str_sep=\'\\t\')" + "\n"
+
+                text_code += "optTrEr_" + oe_name + " = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data," + "\n"
+                text_code += "                                                        _ang="+ str(self.grazing_angle) + "," + "\n"
+                text_code += "                                                        _ang_r="+ str(self.get_deflection_angle(wavefront.get_photon_energy())) + "," + "\n"
+                text_code += "                                                        _dim='"+ dim + "'," + "\n"
+                text_code += "                                                        _amp_coef="+ str(self.height_amplification_coefficient) + ")" + "\n"
+
+        return text_code

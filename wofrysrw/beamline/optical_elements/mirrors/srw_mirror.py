@@ -162,3 +162,62 @@ class SRWMirror(Mirror, SRWOpticalElement):
                       orientation_of_reflection_plane = orientation_of_reflection_plane,
                       invert_tangent_component        = invert_tangent_component,
                       height_profile_data_file        = None)
+
+    def to_python_code(self, data=None):
+        oe_name = data[0]
+
+        nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
+        x, y = self.getXY()
+
+        if isinstance(self.get_boundary_shape(), Rectangle):
+            ap_shape = ApertureShape.RECTANGULAR
+        elif isinstance(self.get_boundary_shape(), Ellipse) or isinstance(self.get_boundary_shape(), Circle):
+            ap_shape = ApertureShape.ELLIPTIC
+
+        text_code = oe_name + " = " + self.to_python_code_aux(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+
+        text_code += oe_name + ".set_dim_sim_meth(_size_tang=" + str(self.tangential_size) + "," + "\n"
+        text_code += "                            _size_sag=" + str(self.sagittal_size) + "," + "\n"
+        text_code += "                            _ap_shape='" + str(ap_shape) + "'," + "\n"
+        text_code += "                            _sim_meth=" + str(SimulationMethod.THICK) + "," + "\n"
+        text_code += "                            _treat_in_out=" + str(TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER) + ")" + "\n"
+
+        text_code += oe_name + ".set_orient(_nvx=" + str(nvx) + "," + "\n"
+        text_code += "                      _nvy=" + str(nvy) + "," + "\n"
+        text_code += "                      _nvz=" + str(nvz) + "," + "\n"
+        text_code += "                      _tvx=" + str(tvx) + "," + "\n"
+        text_code += "                      _tvy=" + str(tvy) + "," + "\n"
+        text_code += "                      _x=" + str(x) + "," + "\n"
+        text_code += "                      _y=" + str(y) + ")" + "\n"
+
+        text_code += "\n"
+
+        if not self.height_profile_data_file is None:
+            text_code += "\n"
+
+            if self.orientation_of_reflection_plane == Orientation.LEFT or self.orientation_of_reflection_plane == Orientation.RIGHT:
+                dim = 'x'
+            elif self.orientation_of_reflection_plane == Orientation.UP or self.orientation_of_reflection_plane == Orientation.DOWN:
+                dim = 'y'
+
+            if self.height_profile_data_file_dimension == 1:
+                text_code += "height_profile_data = srwl_uti_read_data_cols(" + self.height_profile_data_file + "," + "\n"
+                text_code += "                                              _str_sep='\\t'," + "\n"
+                text_code += "                                              _i_col_start=0," + "\n"
+                text_code += "                                              _i_col_end=1)" + "\n"
+
+                text_code += "optTrEr_" + oe_name + " = srwl_opt_setup_surf_height_1d(_height_prof_data=height_profile_data," + "\n"
+                text_code += "                                                        _ang="+ str(self.grazing_angle) + "," + "\n"
+                text_code += "                                                        _dim='"+ dim + "'," + "\n"
+                text_code += "                                                        _amp_coef="+ str(self.height_amplification_coefficient) + ")" + "\n"
+
+            elif self.height_profile_data_file_dimension == 2:
+                text_code += "height_profile_data = srwl_uti_read_data_cols(" + self.height_profile_data_file + "," + "\n"
+                text_code += "                                              _str_sep='\\t')" + "\n"
+
+                text_code += "optTrEr_" + oe_name + " = srwl_opt_setup_surf_height_2d(_height_prof_data=height_profile_data," + "\n"
+                text_code += "                                                        _ang="+ str(self.grazing_angle) + "," + "\n"
+                text_code += "                                                        _dim='"+ dim + "'," + "\n"
+                text_code += "                                                        _amp_coef="+ str(self.height_amplification_coefficient) + ")" + "\n"
+
+        return text_code

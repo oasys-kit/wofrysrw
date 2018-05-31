@@ -12,7 +12,9 @@ from wofry.propagator.wavefront2D.generic_wavefront import GenericWavefront2D
 from wofry.propagator.decorators import WavefrontDecorator
 from wofry.propagator.polarization import Polarization
 
-class WavefrontPrecisionParameters(object):
+from wofrysrw.srw_object import SRWObject
+
+class WavefrontPrecisionParameters(SRWObject):
     def __init__(self,
                  sr_method = 1,  #SR calculation method: 0- "manual", 1- "auto-undulator", 2- "auto-wiggler"
                  relative_precision = 0.01, # relative precision
@@ -39,7 +41,19 @@ class WavefrontPrecisionParameters(object):
                 int(self._use_terminating_terms),
                 float(self._sampling_factor_for_adjusting_nx_ny)]
 
-class WavefrontParameters(object):
+    def to_python_code(self):
+        text_code  =  "[" + str(int(self._sr_method)) + ","
+        text_code +=        str(float(self._relative_precision)) + ","
+        text_code +=        str(float(self._start_integration_longitudinal_position)) + ","
+        text_code +=        str(float(self._end_integration_longitudinal_position)) + ","
+        text_code +=        str(int(self._number_of_points_for_trajectory_calculation)) + ","
+        text_code +=        str(int(self._use_terminating_terms)) + ","
+        text_code +=        str(float(self._sampling_factor_for_adjusting_nx_ny)) + "]"
+
+        return text_code
+
+
+class WavefrontParameters(SRWObject):
     def __init__(self, 
                  photon_energy_min = 100,
                  photon_energy_max = 10100,
@@ -61,12 +75,16 @@ class WavefrontParameters(object):
         self._wavefront_precision_parameters  = wavefront_precision_parameters
 
     def to_SRWRadMesh(self):
-        return SRWLRadMesh(self._photon_energy_min,
-                           self._photon_energy_max,
-                           int(self._photon_energy_points),
-                           -self._h_slit_gap/2, self._h_slit_gap/2, int(self._h_slit_points),
-                           -self._v_slit_gap/2, self._v_slit_gap/2, int(self._v_slit_points),
-                           self._distance)
+        return SRWLRadMesh(_eStart=self._photon_energy_min,
+                           _eFin=self._photon_energy_max,
+                           _ne=int(self._photon_energy_points),
+                           _xStart=-self._h_slit_gap/2, 
+                           _xFin=self._h_slit_gap/2, 
+                           _nx=int(self._h_slit_points),
+                           _yStart=-self._v_slit_gap/2, 
+                           _yFin=self._v_slit_gap/2, 
+                           _ny=int(self._v_slit_points),
+                           _zStart=self._distance)
 
     def to_SRWLStokes(self):
         stk = SRWLStokes()
@@ -76,6 +94,26 @@ class WavefrontParameters(object):
         stk.mesh = self.to_SRWRadMesh()
 
         return stk
+
+    def to_python_code(self, data=None):
+        mesh = self.to_SRWRadMesh()
+
+        text_code  = "mesh = SRWLRadMesh(_eStart=" + str(mesh.eStart) + "," + "\n"
+        text_code += "                   _eFin  =" + str(mesh.eFin  ) + "," + "\n"
+        text_code += "                   _ne    =" + str(mesh.ne    ) + "," + "\n"
+        text_code += "                   _xStart=" + str(mesh.xStart) + "," + "\n"
+        text_code += "                   _xFin  =" + str(mesh.xFin  ) + "," + "\n"
+        text_code += "                   _nx    =" + str(mesh.nx    ) + "," + "\n"
+        text_code += "                   _yStart=" + str(mesh.yStart) + "," + "\n"
+        text_code += "                   _yFin  =" + str(mesh.yFin  ) + "," + "\n"
+        text_code += "                   _ny    =" + str(mesh.ny    ) + "," + "\n"
+        text_code += "                   _zStart=" + str(mesh.zStart) + ")" + "\n"
+        text_code += "\n"
+        text_code += "stk = SRWLStokes()"  + "\n"
+        text_code += "stk.allocate(" + str(mesh.ne) + "," + str(mesh.nx) + "," + str(mesh.ny) + ")" + "\n"
+        text_code += "stk.mesh = mesh" + "\n"
+
+        return text_code
 
 #Meaning of Wavefront Propagation Parameters:
 #[0]: Auto-Resize (1) or not (0) Before propagation
@@ -91,7 +129,7 @@ class WavefrontParameters(object):
 #[10]: New Horizontal wavefront Center position after Shift (not yet implemented)
 #[11]: New Vertical wavefront Center position after Shift (not yet implemented)
 
-class WavefrontPropagationParameters(object):
+class WavefrontPropagationParameters(SRWObject):
     def __init__(self,
                  auto_resize_before_propagation                         = 0,
                  auto_resize_after_propagation                          = 0,
@@ -132,6 +170,21 @@ class WavefrontPropagationParameters(object):
                 float(self._new_horizontal_wavefront_center_position_after_shift),
                 float(self._new_vertical_wavefront_center_position_after_shift)]
 
+    def to_python_code(self, data=None):
+        text_code  =  "[" + str(int(self._auto_resize_before_propagation)) + ","
+        text_code +=        str(int(self._auto_resize_after_propagation)) + ","
+        text_code +=        str(float(self._relative_precision_for_propagation_with_autoresizing)) + ","
+        text_code +=        str(int(self._allow_semianalytical_treatment_of_quadratic_phase_term)) + ","
+        text_code +=        str(int(self._do_any_resizing_on_fourier_side_using_fft)) + ","
+        text_code +=        str(float(self._horizontal_range_modification_factor_at_resizing)) + ","
+        text_code +=        str(float(self._horizontal_resolution_modification_factor_at_resizing)) + ","
+        text_code +=        str(float(self._vertical_range_modification_factor_at_resizing)) + ","
+        text_code +=        str(float(self._vertical_resolution_modification_factor_at_resizing)) + ","
+        text_code +=        str(int(self._type_of_wavefront_shift_before_resizing)) + ","
+        text_code +=        str(float(self._new_horizontal_wavefront_center_position_after_shift)) + ","
+        text_code +=        str(float(self._new_vertical_wavefront_center_position_after_shift)) + "]"
+
+        return text_code
 
 class WavefrontPropagationOptionalParameters:
     def __init__(self,
@@ -152,6 +205,18 @@ class WavefrontPropagationOptionalParameters:
         srw_array.append(self.orientation_of_the_output_optical_axis_vector_z)
         srw_array.append(self.orientation_of_the_horizontal_base_vector_x    )
         srw_array.append(self.orientation_of_the_horizontal_base_vector_y    )
+
+    def append_to_python_code(self, text_code):
+        text_code = text_code[:-1]
+
+        text_code +=  "," + str(float(self.orientation_of_the_output_optical_axis_vector_x)) + ","
+        text_code +=        str(float(self.orientation_of_the_output_optical_axis_vector_y)) + ","
+        text_code +=        str(float(self.orientation_of_the_output_optical_axis_vector_z)) + ","
+        text_code +=        str(float(self.orientation_of_the_horizontal_base_vector_x    )) + ","
+        text_code +=        str(float(self.orientation_of_the_horizontal_base_vector_y    )) + "]"
+
+        return text_code
+
 
 class PolarizationComponent:
     LINEAR_HORIZONTAL  = 0

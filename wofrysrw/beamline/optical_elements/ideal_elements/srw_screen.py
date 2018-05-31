@@ -11,3 +11,6 @@ class SRWScreen(Screen, SRWOpticalElement):
 
     def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
         pass
+
+    def to_python_code(self, data=None):
+        return ""

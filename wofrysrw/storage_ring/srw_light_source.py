@@ -5,6 +5,7 @@ from srwlib import srwl
 from syned.storage_ring.light_source import LightSource
 
 from wofry.beamline.decorators import LightSourceDecorator
+from wofrysrw.srw_object import SRWObject
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam, SRWElectronBeamGeometricalProperties
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront, WavefrontParameters
@@ -59,12 +60,14 @@ class PhotonSourceProperties(object):
 
         return info
 
-class SRWLightSource(LightSource, LightSourceDecorator):
+class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
     def __init__(self,
                  name="Undefined",
                  electron_beam=SRWElectronBeam(),
                  magnetic_structure=SRWMagneticStructure()):
         LightSource.__init__(self, name, electron_beam, magnetic_structure)
+
+        self.__source_wavefront_parameters = None
 
     def get_gamma(self):
         return self._electron_beam.gamma()
@@ -77,6 +80,8 @@ class SRWLightSource(LightSource, LightSourceDecorator):
         return self.get_SRW_Wavefront(source_wavefront_parameters=wavefront_parameters).toGenericWavefront()
 
     def get_SRW_Wavefront(self, source_wavefront_parameters = WavefrontParameters()):
+        self.__source_wavefront_parameters = source_wavefront_parameters
+
         mesh = source_wavefront_parameters.to_SRWRadMesh()
 
         wfr = SRWWavefront()
@@ -90,6 +95,31 @@ class SRWLightSource(LightSource, LightSourceDecorator):
                              source_wavefront_parameters._wavefront_precision_parameters.to_SRW_array())
 
         return wfr
+
+    def get_source_wavefront_parameters(self):
+        return self.__source_wavefront_parameters
+
+    def to_python_code(self, data=None):
+        text_code = self.get_electron_beam().to_python_code()
+        text_code += "\n"
+        text_code += self.get_magnetic_structure().to_python_code()
+
+        source_wavefront_parameters = self.get_source_wavefront_parameters()
+
+        if not source_wavefront_parameters is None:
+            text_code += "\n"
+            text_code += source_wavefront_parameters.to_python_code()
+            text_code += "\n"
+            text_code += "wfr = SRWLWfr()" + "\n"
+            text_code += "wfr.allocate(mesh.ne, mesh.nx, mesh.ny)" + "\n"
+            text_code += "wfr.mesh = mesh" + "\n"
+            text_code += "wfr.partBeam = part_beam" + "\n"
+            text_code += "\n"
+
+            text_code += "srwl.CalcElecFieldSR(wfr, 0, magnetic_field_container, "
+            text_code += source_wavefront_parameters._wavefront_precision_parameters.to_python_code() + ")" + "\n"
+
+        return text_code
 
     def get_power_density(self,
                           source_wavefront_parameters = WavefrontParameters(),
@@ -130,44 +160,3 @@ class SRWLightSource(LightSource, LightSourceDecorator):
 
         return total_power
 
-    '''
-        print("PRIMA ------------------------------")
-
-        print(wfr.partBeam.Iavg)
-        print(wfr.partBeam.partStatMom1.x)
-        print(wfr.partBeam.partStatMom1.y)
-        print(wfr.partBeam.partStatMom1.z)
-        print(wfr.partBeam.partStatMom1.xp)
-        print(wfr.partBeam.partStatMom1.yp)
-        print(wfr.partBeam.partStatMom1.gamma)
-
-        print(wfr.partBeam.arStatMom2[0])
-        print(wfr.partBeam.arStatMom2[1])
-        print(wfr.partBeam.arStatMom2[2])
-        print(wfr.partBeam.arStatMom2[3])
-        print(wfr.partBeam.arStatMom2[4])
-        print(wfr.partBeam.arStatMom2[5])
-        print(wfr.partBeam.arStatMom2[10])
-
-        print(wfr.mesh.ne)
-        print(wfr.mesh.nx)
-        print(wfr.mesh.ny)
-
-        print(wfr.mesh.xStart)
-        print(wfr.mesh.xFin)
-        print(wfr.mesh.yStart)
-        print(wfr.mesh.yFin)
-        print(wfr.mesh.eStart)
-        print(wfr.mesh.eFin)
-
-        print(len(self._magnetic_structure.get_SRWLMagFldC().arMagFld))
-        print(len(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm))
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].per)
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].nPer)
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].n      )
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].h_or_v )
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].B      )
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].ph     )
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].s      )
-        print(self._magnetic_structure.get_SRWLMagFldC().arMagFld[0].arHarm[0].a      )
-    '''

@@ -4,6 +4,8 @@ from srwlib import SRWLPartBeam
 
 from syned.storage_ring.electron_beam import ElectronBeam
 
+from wofrysrw.srw_object import SRWObject
+
 class SRWElectronBeamDecorator():
 
     def to_SRWLPartBeam(self):
@@ -31,7 +33,7 @@ class SRWElectronBeamGeometricalProperties(object):
 
         return info
 
-class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
+class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator, SRWObject):
     def __init__(self,
                  energy_in_GeV = 1.0,
                  energy_spread = 0.0,
@@ -120,3 +122,22 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator):
         srw_electron_beam.set_energy_from_gamma(srw_part_beam.partStatMom1.gamma)
 
         return srw_electron_beam
+
+    def to_python_code(self, data=None):
+        text_code  = "part_beam = SRWLPartBeam()" + "\n"
+        text_code += "part_beam.Iavg               = " + str(self._current) + "\n"
+        text_code += "part_beam.partStatMom1.x     = " + str(self._moment_x) + "\n"
+        text_code += "part_beam.partStatMom1.y     = " + str(self._moment_y) + "\n"
+        text_code += "part_beam.partStatMom1.z     = " + str(self._moment_z) + "\n"
+        text_code += "part_beam.partStatMom1.xp    = " + str(self._moment_xp) + "\n"
+        text_code += "part_beam.partStatMom1.yp    = " + str(self._moment_yp) + "\n"
+        text_code += "part_beam.partStatMom1.gamma = " + str(self.gamma()) + "\n"
+        text_code += "part_beam.arStatMom2[0]      = " + str(self._moment_xx) + "\n"
+        text_code += "part_beam.arStatMom2[1]      = " + str(self._moment_xxp) + "\n"
+        text_code += "part_beam.arStatMom2[2]      = " + str(self._moment_xpxp) + "\n"
+        text_code += "part_beam.arStatMom2[3]      = " + str(self._moment_yy) + "\n"
+        text_code += "part_beam.arStatMom2[4]      = " + str(self._moment_yyp) + "\n"
+        text_code += "part_beam.arStatMom2[5]      = " + str(self._moment_ypyp) + "\n"
+        text_code += "part_beam.arStatMom2[10]     = " + str(self._energy_spread**2) + "\n"
+
+        return text_code

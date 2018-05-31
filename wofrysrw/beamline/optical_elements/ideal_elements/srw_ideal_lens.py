@@ -23,3 +23,5 @@ class SRWIdealLens(IdealLens, SRWOpticalElement):
 
         self.__init__(focal_x=srwlopt.Fx, focal_y=srwlopt.Fy, x=srwlopt.x, y=srwlopt.y)
 
+    def to_python_code(self, data=None):
+        return data[0] + "="+  "SRWLOptL(_Fx=" + str(self.focal_x()) + ", _Fy=" + str(self.focal_y()) + ", _x=" + str(self._x) + ", _y=" + str(self._y) + ")" + "\n"

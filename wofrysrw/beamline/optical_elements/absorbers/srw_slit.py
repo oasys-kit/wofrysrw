@@ -55,3 +55,30 @@ class SRWSlit(Slit, SRWOpticalElement):
 
     def get_srw_ap_or_ob(self):
         raise NotImplementedError()
+
+    def to_python_code(self, data=None):
+        oe_name = data[0]
+
+        boundaries = self._boundary_shape.get_boundaries()
+
+        Dx = abs(boundaries[1]-boundaries[0])
+        Dy = abs(boundaries[3]-boundaries[2])
+        x = 0.5*(boundaries[1]+boundaries[0])
+        y = 0.5*(boundaries[3]+boundaries[2])
+
+        if isinstance(self._boundary_shape, Rectangle):
+            shape = 'r'
+        elif isinstance(self._boundary_shape, Ellipse):
+            if Dx != Dy:
+                raise ValueError("SRW doesn't support elliptic apertures")
+
+            shape = 'c'
+
+        text_code  = oe_name + "="+  "SRWLOptA(_shape='" + shape + "'," + "\n"
+        text_code += "            _ap_or_ob='" + self.get_srw_ap_or_ob() + "'," + "\n"
+        text_code += "            _Dx=" + str(Dx) + "," + "\n"
+        text_code += "            _Dy=" + str(Dy) + "," + "\n"
+        text_code += "            _x="  + str(x) + "," + "\n"
+        text_code += "            _y="  + str(y) + ")" + "\n"
+
+        return text_code

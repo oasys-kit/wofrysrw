@@ -5,6 +5,7 @@ from wofry.beamline.decorators import OpticalElementDecorator
 
 from wofry.propagator.propagator import PropagationParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
+from wofrysrw.srw_object import SRWObject
 
 from srwlib import SRWLOptC, srwl
 
@@ -14,7 +15,7 @@ class Orientation:
     LEFT = 2
     RIGHT = 3
 
-class SRWOpticalElementDecorator:
+class SRWOpticalElementDecorator(SRWObject):
     def toSRWLOpt(self):
         raise NotImplementedError("")
 
@@ -110,4 +111,3 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
             tvy = -sign*numpy.sin(self.grazing_angle)
 
         return nvx, nvy, nvz, tvx, tvy
-

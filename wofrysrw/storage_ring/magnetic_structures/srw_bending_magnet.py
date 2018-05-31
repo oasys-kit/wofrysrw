@@ -1,9 +1,9 @@
 from srwlib import SRWLMagFldM
 
 from syned.storage_ring.magnetic_structures.bending_magnet import BendingMagnet
-from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructureDecorator
+from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 
-class SRWBendingMagnet(BendingMagnet, SRWMagneticStructureDecorator):
+class SRWBendingMagnet(BendingMagnet, SRWMagneticStructure):
 
     def __init__(self,
                  radius = 0.0,
@@ -14,4 +14,6 @@ class SRWBendingMagnet(BendingMagnet, SRWMagneticStructureDecorator):
     def get_SRWMagneticStructure(self):
         return SRWLMagFldM(self._magnetic_field, 1, 'n', self._length)
 
+    def to_python_code_aux(self):
+        text_code = "magnetic_structure = SRWLMagFldM(" + str(self._magnetic_field) + ", 1, 'n', " + str(self._length) + ")"
 

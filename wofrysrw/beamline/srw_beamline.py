@@ -62,31 +62,34 @@ class SRWBeamline(Beamline, SRWObject):
 
     #TODO: to be completed
     def to_python_code(self, data=None):
-        wavefront = data
+        wavefront = data[0]
+        is_multi_electron = data[1] == True
 
-        text_code = "from srwlib import *\nfrom uti_plot import *\nimport numpy\n\n"
+        text_code  = "from srwlib import *\nfrom uti_plot import *\nimport numpy\n\n"
+
+        text_code += "if not srwl_uti_proc_is_master(): exit()\n"
 
         text_code += "\n####################################################\n# LIGHT SOURCE\n\n"
-        text_code += self.get_light_source().to_python_code()
+        text_code += self.get_light_source().to_python_code(is_multi_electron)
 
-        text_code += "\n"
-        text_code += "mesh0 = deepcopy(wfr.mesh)" + "\n"
-        text_code += "arI = array('f', [0]*mesh0.nx*mesh0.ny)" + "\n"
-        text_code += "srwl.CalcIntFromElecField(arI, wfr, 6, 0, 3, mesh0.eStart, 0, 0)" + "\n"
-        text_code += "arIx = array('f', [0]*mesh0.nx)" + "\n"
-        text_code += "srwl.CalcIntFromElecField(arIx, wfr, 6, 0, 1, mesh0.eStart, 0, 0)" + "\n"
-        text_code += "arIy = array('f', [0]*mesh0.ny)" + "\n"
-        text_code += "srwl.CalcIntFromElecField(arIy, wfr, 6, 0, 2, mesh0.eStart, 0, 0)" + "\n"
-        text_code += "#save ascii file with intensity" + "\n"
-        text_code += "#srwl_uti_save_intens_ascii(arI, mesh0, <file_path>)" + "\n"
-        text_code += "plotMesh0x = [1000*mesh0.xStart, 1000*mesh0.xFin, mesh0.nx]" + "\n"
-        text_code += "plotMesh0y = [1000*mesh0.yStart, 1000*mesh0.yFin, mesh0.ny]" + "\n"
-        text_code += "uti_plot2d1d (arI, plotMesh0x, plotMesh0y, labels=['Horizontal Position [mm]', 'Vertical Position [mm]', 'Intensity Before Propagation'])" + "\n"
+        if not is_multi_electron:
+            text_code += "\n"
+            text_code += "mesh0 = deepcopy(wfr.mesh)" + "\n"
+            text_code += "arI = array('f', [0]*mesh0.nx*mesh0.ny)" + "\n"
+            text_code += "srwl.CalcIntFromElecField(arI, wfr, 6, 0, 3, mesh0.eStart, 0, 0)" + "\n"
+            text_code += "arIx = array('f', [0]*mesh0.nx)" + "\n"
+            text_code += "srwl.CalcIntFromElecField(arIx, wfr, 6, 0, 1, mesh0.eStart, 0, 0)" + "\n"
+            text_code += "arIy = array('f', [0]*mesh0.ny)" + "\n"
+            text_code += "srwl.CalcIntFromElecField(arIy, wfr, 6, 0, 2, mesh0.eStart, 0, 0)" + "\n"
+            text_code += "#save ascii file with intensity" + "\n"
+            text_code += "#srwl_uti_save_intens_ascii(arI, mesh0, <file_path>)" + "\n"
+            text_code += "plotMesh0x = [1000*mesh0.xStart, 1000*mesh0.xFin, mesh0.nx]" + "\n"
+            text_code += "plotMesh0y = [1000*mesh0.yStart, 1000*mesh0.yFin, mesh0.ny]" + "\n"
+            text_code += "uti_plot2d1d (arI, plotMesh0x, plotMesh0y, labels=['Horizontal Position [mm]', 'Vertical Position [mm]', 'Intensity Before Propagation'])" + "\n"
 
         #TODO: HERE CODE FOR PRPAGATION
         if self.get_beamline_elements_number() > 0:
             text_code += "\n####################################################\n# BEAMLINE\n\n"
-
             text_code += "srw_oe_array = []" + "\n"
             text_code += "srw_pp_array = []" + "\n"
 
@@ -148,22 +151,51 @@ class SRWBeamline(Beamline, SRWObject):
 
             text_code += "\n####################################################\n# PROPAGATION\n\n"
             text_code += "optBL = SRWLOptC(srw_oe_array, srw_pp_array)" + "\n"
-            text_code += "srwl.PropagElecField(wfr, optBL)" + "\n"
+            if not is_multi_electron: text_code += "srwl.PropagElecField(wfr, optBL)" + "\n"
             text_code += "\n"
-            text_code += "mesh1 = deepcopy(wfr.mesh)" + "\n"
-            text_code += "arI1 = array('f', [0]*mesh1.nx*mesh1.ny)" + "\n"
-            text_code += "srwl.CalcIntFromElecField(arI1, wfr, 6, 0, 3, mesh1.eStart, 0, 0)" + "\n"
-            text_code += "arI1x = array('f', [0]*mesh1.nx)" + "\n"
-            text_code += "srwl.CalcIntFromElecField(arI1x, wfr, 6, 0, 1, mesh1.eStart, 0, 0)" + "\n"
-            text_code += "arI1y = array('f', [0]*mesh1.ny)" + "\n"
-            text_code += "srwl.CalcIntFromElecField(arI1y, wfr, 6, 0, 2, mesh1.eStart, 0, 0)" + "\n"
-            text_code += "#save ascii file with intensity" + "\n"
-            text_code += "#srwl_uti_save_intens_ascii(arI1, mesh1, <file_path>)" + "\n"
-            text_code += "plotMesh1x = [1000*mesh1.xStart, 1000*mesh1.xFin, mesh1.nx]" + "\n"
-            text_code += "plotMesh1y = [1000*mesh1.yStart, 1000*mesh1.yFin, mesh1.ny]" + "\n"
-            text_code += "uti_plot2d1d(arI1, plotMesh1x, plotMesh1y, labels=['Horizontal Position [mm]', 'Vertical Position [mm]', 'Intensity After Propagation'])" + "\n"
 
-        text_code += "uti_plot_show()" + "\n"
+            if not is_multi_electron:
+                text_code += "mesh1 = deepcopy(wfr.mesh)" + "\n"
+                text_code += "arI1 = array('f', [0]*mesh1.nx*mesh1.ny)" + "\n"
+                text_code += "srwl.CalcIntFromElecField(arI1, wfr, 6, 0, 3, mesh1.eStart, 0, 0)" + "\n"
+                text_code += "arI1x = array('f', [0]*mesh1.nx)" + "\n"
+                text_code += "srwl.CalcIntFromElecField(arI1x, wfr, 6, 0, 1, mesh1.eStart, 0, 0)" + "\n"
+                text_code += "arI1y = array('f', [0]*mesh1.ny)" + "\n"
+                text_code += "srwl.CalcIntFromElecField(arI1y, wfr, 6, 0, 2, mesh1.eStart, 0, 0)" + "\n"
+                text_code += "#save ascii file with intensity" + "\n"
+                text_code += "#srwl_uti_save_intens_ascii(arI1, mesh1, <file_path>)" + "\n"
+                text_code += "plotMesh1x = [1000*mesh1.xStart, 1000*mesh1.xFin, mesh1.nx]" + "\n"
+                text_code += "plotMesh1y = [1000*mesh1.yStart, 1000*mesh1.yFin, mesh1.ny]" + "\n"
+                text_code += "uti_plot2d1d(arI1, plotMesh1x, plotMesh1y, labels=['Horizontal Position [mm]', 'Vertical Position [mm]', 'Intensity After Propagation'])" + "\n"
+
+        if not is_multi_electron: text_code += "uti_plot_show()" + "\n"
+
+        if is_multi_electron:
+            parameters = data[2]
+
+            sampFactNxNyForProp  = parameters[0]
+            nMacroElec           = parameters[1]
+            nMacroElecAvgOneProc = parameters[2]
+            nMacroElecSavePer    = parameters[3]
+            srCalcMeth           = parameters[4]
+            srCalcPrec           = parameters[5]
+            strIntPropME_OutFileName = parameters[6]
+            _char = parameters[7]
+
+            text_code += "\n\n####################################################\n# MULTI ELECTRON PROPAGATION\n\n"
+
+            text_code += "radStokesProp = srwl_wfr_emit_prop_multi_e(part_beam," + "\n"
+            text_code += "                                           magnetic_field_container," + "\n"
+            text_code += "                                           initial_mesh," + "\n"
+            text_code += "                                           " + str(srCalcMeth) + "," + "\n"
+            text_code += "                                           " + str(srCalcPrec) + "," + "\n"
+            text_code += "                                           " + str(nMacroElec) + "," + "\n"
+            text_code += "                                           " + str(nMacroElecAvgOneProc) + "," + "\n"
+            text_code += "                                           " + str(nMacroElecSavePer) + "," + "\n"
+            text_code += "                                           '" + str(strIntPropME_OutFileName) + "'," + "\n"
+            text_code += "                                           " + str(sampFactNxNyForProp) + "," + "\n"
+            text_code += "                                           optBL," + "\n"
+            text_code += "                                           _char=" + str(int(_char)) + ")" + "\n"
 
         return text_code
 

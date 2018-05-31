@@ -100,6 +100,8 @@ class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
         return self.__source_wavefront_parameters
 
     def to_python_code(self, data=None):
+        is_multi_electron = data
+
         text_code = self.get_electron_beam().to_python_code()
         text_code += "\n"
         text_code += self.get_magnetic_structure().to_python_code()
@@ -115,9 +117,12 @@ class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
             text_code += "wfr.mesh = mesh" + "\n"
             text_code += "wfr.partBeam = part_beam" + "\n"
             text_code += "\n"
+            text_code += "initial_mesh = deepcopy(wfr.mesh)"
+            text_code += "\n"
 
-            text_code += "srwl.CalcElecFieldSR(wfr, 0, magnetic_field_container, "
-            text_code += source_wavefront_parameters._wavefront_precision_parameters.to_python_code() + ")" + "\n"
+            if not is_multi_electron:
+                text_code += "srwl.CalcElecFieldSR(wfr, 0, magnetic_field_container, "
+                text_code += source_wavefront_parameters._wavefront_precision_parameters.to_python_code() + ")" + "\n"
 
         return text_code
 

@@ -46,12 +46,12 @@ class FresnelSRWNative(Propagator2D):
         propagation_mode = PropagationManager.Instance().get_propagation_mode(SRW_APPLICATION)
 
         if propagation_mode == SRWPropagationMode.STEP_BY_STEP:
-            self.add_optical_element(parameters, 0, srw_oe_array, srw_pp_array)
+            self.add_optical_element(parameters, 0, srw_oe_array, srw_pp_array, wavefront)
         elif propagation_mode == SRWPropagationMode.WHOLE_BEAMLINE:
             srw_beamline = parameters.get_additional_parameter("working_beamline")
 
             for index in range(srw_beamline.get_beamline_elements_number()):
-                self.add_optical_element_from_beamline(srw_beamline, index, srw_oe_array, srw_pp_array)
+                self.add_optical_element_from_beamline(srw_beamline, index, srw_oe_array, srw_pp_array, wavefront)
         else:
             raise ValueError("Propagation Mode not supported by this Propagator")
 
@@ -67,7 +67,7 @@ class FresnelSRWNative(Propagator2D):
     ########################################################
     # WHOLE BEAMLINE
 
-    def add_optical_element_from_beamline(self, srw_beamline, index, srw_oe_array, srw_pp_array):
+    def add_optical_element_from_beamline(self, srw_beamline, index, srw_oe_array, srw_pp_array, wavefront):
         optical_element = srw_beamline.get_beamline_element_at(index).get_optical_element()
         coordinates = srw_beamline.get_beamline_element_at(index).get_coordinates()
 
@@ -75,7 +75,7 @@ class FresnelSRWNative(Propagator2D):
             srw_oe_array.append(SRWLOptD(coordinates.p()))
             srw_pp_array.append(self.__get_drift_wavefront_propagation_parameters_from_beamline(srw_beamline, index, Where.DRIFT_BEFORE))
 
-        optical_element.add_to_srw_native_array(srw_oe_array, srw_pp_array, srw_beamline.get_wavefront_propagation_parameters_at(index, Where.OE))
+        optical_element.add_to_srw_native_array(srw_oe_array, srw_pp_array, srw_beamline.get_wavefront_propagation_parameters_at(index, Where.OE), wavefront)
 
         if coordinates.q() != 0.0:
             srw_oe_array.append(SRWLOptD(coordinates.q()))
@@ -113,7 +113,7 @@ class FresnelSRWNative(Propagator2D):
 
         return srw_parameters_array
 
-    def add_optical_element(self, parameters, index, srw_oe_array, srw_pp_array):
+    def add_optical_element(self, parameters, index, srw_oe_array, srw_pp_array, wavefront):
         optical_element = parameters.get_PropagationElements().get_propagation_element(index).get_optical_element()
         coordinates = parameters.get_PropagationElements().get_propagation_element(index).get_coordinates()
 
@@ -121,7 +121,7 @@ class FresnelSRWNative(Propagator2D):
             srw_oe_array.append(SRWLOptD(coordinates.p()))
             srw_pp_array.append(self.__get_drift_wavefront_propagation_parameters(parameters, Where.DRIFT_BEFORE))
 
-        optical_element.add_to_srw_native_array(srw_oe_array, srw_pp_array, parameters)
+        optical_element.add_to_srw_native_array(srw_oe_array, srw_pp_array, parameters, wavefront)
 
         if coordinates.q() != 0.0:
             srw_oe_array.append(SRWLOptD(coordinates.q()))

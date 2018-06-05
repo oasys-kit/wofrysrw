@@ -17,3 +17,5 @@ class SRWBendingMagnet(BendingMagnet, SRWMagneticStructure):
     def to_python_code_aux(self):
         text_code = "magnetic_structure = SRWLMagFldM(" + str(self._magnetic_field) + ", 1, 'n', " + str(self._length) + ")"
 
+        return text_code
+

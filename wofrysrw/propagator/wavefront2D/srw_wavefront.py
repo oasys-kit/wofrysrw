@@ -476,11 +476,17 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
     def get_flux(self, multi_electron=True):
         if multi_electron:
-            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_FLUX,
-                                                                  type_of_dependence = TypeOfDependence.VS_E)
+            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_INTENSITY,
+                                                                  type_of_dependence = TypeOfDependence.VS_E,
+                                                                  fixed_input_photon_energy_or_time=self.mesh.eStart,
+                                                                  fixed_horizontal_position=self.mesh.xStart,
+                                                                  fixed_vertical_position=self.mesh.yStart)
         else:
-            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_FLUX,
-                                                                  type_of_dependence = TypeOfDependence.VS_E)
+            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
+                                                                  type_of_dependence = TypeOfDependence.VS_E,
+                                                                  fixed_input_photon_energy_or_time=self.mesh.eStart,
+                                                                  fixed_horizontal_position=self.mesh.xStart,
+                                                                  fixed_vertical_position=self.mesh.yStart)
 
         output_array = srw_array('f', [0]*self.mesh.ne)
 

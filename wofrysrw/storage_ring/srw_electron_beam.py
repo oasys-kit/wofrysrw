@@ -67,6 +67,50 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator, SRWObject):
         self._moment_yp = moment_yp
         self._moment_z = moment_z
 
+    def set_moments_from_twiss(self, horizontal_emittance = 0.0,
+                                     horizontal_beta = 0.0,
+                                     horizontal_alpha = 0.0,
+                                     horizontal_eta = 0.0,
+                                     horizontal_etap   = 0.0,
+                                     vertical_emittance=0.0,
+                                     vertical_beta     = 0.0,
+                                     vertical_alpha    = 0.0,
+                                     vertical_eta = 0.0,
+                                     vertical_etap = 0.0):
+        
+        srw_electron_beam = self.to_SRWLPartBeam()
+        srw_electron_beam.from_Twiss(_Iavg    =self._current,
+                                     _e       =self._energy_in_GeV,
+                                     _sig_e   =self._energy_spread,
+                                     _emit_x  =horizontal_emittance,
+                                     _beta_x  =horizontal_beta,
+                                     _alpha_x =horizontal_alpha,
+                                     _eta_x   =horizontal_eta,
+                                     _eta_x_pr=horizontal_etap,
+                                     _emit_y  =vertical_emittance,
+                                     _beta_y  =vertical_beta,
+                                     _alpha_y =vertical_alpha,
+                                     _eta_y   =vertical_eta,
+                                     _eta_y_pr=vertical_etap)
+                                     
+        srw_electron_beam = SRWElectronBeam.from_SRWLPartBeam(srw_electron_beam, self._number_of_bunches)
+
+        self._energy_in_GeV       = srw_electron_beam._energy_in_GeV
+        self._energy_spread       = srw_electron_beam._energy_spread
+        self._current             = srw_electron_beam._current
+        self._number_of_bunches   = srw_electron_beam._number_of_bunches
+        self._moment_xx           = srw_electron_beam._moment_xx
+        self._moment_xxp          = srw_electron_beam._moment_xxp
+        self._moment_xpxp         = srw_electron_beam._moment_xpxp
+        self._moment_yy           = srw_electron_beam._moment_yy
+        self._moment_yyp          = srw_electron_beam._moment_yyp
+        self._moment_ypyp         = srw_electron_beam._moment_ypyp
+        self._moment_x            = srw_electron_beam._moment_x
+        self._moment_xp           = srw_electron_beam._moment_xp
+        self._moment_y            = srw_electron_beam._moment_y
+        self._moment_yp           = srw_electron_beam._moment_yp
+        self._moment_z            = srw_electron_beam._moment_z
+
     def set_moments_from_electron_beam_geometrical_properties(self, electron_beam_geometrical_properties = SRWElectronBeamGeometricalProperties()):
         self.set_sigmas_all(sigma_x=electron_beam_geometrical_properties._electron_beam_size_h,
                             sigma_xp=electron_beam_geometrical_properties._electron_beam_divergence_h,
@@ -99,7 +143,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator, SRWObject):
         srw_electron_beam.arStatMom2[4] = self._moment_yyp  #<(y-y0)*(y'-y'0)> [m]
         srw_electron_beam.arStatMom2[5] = self._moment_ypyp #<(y'-y'0)^2>
         srw_electron_beam.arStatMom2[10] = self._energy_spread**2 #<(E-E0)^2>/E0^2
-
+                
         return srw_electron_beam
 
     @classmethod

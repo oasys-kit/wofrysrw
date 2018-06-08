@@ -62,6 +62,8 @@ class WavefrontParameters(SRWObject):
                  h_slit_points = 1,
                  v_slit_gap = 0,
                  v_slit_points = 1,
+                 h_position = 0.0,
+                 v_position = 0.0,
                  distance = 10.0,
                  wavefront_precision_parameters=WavefrontPrecisionParameters()):
         self._photon_energy_min         = photon_energy_min
@@ -71,6 +73,8 @@ class WavefrontParameters(SRWObject):
         self._h_slit_points             = h_slit_points
         self._v_slit_gap                = v_slit_gap
         self._v_slit_points             = v_slit_points
+        self._h_position                = h_position
+        self._v_position                = v_position
         self._distance                  = distance
         self._wavefront_precision_parameters  = wavefront_precision_parameters
 
@@ -78,11 +82,11 @@ class WavefrontParameters(SRWObject):
         return SRWLRadMesh(_eStart=self._photon_energy_min,
                            _eFin=self._photon_energy_max,
                            _ne=int(self._photon_energy_points),
-                           _xStart=-self._h_slit_gap/2, 
-                           _xFin=self._h_slit_gap/2, 
+                           _xStart=self._h_position-self._h_slit_gap/2,
+                           _xFin=self._h_position+self._h_slit_gap/2,
                            _nx=int(self._h_slit_points),
-                           _yStart=-self._v_slit_gap/2, 
-                           _yFin=self._v_slit_gap/2, 
+                           _yStart=self._v_position-self._v_slit_gap/2,
+                           _yFin=self._v_position+self._v_slit_gap/2,
                            _ny=int(self._v_slit_points),
                            _zStart=self._distance)
 
@@ -226,6 +230,17 @@ class PolarizationComponent:
     CIRCULAR_RIGHT     = 4
     CIRCULAR_LEFT      = 5
     TOTAL              = 6
+
+    @classmethod
+    def tuple(cls):
+        return ["Linear Horizontal",
+                "Linear Vertical",
+                "Linear 45\u00b0",
+                "Linear 135\u00b0",
+                "Circular Right",
+                "Circular Left",
+                "Total"]
+
 
 class CalculationType:
     SINGLE_ELECTRON_INTENSITY = 0
@@ -458,12 +473,14 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
         return wavefront
         
-    def get_intensity(self, multi_electron=True):
+    def get_intensity(self, multi_electron=True, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
         if multi_electron:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_INTENSITY,
+                                                                  polarization_component_to_be_extracted=polarization_component_to_be_extracted,
                                                                   type_of_dependence = TypeOfDependence.VS_XY)
         else:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
+                                                                  polarization_component_to_be_extracted=polarization_component_to_be_extracted,
                                                                   type_of_dependence = TypeOfDependence.VS_XY)
 
         return self.get_2D_intensity_distribution(type='f', flux_calculation_parameters=flux_calculation_parameters)
@@ -474,16 +491,18 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
         return self.get_2D_intensity_distribution(type='d', flux_calculation_parameters=flux_calculation_parameters)
 
-    def get_flux(self, multi_electron=True):
+    def get_flux(self, multi_electron=True, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
         if multi_electron:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_INTENSITY,
                                                                   type_of_dependence = TypeOfDependence.VS_E,
+                                                                  polarization_component_to_be_extracted=polarization_component_to_be_extracted,
                                                                   fixed_input_photon_energy_or_time=self.mesh.eStart,
                                                                   fixed_horizontal_position=self.mesh.xStart,
                                                                   fixed_vertical_position=self.mesh.yStart)
         else:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
                                                                   type_of_dependence = TypeOfDependence.VS_E,
+                                                                  polarization_component_to_be_extracted=polarization_component_to_be_extracted,
                                                                   fixed_input_photon_energy_or_time=self.mesh.eStart,
                                                                   fixed_horizontal_position=self.mesh.xStart,
                                                                   fixed_vertical_position=self.mesh.yStart)

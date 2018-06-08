@@ -33,10 +33,6 @@ from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, T
 class SRWCrystal(Crystal, SRWOpticalElement):
     def __init__(self,
                  name                                 = "Undefined",
-                 tangential_size                      = 1.2,
-                 sagittal_size                        = 0.01,
-                 vertical_position_of_mirror_center   = 0.0,
-                 horizontal_position_of_mirror_center = 0.0,
                  orientation_of_reflection_plane      = Orientation.UP,
                  invert_tangent_component             = False,
                  d_spacing                            = 0.0,
@@ -52,17 +48,15 @@ class SRWCrystal(Crystal, SRWOpticalElement):
                 ):
         Crystal.__init__(name,
                          surface_shape=Plane(),
-                         boundary_shape=Rectangle(x_left=horizontal_position_of_mirror_center - 0.5*sagittal_size,
-                                                  x_right=horizontal_position_of_mirror_center + 0.5*sagittal_size,
-                                                  y_bottom=vertical_position_of_mirror_center - 0.5*tangential_size,
-                                                  y_top=vertical_position_of_mirror_center + 0.5*tangential_size),
+                         boundary_shape=Rectangle(x_left=0.0,
+                                                  x_right=0.0,
+                                                  y_bottom=0.0,
+                                                  y_top=0.0),
                          material="Unknown",
                          diffraction_geometry=diffraction_geometry,
                          asymmetry_angle = asymmetry_angle,
                          thickness = thickness
                         )
-        self.tangential_size                                  = tangential_size
-        self.sagittal_size                                    = sagittal_size
         self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
         self.invert_tangent_component                         = invert_tangent_component
 

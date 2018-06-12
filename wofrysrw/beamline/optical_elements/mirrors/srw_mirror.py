@@ -183,12 +183,12 @@ class SRWMirror(Mirror, SRWOpticalElement):
         text_code += "                      _treat_in_out=" + str(TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER) + ")" + "\n"
 
         text_code += oe_name + ".set_orient(_nvx=" + str(nvx) + "," + "\n"
-        text_code += "               _nvy=" + str(nvy) + "," + "\n"
-        text_code += "               _nvz=" + str(nvz) + "," + "\n"
-        text_code += "               _tvx=" + str(tvx) + "," + "\n"
-        text_code += "               _tvy=" + str(tvy) + "," + "\n"
-        text_code += "               _x=" + str(x) + "," + "\n"
-        text_code += "               _y=" + str(y) + ")" + "\n"
+        text_code += "                 _nvy=" + str(nvy) + "," + "\n"
+        text_code += "                 _nvz=" + str(nvz) + "," + "\n"
+        text_code += "                 _tvx=" + str(tvx) + "," + "\n"
+        text_code += "                 _tvy=" + str(tvy) + "," + "\n"
+        text_code += "                 _x=" + str(x) + "," + "\n"
+        text_code += "                 _y=" + str(y) + ")" + "\n"
 
         text_code += "\n"
 

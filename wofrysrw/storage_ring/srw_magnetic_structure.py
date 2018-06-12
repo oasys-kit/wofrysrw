@@ -9,7 +9,10 @@ class SRWMagneticStructureDecorator():
         raise NotImplementedError("this method should be implented in subclasses")
 
     def get_SRWLMagFldC(self):
-        return SRWLMagFldC([self.get_SRWMagneticStructure()], array('d', [0]), array('d', [0]), array('d', [0]))
+        return SRWLMagFldC(_arMagFld=[self.get_SRWMagneticStructure()],
+                           _arXc=array('d', [self.horizontal_central_position]),
+                           _arYc=array('d', [self.vertical_central_position]),
+                           _arZc=array('d', [self.longitudinal_central_position]))
 
 
 class SRWMagneticStructure(SRWMagneticStructureDecorator, SRWObject):
@@ -25,10 +28,10 @@ class SRWMagneticStructure(SRWMagneticStructureDecorator, SRWObject):
 
     def to_python_code(self, data=None):
         text_code  = self.to_python_code_aux()
-        text_code += "magnetic_field_container = SRWLMagFldC([magnetic_structure], " + \
-                     "array('d', [" + str(self.horizontal_central_position) + "]), " + \
-                     "array('d', [" + str(self.vertical_central_position) + "])), " + \
-                     "array('d', [" + str(self.longitudinal_central_position) + "])))"  + "\n"
+        text_code += "magnetic_field_container = SRWLMagFldC(_arMagFld=[magnetic_structure], " + "\n"
+        text_code += "                                       _arXc=array('d', [" + str(self.horizontal_central_position) + "]), " + "\n"
+        text_code += "                                       _arYc=array('d', [" + str(self.vertical_central_position) + "]), " + "\n"
+        text_code += "                                       _arZc=array('d', [" + str(self.longitudinal_central_position) + "]))" + "\n"
 
         return text_code
 

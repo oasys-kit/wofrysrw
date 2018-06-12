@@ -12,10 +12,10 @@ class SRWBendingMagnet(BendingMagnet, SRWMagneticStructure):
         BendingMagnet.__init__(self, radius, magnetic_field, length)
 
     def get_SRWMagneticStructure(self):
-        return SRWLMagFldM(self._magnetic_field, 1, 'n', self._length)
+        return SRWLMagFldM(_G=self._magnetic_field, _m=1, _n_or_s='n', _Leff=self._length)
 
     def to_python_code_aux(self):
-        text_code = "magnetic_structure = SRWLMagFldM(" + str(self._magnetic_field) + ", 1, 'n', " + str(self._length) + ")"
+        text_code = "magnetic_structure = SRWLMagFldM(_G=" + str(self._magnetic_field) + ", _m=1, _n_or_s='n', _Leff=" + str(self._length) + ")" + "\n"
 
         return text_code
 

@@ -44,9 +44,11 @@ class SRWCrystal(Crystal, SRWOpticalElement):
                  psi_hbi                              = 0.0,
                  asymmetry_angle                      = 0.0,
                  thickness                            = 0.0,
-                 diffraction_geometry                 = DiffractionGeometry.BRAGG
+                 diffraction_geometry                 = DiffractionGeometry.BRAGG,
+                 incident_angle                       = 0.0
                 ):
-        Crystal.__init__(name,
+        Crystal.__init__(self,
+                         name,
                          surface_shape=Plane(),
                          boundary_shape=Rectangle(x_left=0.0,
                                                   x_right=0.0,
@@ -70,6 +72,7 @@ class SRWCrystal(Crystal, SRWOpticalElement):
         self.asymmetry_angle                      = asymmetry_angle
         self.thickness                            = thickness
         self.diffraction_geometry                 = diffraction_geometry
+        self.grazing_angle                        = incident_angle
 
         if diffraction_geometry == DiffractionGeometry.LAUE: raise NotImplementedError("Laue Geometry is not yet supported")
 
@@ -92,3 +95,25 @@ class SRWCrystal(Crystal, SRWOpticalElement):
                             _tvy=tvy,
                             _uc=1 if self.diffraction_geometry==DiffractionGeometry.BRAGG else 0)
 
+    def to_python_code(self, data=None):
+        oe_name = data[0]
+
+        nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
+
+        text_code  = oe_name + "="+ "SRWLOptCryst(_d_sp=" + str(self.d_spacing) + "," + "\n"
+        text_code += "                        _psi0r=" + str(self.psi_0r) + "," + "\n"
+        text_code += "                        _psi0i=" + str(self.psi_0i) + "," + "\n"
+        text_code += "                        _psi_hr=" + str(self.psi_hr) + "," + "\n"
+        text_code += "                        _psi_hi=" + str(self.psi_hi) + "," + "\n"
+        text_code += "                        _psi_hbr=" + str(self.psi_hbr) + "," + "\n"
+        text_code += "                        _psi_hbi=" + str(self.psi_hbi) + "," + "\n"
+        text_code += "                        _tc=" + str(self.thickness) + "," + "\n"
+        text_code += "                        _ang_as=" + str(self.asymmetry_angle) + "," + "\n"
+        text_code += "                        _nvx=" + str(nvx) + "," + "\n"
+        text_code += "                        _nvy=" + str(nvy) + "," + "\n"
+        text_code += "                        _nvz=" + str(nvz) + "," + "\n"
+        text_code += "                        _tvx=" + str(tvx) + "," + "\n"
+        text_code += "                        _tvy=" + str(tvy)+ "," + "\n"
+        text_code += "                        _uc=" + str(1 if self.diffraction_geometry==DiffractionGeometry.BRAGG else 0) + ")" + "\n"
+
+        return text_code

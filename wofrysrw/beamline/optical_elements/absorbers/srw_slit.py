@@ -75,10 +75,10 @@ class SRWSlit(Slit, SRWOpticalElement):
             shape = 'c'
 
         text_code  = oe_name + "="+  "SRWLOptA(_shape='" + shape + "'," + "\n"
-        text_code += "            _ap_or_ob='" + self.get_srw_ap_or_ob() + "'," + "\n"
-        text_code += "            _Dx=" + str(Dx) + "," + "\n"
-        text_code += "            _Dy=" + str(Dy) + "," + "\n"
-        text_code += "            _x="  + str(x) + "," + "\n"
-        text_code += "            _y="  + str(y) + ")" + "\n"
+        text_code += "               _ap_or_ob='" + self.get_srw_ap_or_ob() + "'," + "\n"
+        text_code += "               _Dx=" + str(Dx) + "," + "\n"
+        text_code += "               _Dy=" + str(Dy) + "," + "\n"
+        text_code += "               _x="  + str(x) + "," + "\n"
+        text_code += "               _y="  + str(y) + ")" + "\n"
 
         return text_code

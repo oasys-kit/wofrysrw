@@ -14,7 +14,7 @@ class SRWZonePlate(SRWOpticalElement):
                  attenuation_length_complementary_material=1e-06,
                  x=0.0,
                  y=0.0):
-        SRWZonePlate.__init__(self, name=name)
+        self._name=name
 
         self.total_number_of_zones=total_number_of_zones
         self.outer_zone_radius=outer_zone_radius
@@ -50,13 +50,13 @@ class SRWZonePlate(SRWOpticalElement):
 
     def to_python_code(self, data=None):
         text_code = data[0] + "="+  "SRWLOptZP(_nZones=" + str(self.total_number_of_zones) + "," +  "\n"
-        text_code += "                  _rn=" + str(self.outer_zone_radius) + "," +  "\n"
-        text_code += "                  _thick=" + str(self.thickness) + "," +  "\n"
-        text_code += "                  _delta1=" + str(self.delta_main_material) + "," +  "\n"
-        text_code += "                  _atLen1=" + str(self.attenuation_length_main_material) + "," +  "\n"
-        text_code += "                  _delta2=" + str(self.delta_complementary_material) + "," +  "\n"
-        text_code += "                  _atLen2=" + str(self.attenuation_length_complementary_material) + "," +  "\n"
-        text_code += "                  _x=" + str(self.x) + "," +  "\n"
-        text_code += "                  _y=" + str(self.y) + ")" + "\n"
+        text_code += "                _rn=" + str(self.outer_zone_radius) + "," +  "\n"
+        text_code += "                _thick=" + str(self.thickness) + "," +  "\n"
+        text_code += "                _delta1=" + str(self.delta_main_material) + "," +  "\n"
+        text_code += "                _atLen1=" + str(self.attenuation_length_main_material) + "," +  "\n"
+        text_code += "                _delta2=" + str(self.delta_complementary_material) + "," +  "\n"
+        text_code += "                _atLen2=" + str(self.attenuation_length_complementary_material) + "," +  "\n"
+        text_code += "                _x=" + str(self.x) + "," +  "\n"
+        text_code += "                _y=" + str(self.y) + ")" + "\n"
 
         return text_code

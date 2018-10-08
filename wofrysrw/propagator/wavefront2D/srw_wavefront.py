@@ -485,8 +485,9 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
         return self.get_2D_intensity_distribution(type='f', flux_calculation_parameters=flux_calculation_parameters)
 
-    def get_phase(self):
+    def get_phase(self, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
         flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_PHASE,
+                                                              polarization_component_to_be_extracted=polarization_component_to_be_extracted,
                                                               type_of_dependence = TypeOfDependence.VS_XY)
 
         return self.get_2D_intensity_distribution(type='d', flux_calculation_parameters=flux_calculation_parameters)

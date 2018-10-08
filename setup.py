@@ -11,7 +11,7 @@ except AttributeError:
 
 NAME = 'wofrysrw'
 
-VERSION = '1.0.20'
+VERSION = '1.0.21'
 ISRELEASED = False
 
 DESCRIPTION = 'WOFRY (Wave Optics FRamework in pYthon) for SRW library'

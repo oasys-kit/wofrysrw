@@ -6,6 +6,8 @@ from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure
 class SRWUndulator(Undulator, SRWMagneticStructure):
 
     def __init__(self,
+                 horizontal_central_position = 0.0,
+                 vertical_central_position = 0.0,
                  longitudinal_central_position = 0.0,
                  K_vertical = 0.0,
                  K_horizontal = 0.0,
@@ -19,7 +21,7 @@ class SRWUndulator(Undulator, SRWMagneticStructure):
                  coefficient_for_transverse_dependence_horizontal = 1.0 # coefficient for transverse depenednce B*cosh(2*Pi*n*a*y/per)*cos(2*Pi*n*z/per + ph)
                 ):
         Undulator.__init__(self, K_vertical, K_horizontal, period_length, number_of_periods)
-        SRWMagneticStructure.__init__(self, longitudinal_central_position=longitudinal_central_position)
+        SRWMagneticStructure.__init__(self, horizontal_central_position, vertical_central_position, longitudinal_central_position)
 
         self.initial_phase_vertical = initial_phase_vertical
         self.initial_phase_horizontal = initial_phase_horizontal

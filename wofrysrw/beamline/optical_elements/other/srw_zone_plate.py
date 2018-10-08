@@ -1,3 +1,5 @@
+from syned.beamline.shape import Circle
+
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 
 from srwlib import *
@@ -60,3 +62,8 @@ class SRWZonePlate(SRWOpticalElement):
         text_code += "                _y=" + str(self.y) + ")" + "\n"
 
         return text_code
+
+    def get_boundary_shape(self):
+        return Circle(a_axis_min=self.outer_zone_radius,
+                      x_center=self.x,
+                      y_center=self.y)

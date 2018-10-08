@@ -19,8 +19,7 @@ class SRWOpticalElementDecorator(SRWObject):
     def toSRWLOpt(self):
         raise NotImplementedError("")
 
-    @classmethod
-    def fromSRWLOpt(cls, srwlopt=None):
+    def fromSRWLOpt(self, srwlopt=None):
         raise NotImplementedError("")
 
 class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):

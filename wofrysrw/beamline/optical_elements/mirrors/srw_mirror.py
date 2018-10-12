@@ -60,6 +60,29 @@ class SRWMirror(Mirror, SRWOpticalElement):
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
         self.height_amplification_coefficient = height_amplification_coefficient
 
+    # this method remembers the original SRW object
+    def set_reflectivity(self,
+                         reflectivity_data=0.95,
+                         energies_number=1,
+                         angles_number=1,
+                         components_number=1,
+                         energy_start=0.0,
+                         energy_end=0.0,
+                         energy_scale_type=ScaleType.LINEAR,
+                         angle_start=0.0,
+                         angle_end=0.0,
+                         angle_scale_type=ScaleType.LINEAR):
+        self.reflectivity_data = reflectivity_data
+        self.energies_number   = energies_number
+        self.angles_number     = angles_number
+        self.components_number = components_number
+        self.energy_start      = energy_start
+        self.energy_end        = energy_end
+        self.energy_scale_type = energy_scale_type
+        self.angle_start       = angle_start
+        self.angle_end         = angle_end
+        self.angle_scale_type  = angle_scale_type
+
     def get_shape(self):
         raise NotImplementedError()
 
@@ -119,7 +142,22 @@ class SRWMirror(Mirror, SRWOpticalElement):
         elif isinstance(self.get_boundary_shape(), Ellipse) or isinstance(self.get_boundary_shape(), Circle):
             ap_shape = ApertureShape.ELLIPTIC
 
-        return self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+        mirror = self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+
+        if hasattr(self, "reflectivity_data"):
+            mirror.set_reflect(_refl=self.reflectivity_data,
+                               _n_ph_en=self.energies_number,
+                               _n_ang=self.angles_number,
+                               _n_comp=self.components_number,
+                               _ph_en_start=self.energy_start,
+                               _ph_en_fin=self.energy_end,
+                               _ph_en_scale_type=self.energy_scale_type,
+                               _ang_start=self.angle_start,
+                               _ang_fin=self.angle_end,
+                               _ang_scale_type=self.angle_scale_type)
+
+        return mirror
+
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         mirror = SRWLOptMir()

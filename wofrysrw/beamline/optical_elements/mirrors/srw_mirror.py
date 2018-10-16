@@ -147,7 +147,12 @@ class SRWMirror(Mirror, SRWOpticalElement):
         if hasattr(self, "reflectivity_data"):
             from srwlib import array as srw_array
 
-            mirror.set_reflect(_refl=srw_array('d', self.reflectivity_data),
+            try:
+                reflectivity_data = srw_array('d', self.reflectivity_data)
+            except:
+                reflectivity_data = self.reflectivity_data
+
+            mirror.set_reflect(_refl=reflectivity_data,
                                _n_ph_en=self.energies_number,
                                _n_ang=self.angles_number,
                                _n_comp=self.components_number,

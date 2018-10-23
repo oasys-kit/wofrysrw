@@ -110,3 +110,43 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
             tvy = -sign*numpy.sin(self.grazing_angle)
 
         return nvx, nvy, nvz, tvx, tvy
+
+from srwlib import SRWLOptA
+
+class SRWOpticalElementWithAcceptanceSlit(SRWOpticalElement):
+
+    def __init__(self,
+                 tangential_size                    = 1.2,
+                 sagittal_size                      = 0.01,
+                 vertical_position_of_mirror_center = 0.0,
+                 horizontal_position_of_mirror_center = 0.0,
+                 grazing_angle                      = 0.003,
+                 orientation_of_reflection_plane    = Orientation.UP,
+                 invert_tangent_component           = False,
+                 add_acceptance_slit=False):
+
+        self.vertical_position_of_mirror_center = vertical_position_of_mirror_center
+        self.horizontal_position_of_mirror_center = horizontal_position_of_mirror_center
+
+        self.tangential_size                                  = tangential_size
+        self.sagittal_size                                    = sagittal_size
+        self.grazing_angle                                    = grazing_angle
+        self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
+        self.invert_tangent_component                         = invert_tangent_component
+
+        self.add_acceptance_slit=add_acceptance_slit
+
+    def get_acceptance_slit(self):
+        if self.orientation_of_reflection_plane == Orientation.UP or \
+                self.orientation_of_reflection_plane==Orientation.DOWN:
+            vertical_aperture   = self.tangential_size*numpy.sin(self.grazing_angle)
+            horizontal_aperture = self.sagittal_size
+        else:
+            vertical_aperture   = self.sagittal_size
+            horizontal_aperture = self.tangential_size*numpy.sin(self.grazing_angle)
+
+        return SRWLOptA('r', 'a', horizontal_aperture, vertical_aperture)
+
+
+    def get_acceptance_slit_parameters(self):
+        return [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0, 0, 0]

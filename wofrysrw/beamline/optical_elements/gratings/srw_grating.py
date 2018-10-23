@@ -3,7 +3,7 @@ import numpy
 from syned.beamline.optical_elements.gratings.grating import Grating
 from syned.beamline.shape import Ellipse, Rectangle, Circle
 
-from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
+from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElementWithAcceptanceSlit
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 
 from srwlib import SRWLOptC, SRWLOptMir, SRWLOptG
@@ -11,7 +11,7 @@ from srwlib import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_heig
 
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, TreatInputOutput, ApertureShape, SimulationMethod
 
-class SRWGrating(Grating, SRWOpticalElement):
+class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
     def __init__(self,
                  name                               = "Undefined",
                  tangential_size                    = 1.2,
@@ -21,6 +21,7 @@ class SRWGrating(Grating, SRWOpticalElement):
                  horizontal_position_of_mirror_center = 0.0,
                  orientation_of_reflection_plane    = Orientation.UP,
                  invert_tangent_component           = False,
+                 add_acceptance_slit=False,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0,
@@ -33,6 +34,16 @@ class SRWGrating(Grating, SRWOpticalElement):
                  grooving_angle                     = 0.0 # angle between the grove direction and the sagittal direction of the substrate
                  ):
 
+        SRWOpticalElementWithAcceptanceSlit.__init__(self,
+                                                     tangential_size                      = tangential_size,
+                                                     sagittal_size                        = sagittal_size,
+                                                     grazing_angle                        = grazing_angle,
+                                                     vertical_position_of_mirror_center   = vertical_position_of_mirror_center,
+                                                     horizontal_position_of_mirror_center = horizontal_position_of_mirror_center,
+                                                     orientation_of_reflection_plane      = orientation_of_reflection_plane,
+                                                     invert_tangent_component             = invert_tangent_component,
+                                                     add_acceptance_slit                  = add_acceptance_slit)
+
         Grating.__init__(self,
                         name=name,
                         boundary_shape=Rectangle(x_left=horizontal_position_of_mirror_center - 0.5*sagittal_size,
@@ -41,12 +52,6 @@ class SRWGrating(Grating, SRWOpticalElement):
                                                  y_top=vertical_position_of_mirror_center + 0.5*tangential_size),
                         surface_shape=self.get_shape(),
                         ruling=grooving_density_0*1e3)
-
-        self.tangential_size                                  = tangential_size
-        self.sagittal_size                                    = sagittal_size
-        self.grazing_angle                                    = grazing_angle
-        self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
-        self.invert_tangent_component                         = invert_tangent_component
 
         self.height_profile_data_file = height_profile_data_file
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
@@ -89,8 +94,14 @@ class SRWGrating(Grating, SRWOpticalElement):
         raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront=None, parameters=None):
-        optical_elements = [self.toSRWLOpt()]
-        propagation_parameters = [self.get_srw_wavefront_propagation_parameter()]
+        if self.add_acceptance_slit:
+            optical_elements = [self.toSRWLOpt()]
+            propagation_parameters = [self.get_srw_wavefront_propagation_parameter()]
+        else:
+            optical_elements = [self.get_acceptance_slit(),
+                                self.toSRWLOpt()]
+            propagation_parameters = [self.get_acceptance_slit_parameters(),
+                                      self.get_srw_wavefront_propagation_parameter()]
 
         if not self.height_profile_data_file is None:
             optical_elements.append(self.get_optTrEr(wavefront))

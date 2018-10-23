@@ -3,7 +3,7 @@ import numpy
 from syned.beamline.optical_elements.mirrors.mirror import Mirror
 from syned.beamline.shape import Rectangle, Ellipse, Circle
 
-from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement, Orientation
+from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElementWithAcceptanceSlit, Orientation
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 
 from srwlib import SRWLOptC, SRWLOptMir
@@ -27,7 +27,7 @@ class ScaleType:
     LINEAR = 'lin'
     LOGARITHMIC = 'log'
 
-class SRWMirror(Mirror, SRWOpticalElement):
+class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
     def __init__(self,
                  name                               = "Undefined",
                  tangential_size                    = 1.2,
@@ -37,10 +37,20 @@ class SRWMirror(Mirror, SRWOpticalElement):
                  grazing_angle                      = 0.003,
                  orientation_of_reflection_plane    = Orientation.UP,
                  invert_tangent_component           = False,
+                 add_acceptance_slit=False,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0):
 
+        SRWOpticalElementWithAcceptanceSlit.__init__(self,
+                                                     tangential_size                      = tangential_size,
+                                                     sagittal_size                        = sagittal_size,
+                                                     grazing_angle                        = grazing_angle,
+                                                     vertical_position_of_mirror_center   = vertical_position_of_mirror_center,
+                                                     horizontal_position_of_mirror_center = horizontal_position_of_mirror_center,
+                                                     orientation_of_reflection_plane      = orientation_of_reflection_plane,
+                                                     invert_tangent_component             = invert_tangent_component,
+                                                     add_acceptance_slit                  = add_acceptance_slit)
 
         Mirror.__init__(self,
                         name=name,
@@ -49,12 +59,6 @@ class SRWMirror(Mirror, SRWOpticalElement):
                                                  y_bottom=vertical_position_of_mirror_center - 0.5*tangential_size,
                                                  y_top=vertical_position_of_mirror_center + 0.5*tangential_size),
                         surface_shape=self.get_shape())
-
-        self.tangential_size                                  = tangential_size
-        self.sagittal_size                                    = sagittal_size
-        self.grazing_angle                                    = grazing_angle
-        self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
-        self.invert_tangent_component                         = invert_tangent_component
 
         self.height_profile_data_file = height_profile_data_file
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
@@ -87,8 +91,14 @@ class SRWMirror(Mirror, SRWOpticalElement):
         raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront=None, parameters=None):
-        optical_elements = [self.toSRWLOpt()]
-        propagation_parameters = [self.get_srw_wavefront_propagation_parameter(parameters)]
+        if self.add_acceptance_slit:
+            optical_elements = [self.toSRWLOpt()]
+            propagation_parameters = [self.get_srw_wavefront_propagation_parameter()]
+        else:
+            optical_elements = [self.get_acceptance_slit(),
+                                self.toSRWLOpt()]
+            propagation_parameters = [self.get_acceptance_slit_parameters(),
+                                      self.get_srw_wavefront_propagation_parameter()]
 
         if not self.height_profile_data_file is None:
             optical_elements.append(self.get_optTrEr())
@@ -162,6 +172,8 @@ class SRWMirror(Mirror, SRWOpticalElement):
                                _ang_start=self.angle_start,
                                _ang_fin=self.angle_end,
                                _ang_scale_type=self.angle_scale_type)
+
+
 
         return mirror
 

@@ -5,6 +5,7 @@ from syned.beamline.shape import Ellipse, Rectangle, Circle
 
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElementWithAcceptanceSlit
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
+from wofrysrw.beamline.optical_elements.absorbers.srw_aperture import SRWAperture
 
 from srwlib import SRWLOptC, SRWLOptMir, SRWLOptG
 from srwlib import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
@@ -94,14 +95,7 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
         raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront=None, parameters=None):
-        if self.add_acceptance_slit:
-            optical_elements = [self.toSRWLOpt()]
-            propagation_parameters = [self.get_srw_wavefront_propagation_parameter()]
-        else:
-            optical_elements = [self.get_acceptance_slit(),
-                                self.toSRWLOpt()]
-            propagation_parameters = [self.get_srw_wavefront_propagation_parameter(), # all the resizing/resampling goes to the slit
-                                      self.get_default_propagation_parameters()] # no resizing/resampling needed
+        optical_elements, propagation_parameters = super(SRWGrating, self).create_propagation_elements()
 
         if not self.height_profile_data_file is None:
             optical_elements.append(self.get_optTrEr(wavefront))
@@ -114,8 +108,7 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
         return wavefront
 
     def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
-        oe_array.append(self.toSRWLOpt())
-        pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters))
+        super(SRWGrating, self).add_to_srw_native_array(oe_array, pp_array, parameters)
 
         if not self.height_profile_data_file is None:
             oe_array.append(self.get_optTrEr(wavefront))
@@ -228,6 +221,15 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
 
         text_code += "\n"
 
+        if self.add_acceptance_slit:
+            slit = SRWAperture()
+            slit.fromSRWLOpt(self.get_acceptance_slit())
+
+            text_code = slit.to_python_code(data=["acceptance_slits_" + oe_name])
+            text_code += "\n"
+        else:
+            text_code += ""
+
         text_code += oe_name + "="+ "SRWLOptG(_mirSub=substrate_mirror" + "," + "\n"
         text_code += "               _m="     + str(self.diffraction_order) + "," + "\n"
         text_code += "               _grDen=" + str(self.grooving_density_0) + "," + "\n"
@@ -268,3 +270,6 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
                 text_code += "                                              _amp_coef="+ str(self.height_amplification_coefficient) + ")" + "\n"
 
         return text_code
+
+    def to_python_code_aux(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
+        raise NotImplementedError("This method is abstract")

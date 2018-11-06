@@ -147,6 +147,28 @@ class SRWOpticalElementWithAcceptanceSlit(SRWOpticalElement):
 
         return SRWLOptA('r', 'a', horizontal_aperture, vertical_aperture)
 
+    def create_propagation_elements(self):
+        if self.add_acceptance_slit:
+            optical_elements = [self.toSRWLOpt()]
+            propagation_parameters = [self.get_srw_wavefront_propagation_parameter()]
+        else:
+            optical_elements = [self.get_acceptance_slit(),
+                                self.toSRWLOpt()]
+            propagation_parameters = [self.get_srw_wavefront_propagation_parameter(), # all the resizing/resampling goes to the slit
+                                      self.get_default_propagation_parameters()] # no resizing/resampling needed
+
+        return optical_elements, propagation_parameters
+
+    def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
+        if self.add_acceptance_slit:
+            oe_array.append(self.toSRWLOpt())
+            pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters))
+        else:
+            oe_array.append(self.get_acceptance_slit())
+            oe_array.append(self.toSRWLOpt())
+            pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters)) # all the resizing/resampling goes to the slit
+            pp_array.append(self.get_default_propagation_parameters()) # no resizing/resampling needed
+
 
     def get_default_propagation_parameters(self):
-        return [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0, 0, 0]
+        return WavefrontPropagationParameters().to_SRW_array()

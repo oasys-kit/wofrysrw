@@ -92,6 +92,7 @@ class SRWBeamline(Beamline, SRWObject):
             text_code += "\n####################################################\n# BEAMLINE\n\n"
             text_code += "srw_oe_array = []" + "\n"
             text_code += "srw_pp_array = []" + "\n"
+            text_code += "\n"
 
             for index in range(self.get_beamline_elements_number()):
                 oe_name = "oe_" + str(index)
@@ -123,7 +124,20 @@ class SRWBeamline(Beamline, SRWObject):
                     text_array = wp.to_python_code()
                     if not wop is None: text_array = wop.append_to_python_code(text_array)
 
-                    text_code += "pp_" + oe_name + " = " + text_array  + "\n"
+                    text_code += "\n"
+
+                    if hasattr(optical_element, "add_acceptance_slit") and getattr(optical_element, "add_acceptance_slit") == True: # MIRROR AND GRATINGS
+
+                        text_code += "pp_acceptance_slits_" + oe_name + " = " + text_array  + "\n"
+                        text_code += "pp_" + oe_name + " = " + WavefrontPropagationParameters().to_python_code()  + "\n"
+                        text_code += "\n"
+
+                        text_code += "srw_oe_array.append(acceptance_slits_" + oe_name + ")" + "\n"
+                        text_code += "srw_pp_array.append(pp_acceptance_slits_" + oe_name + ")" + "\n"
+
+                    else:
+                        text_code += "pp_" + oe_name + " = " + text_array  + "\n"
+
                     text_code += "\n"
                     text_code += "srw_oe_array.append(" + oe_name + ")" + "\n"
                     text_code += "srw_pp_array.append(pp_" + oe_name + ")" + "\n"

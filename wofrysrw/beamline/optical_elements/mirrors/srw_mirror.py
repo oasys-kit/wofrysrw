@@ -97,8 +97,8 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
         else:
             optical_elements = [self.get_acceptance_slit(),
                                 self.toSRWLOpt()]
-            propagation_parameters = [self.get_acceptance_slit_parameters(),
-                                      self.get_srw_wavefront_propagation_parameter()]
+            propagation_parameters = [self.get_srw_wavefront_propagation_parameter(), # all the resizing/resampling goes to the slit
+                                      self.get_default_propagation_parameters()] # no resizing/resampling needed
 
         if not self.height_profile_data_file is None:
             optical_elements.append(self.get_optTrEr())

@@ -148,5 +148,5 @@ class SRWOpticalElementWithAcceptanceSlit(SRWOpticalElement):
         return SRWLOptA('r', 'a', horizontal_aperture, vertical_aperture)
 
 
-    def get_acceptance_slit_parameters(self):
+    def get_default_propagation_parameters(self):
         return [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0, 0, 0]

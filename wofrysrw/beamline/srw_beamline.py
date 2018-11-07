@@ -67,7 +67,8 @@ class SRWBeamline(Beamline, SRWObject):
 
         text_code  = "from srwlib import *\nfrom uti_plot import *\nimport numpy\n\n"
 
-        text_code += "if not srwl_uti_proc_is_master(): exit()\n"
+        if is_multi_electron: text_code += "#if not srwl_uti_proc_is_master(): exit()\n"
+        else: text_code += "if not srwl_uti_proc_is_master(): exit()\n"
 
         text_code += "\n####################################################\n# LIGHT SOURCE\n\n"
         text_code += self.get_light_source().to_python_code(is_multi_electron)

@@ -60,7 +60,6 @@ class SRWBeamline(Beamline, SRWObject):
 
         return new_beamline
 
-    #TODO: to be completed
     def to_python_code(self, data=None):
         wavefront = data[0]
         is_multi_electron = data[1] == True
@@ -88,7 +87,6 @@ class SRWBeamline(Beamline, SRWObject):
             text_code += "plotMesh0y = [1000*mesh0.yStart, 1000*mesh0.yFin, mesh0.ny]" + "\n"
             text_code += "uti_plot2d1d (arI, plotMesh0x, plotMesh0y, labels=['Horizontal Position [mm]', 'Vertical Position [mm]', 'Intensity Before Propagation'])" + "\n"
 
-        #TODO: HERE CODE FOR PRPAGATION
         if self.get_beamline_elements_number() > 0:
             text_code += "\n####################################################\n# BEAMLINE\n\n"
             text_code += "srw_oe_array = []" + "\n"

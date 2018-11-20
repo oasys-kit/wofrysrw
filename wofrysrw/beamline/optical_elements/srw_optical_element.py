@@ -24,7 +24,7 @@ class SRWOpticalElementDecorator(SRWObject):
 
 class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
 
-    def applyOpticalElement(self, wavefront=None, parameters=None):
+    def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):
         optBL = SRWLOptC([self.toSRWLOpt()],
                          [self.get_srw_wavefront_propagation_parameter(parameters)])
 

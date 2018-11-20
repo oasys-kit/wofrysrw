@@ -91,7 +91,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
     def get_shape(self):
         raise NotImplementedError()
 
-    def applyOpticalElement(self, wavefront=None, parameters=None):
+    def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):
         optical_elements, propagation_parameters = super(SRWMirror, self).create_propagation_elements()
 
         if not self.height_profile_data_file is None:

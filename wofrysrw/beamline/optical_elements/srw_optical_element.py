@@ -21,28 +21,41 @@ class SRWOpticalElementDisplacement(SRWObject):
     BEFORE=0
     AFTER=1
 
-    def __init__(self, shift_x=0.0, shift_y=0.0, rotation_x=0.0, rotation_y=0.0, where=AFTER):
+    def __init__(self, shift_x=0.0, shift_y=0.0, rotation_x=0.0, rotation_y=0.0):
         self.shift_x=shift_x
         self.shift_y=shift_y
         self.rotation_x=rotation_x
         self.rotation_y=rotation_y
-        self.where=where
 
         self.has_shift = self.shift_x != 0.0 or self.shift_y != 0.0
         self.has_rotation = self.rotation_x != 0.0 or self.rotation_y != 0.0
 
     def to_python_code(self, data=None):
         oe_name = data[0]
+        where = data[2]
+
+        if where==SRWOpticalElementDisplacement.BEFORE:
+            sign = -1
+            suffix = "before_"
+            text_where = "Before"
+        elif where==SRWOpticalElementDisplacement.AFTER:
+            sign = 1
+            suffix = "after_"
+            text_where = "After"
 
         text_code = ""
 
         if self.has_shift:
-            text_code += "shift_" + oe_name + " = SRWLOptShift(_shift_x=" + str(self.shift_x) + ", _shift_y=" + str(self.shift_y) + ")" + "\n"
-            text_code += "pp_shift_" + oe_name + " = " + WavefrontPropagationParameters().to_python_code() + "\n"
+            text_code += "# " + oe_name + " Displacement (" + text_where + ")\n\n"
+
+            text_code += "shift_" + suffix + oe_name + " = SRWLOptShift(_shift_x=" + str(sign*self.shift_x) + ", _shift_y=" + str(sign*self.shift_y) + ")" + "\n"
+            text_code += "pp_shift_" + suffix + oe_name + " = " + WavefrontPropagationParameters().to_python_code() + "\n"
 
         if self.has_rotation:
-            text_code += "rotation_" + oe_name + " = SRWLOptAng(_ang_x=" + str(self.rotation_x) + ", _ang_y=" + str(self.rotation_y) + ")" + "\n"
-            text_code += "pp_rotation_" + oe_name + " = " + WavefrontPropagationParameters().to_python_code() + "\n"
+            if self.has_shift: text_code += "\n"
+            else: text_code += "# " + oe_name + " Displacement (" + text_where + ")\n\n"
+            text_code += "rotation_" + suffix + oe_name + " = SRWLOptAng(_ang_x=" + str(sign*self.rotation_x) + ", _ang_y=" + str(sign*self.rotation_y) + ")" + "\n"
+            text_code += "pp_rotation_" + suffix + oe_name + " = " + WavefrontPropagationParameters().to_python_code() + "\n"
 
         return text_code
 
@@ -58,27 +71,30 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
     def __init__(self, optical_element_displacement=None):
         self.displacement = optical_element_displacement
 
-    def add_displacement_to_array(self, oe_array, pp_array):
+    def add_displacement_to_array(self, oe_array, pp_array, where=SRWOpticalElementDisplacement.BEFORE):
+
+        sign = -1 if where==SRWOpticalElementDisplacement.BEFORE else 1
+
         if self.displacement.has_shift:
-            oe_array.append(SRWLOptShift(_shift_x=self.displacement.shift_x, _shift_y=self.displacement.shift_y))
+            oe_array.append(SRWLOptShift(_shift_x=sign*self.displacement.shift_x, _shift_y=sign*self.displacement.shift_y))
             pp_array.append(self.get_default_propagation_parameters())
 
         if self.displacement.has_rotation:
-            oe_array.append(SRWLOptAng(_ang_x=self.displacement.rotation_x, _ang_y=self.displacement.rotation_y))
+            oe_array.append(SRWLOptAng(_ang_x=sign*self.displacement.rotation_x, _ang_y=sign*self.displacement.rotation_y))
             pp_array.append(self.get_default_propagation_parameters())
 
     def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):
         oe_array = []
         pp_array = []
 
-        if not self.displacement is None and self.displacement.where == SRWOpticalElementDisplacement.BEFORE:
-            self.add_displacement_to_array(oe_array, pp_array)
+        if not self.displacement is None:
+            self.add_displacement_to_array(oe_array, pp_array, where=SRWOpticalElementDisplacement.BEFORE)
 
         oe_array.append(self.toSRWLOpt())
         pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters))
 
-        if not self.displacement is None and self.displacement.where == SRWOpticalElementDisplacement.AFTER:
-            self.add_displacement_to_array(oe_array, pp_array)
+        if not self.displacement is None:
+            self.add_displacement_to_array(oe_array, pp_array, where=SRWOpticalElementDisplacement.AFTER)
 
         optBL = SRWLOptC(oe_array,
                          pp_array)
@@ -88,14 +104,14 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
         return wavefront
 
     def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
-        if not self.displacement is None and self.displacement.where == SRWOpticalElementDisplacement.BEFORE:
-            self.add_displacement_to_array(oe_array, pp_array)
+        if not self.displacement is None:
+            self.add_displacement_to_array(oe_array, pp_array, where=SRWOpticalElementDisplacement.BEFORE)
 
         oe_array.append(self.toSRWLOpt())
         pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters))
 
-        if not self.displacement is None and self.displacement.where == SRWOpticalElementDisplacement.AFTER:
-            self.add_displacement_to_array(oe_array, pp_array)
+        if not self.displacement is None:
+            self.add_displacement_to_array(oe_array, pp_array, where=SRWOpticalElementDisplacement.AFTER)
 
     def get_srw_wavefront_propagation_parameter(self, parameters):
         if isinstance(parameters, PropagationParameters):
@@ -235,8 +251,8 @@ class SRWOpticalElementWithAcceptanceSlit(SRWOpticalElement):
         return optical_elements, propagation_parameters
 
     def add_to_srw_native_array(self, oe_array = [], pp_array=[], parameters=None, wavefront=None):
-        if not self.displacement is None and self.displacement.where == SRWOpticalElementDisplacement.BEFORE:
-            self.add_displacement_to_array(oe_array, pp_array)
+        if not self.displacement is None:
+            self.add_displacement_to_array(oe_array, pp_array, where=SRWOpticalElementDisplacement.BEFORE)
 
         if not self.add_acceptance_slit:
             oe_array.append(self.toSRWLOpt())
@@ -247,5 +263,5 @@ class SRWOpticalElementWithAcceptanceSlit(SRWOpticalElement):
             pp_array.append(self.get_srw_wavefront_propagation_parameter(parameters)) # all the resizing/resampling goes to the slit
             pp_array.append(self.get_default_propagation_parameters()) # no resizing/resampling needed
 
-        if not self.displacement is None and self.displacement.where == SRWOpticalElementDisplacement.AFTER:
-            self.add_displacement_to_array(oe_array, pp_array)
+        if not self.displacement is None:
+            self.add_displacement_to_array(oe_array, pp_array, where=SRWOpticalElementDisplacement.AFTER)

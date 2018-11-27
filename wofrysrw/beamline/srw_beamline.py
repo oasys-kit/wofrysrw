@@ -130,19 +130,21 @@ class SRWBeamline(Beamline, SRWObject):
 
                     text_code += "\n"
 
-                    if not optical_element.displacement is None and optical_element.displacement.where == SRWOpticalElementDisplacement.BEFORE:
+                    if not optical_element.displacement is None:
+                        data_oe.append(SRWOpticalElementDisplacement.BEFORE)
+
                         text_code += optical_element.displacement.to_python_code(data_oe)
 
                         text_code += "\n"
 
                         if optical_element.displacement.has_shift:
-                            text_code += "srw_oe_array.append(shift_" + oe_name + ")" + "\n"
-                            text_code += "srw_pp_array.append(pp_shift_" + oe_name + ")" + "\n"
+                            text_code += "srw_oe_array.append(shift_before_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_shift_before_" + oe_name + ")" + "\n"
                             text_code += "\n"
 
                         if optical_element.displacement.has_rotation:
-                            text_code += "srw_oe_array.append(rotation_" + oe_name + ")" + "\n"
-                            text_code += "srw_pp_array.append(pp_rotation_" + oe_name + ")" + "\n"
+                            text_code += "srw_oe_array.append(rotation_before_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_rotation_before_" + oe_name + ")" + "\n"
                             text_code += "\n"
 
                     if hasattr(optical_element, "add_acceptance_slit") and getattr(optical_element, "add_acceptance_slit") == True: # MIRROR AND GRATINGS
@@ -167,19 +169,23 @@ class SRWBeamline(Beamline, SRWObject):
                             text_code += "srw_oe_array.append(optTrEr_" + oe_name + ")" + "\n"
                             text_code += "srw_pp_array.append(" + WavefrontPropagationParameters().to_python_code() + ")" + "\n"
 
-                    if not optical_element.displacement is None and optical_element.displacement.where == SRWOpticalElementDisplacement.AFTER:
+                    if not optical_element.displacement is None:
+                        data_oe[2] = SRWOpticalElementDisplacement.AFTER
+
+                        text_code += "\n"
+
                         text_code += optical_element.displacement.to_python_code(data_oe)
 
                         text_code += "\n"
 
                         if optical_element.displacement.has_shift:
-                            text_code += "srw_oe_array.append(shift_" + oe_name + ")" + "\n"
-                            text_code += "srw_pp_array.append(pp_shift_" + oe_name + ")" + "\n"
+                            text_code += "srw_oe_array.append(shift_after_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_shift_after_" + oe_name + ")" + "\n"
                             text_code += "\n"
 
                         if optical_element.displacement.has_rotation:
-                            text_code += "srw_oe_array.append(rotation_" + oe_name + ")" + "\n"
-                            text_code += "srw_pp_array.append(pp_rotation_" + oe_name + ")" + "\n"
+                            text_code += "srw_oe_array.append(rotation_after_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_rotation_after_" + oe_name + ")" + "\n"
                             text_code += "\n"
 
 

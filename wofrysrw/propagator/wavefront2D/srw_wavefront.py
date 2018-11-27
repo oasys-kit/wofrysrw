@@ -307,6 +307,29 @@ class FluxCalculationParameters(object):
         self._fixed_vertical_position                = fixed_vertical_position     
 
 class SRWWavefront(SRWLWfr, WavefrontDecorator):
+    class ScanningData(object):
+
+        def __init__(self,
+                     scanned_variable_name,
+                     scanned_variable_value,
+                     scanned_variable_display_name,
+                     scanned_variable_um):
+            self.__scanned_variable_name = scanned_variable_name
+            self.__scanned_variable_value = scanned_variable_value
+            self.__scanned_variable_display_name = scanned_variable_display_name
+            self.__scanned_variable_um = scanned_variable_um
+
+        def get_scanned_variable_name(self):
+            return self.__scanned_variable_name
+
+        def get_scanned_variable_value(self):
+            return self.__scanned_variable_value
+
+        def get_scanned_variable_display_name(self):
+            return self.__scanned_variable_display_name
+
+        def get_scanned_variable_um(self):
+            return self.__scanned_variable_um
 
     def __init__(self,
                  _arEx=None,
@@ -340,6 +363,7 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                          _zStart=_zStart,
                          _partBeam=_partBeam)
 
+        self.scanned_variable_data = None
 
     def get_wavelength(self):
         if (self.mesh.eFin + self.mesh.eStart) == 0:
@@ -471,8 +495,13 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         wavefront.arMomY  = copy.deepcopy(self.arMomY)
         wavefront.arWfrAuxData  = copy.deepcopy(self.arWfrAuxData)
 
+        wavefront.scanned_variable_data = self.scanned_variable_data
+
         return wavefront
-        
+
+    def setScanningData(self, scanned_variable_data=ScanningData(None, None, None, None)):
+        self.scanned_variable_data=scanned_variable_data
+
     def get_intensity(self, multi_electron=True, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
         if multi_electron:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_INTENSITY,

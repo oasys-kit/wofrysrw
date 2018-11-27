@@ -6,8 +6,9 @@ from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalEle
 from srwlib import SRWLOptA
 
 class SRWSlit(Slit, SRWOpticalElement):
-    def __init__(self, name="Undefined", boundary_shape=BoundaryShape()):
+    def __init__(self, name="Undefined", boundary_shape=BoundaryShape(), optical_element_displacement=None):
         Slit.__init__(self, name=name, boundary_shape=boundary_shape)
+        SRWOpticalElement.__init__(self, optical_element_displacement)
 
     def toSRWLOpt(self):
         boundaries = self._boundary_shape.get_boundaries()

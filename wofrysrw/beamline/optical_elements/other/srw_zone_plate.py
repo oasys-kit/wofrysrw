@@ -7,6 +7,7 @@ from srwlib import *
 class SRWZonePlate(SRWOpticalElement):
     def __init__(self,
                  name="Undefined",
+                 optical_element_displacement=None,
                  total_number_of_zones=100,
                  outer_zone_radius=0.1e-03,
                  thickness=10e-06,
@@ -16,6 +17,8 @@ class SRWZonePlate(SRWOpticalElement):
                  attenuation_length_complementary_material=1e-06,
                  x=0.0,
                  y=0.0):
+        SRWOpticalElement.__init__(self, optical_element_displacement=optical_element_displacement)
+
         self._name=name
 
         self.total_number_of_zones=total_number_of_zones

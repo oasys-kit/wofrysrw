@@ -5,7 +5,14 @@ from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalEle
 from srwlib import SRWLOptL
 
 class SRWIdealLens(IdealLens, SRWOpticalElement):
-    def __init__(self, name="Undefined", focal_x=1.0, focal_y=1.0, x=0.0, y=0.0):
+    def __init__(self,
+                 name="Undefined",
+                 optical_element_displacement=None,
+                 focal_x=1.0,
+                 focal_y=1.0,
+                 x=0.0,
+                 y=0.0):
+        SRWOpticalElement.__init__(self, optical_element_displacement=optical_element_displacement)
         IdealLens.__init__(self, name=name, focal_x=focal_x, focal_y=focal_y)
 
         self.set_lens_position(x, y)

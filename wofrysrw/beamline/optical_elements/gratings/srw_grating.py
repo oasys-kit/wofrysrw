@@ -15,6 +15,7 @@ from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, T
 class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
     def __init__(self,
                  name                               = "Undefined",
+                 optical_element_displacement       = None,
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
@@ -36,6 +37,7 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
                  ):
 
         SRWOpticalElementWithAcceptanceSlit.__init__(self,
+                                                     optical_element_displacement=optical_element_displacement,
                                                      tangential_size                      = tangential_size,
                                                      sagittal_size                        = sagittal_size,
                                                      grazing_angle                        = grazing_angle,
@@ -203,7 +205,16 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
         elif isinstance(self.get_boundary_shape(), Ellipse) or isinstance(self.get_boundary_shape(), Circle):
             ap_shape = ApertureShape.ELLIPTIC
 
-        text_code = self.to_python_code_aux(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
+        if self.add_acceptance_slit:
+            slit = SRWAperture()
+            slit.fromSRWLOpt(self.get_acceptance_slit())
+
+            text_code = slit.to_python_code(data=["acceptance_slits_" + oe_name])
+            text_code += "\n"
+        else:
+            text_code = ""
+
+        text_code += self.to_python_code_aux(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
 
         text_code += "substrate_mirror.set_dim_sim_meth(_size_tang=" + str(self.tangential_size) + "," + "\n"
         text_code += "                                  _size_sag=" + str(self.sagittal_size) + "," + "\n"
@@ -220,15 +231,6 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
         text_code += "                            _y=" + str(y) + ")" + "\n"
 
         text_code += "\n"
-
-        if self.add_acceptance_slit:
-            slit = SRWAperture()
-            slit.fromSRWLOpt(self.get_acceptance_slit())
-
-            text_code = slit.to_python_code(data=["acceptance_slits_" + oe_name])
-            text_code += "\n"
-        else:
-            text_code += ""
 
         text_code += oe_name + "="+ "SRWLOptG(_mirSub=substrate_mirror" + "," + "\n"
         text_code += "               _m="     + str(self.diffraction_order) + "," + "\n"

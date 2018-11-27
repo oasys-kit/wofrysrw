@@ -5,9 +5,10 @@ from syned.beamline.shape import Plane
 
 from srwlib import SRWLOptMirPl
 
-class SRWPlaneGrating(SRWGrating, SRWOpticalElement):
+class SRWPlaneGrating(SRWGrating):
     def __init__(self,
                  name                               = "Undefined",
+                 optical_element_displacement       = None,
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
                  grazing_angle                      = 0.003,
@@ -24,6 +25,7 @@ class SRWPlaneGrating(SRWGrating, SRWOpticalElement):
                  grooving_density_4                 =0.0):
 
         super().__init__(name=name,
+                         optical_element_displacement=optical_element_displacement,
                          tangential_size=tangential_size,
                          sagittal_size=sagittal_size,
                          grazing_angle=grazing_angle,

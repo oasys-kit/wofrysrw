@@ -2,6 +2,7 @@
 from syned.beamline.beamline import Beamline
 
 from wofrysrw.srw_object import SRWObject
+from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElementDisplacement
 from wofrysrw.storage_ring.srw_light_source import SRWLightSource
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 
@@ -102,14 +103,16 @@ class SRWBeamline(Beamline, SRWObject):
                 optical_element = beamline_element.get_optical_element()
                 coordinates = beamline_element.get_coordinates()
 
+                # DRIFT BEFORE ----------------
+
                 if coordinates.p() != 0.0:
                     text_code += "drift_before_" + oe_name + " = " + "SRWLOptD(" + str(coordinates.p()) + ")" + "\n"
 
                     wp, wop = self.get_wavefront_propagation_parameters_at(index, Where.DRIFT_BEFORE)
-                    text_array = wp.to_python_code()
-                    if not wop is None: text_array = wop.append_to_python_code(text_array)
+                    drift_pp_array = wp.to_python_code()
+                    if not wop is None: drift_pp_array = wop.append_to_python_code(drift_pp_array)
 
-                    text_code += "pp_drift_before_" + oe_name + " = " + text_array  + "\n"
+                    text_code += "pp_drift_before_" + oe_name + " = " + drift_pp_array  + "\n"
                     text_code += "\n"
                     text_code += "srw_oe_array.append(drift_before_" + oe_name + ")" + "\n"
                     text_code += "srw_pp_array.append(pp_drift_before_" + oe_name + ")" + "\n"
@@ -117,17 +120,34 @@ class SRWBeamline(Beamline, SRWObject):
 
                 wp, wop = self.get_wavefront_propagation_parameters_at(index, Where.OE)
 
+                # OPTICAL ELEMENT ----------------
+
                 if not wp is None: # SCREEN!!!
                     text_code += optical_element.to_python_code(data_oe)
 
-                    text_array = wp.to_python_code()
-                    if not wop is None: text_array = wop.append_to_python_code(text_array)
+                    oe_pp_array = wp.to_python_code()
+                    if not wop is None: oe_pp_array = wop.append_to_python_code(oe_pp_array)
 
                     text_code += "\n"
 
+                    if not optical_element.displacement is None and optical_element.displacement.where == SRWOpticalElementDisplacement.BEFORE:
+                        text_code += optical_element.displacement.to_python_code(data_oe)
+
+                        text_code += "\n"
+
+                        if optical_element.displacement.has_shift:
+                            text_code += "srw_oe_array.append(shift_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_shift_" + oe_name + ")" + "\n"
+                            text_code += "\n"
+
+                        if optical_element.displacement.has_rotation:
+                            text_code += "srw_oe_array.append(rotation_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_rotation_" + oe_name + ")" + "\n"
+                            text_code += "\n"
+
                     if hasattr(optical_element, "add_acceptance_slit") and getattr(optical_element, "add_acceptance_slit") == True: # MIRROR AND GRATINGS
 
-                        text_code += "pp_acceptance_slits_" + oe_name + " = " + text_array  + "\n"
+                        text_code += "pp_acceptance_slits_" + oe_name + " = " + oe_pp_array  + "\n"
                         text_code += "pp_" + oe_name + " = " + WavefrontPropagationParameters().to_python_code()  + "\n"
                         text_code += "\n"
 
@@ -135,7 +155,7 @@ class SRWBeamline(Beamline, SRWObject):
                         text_code += "srw_pp_array.append(pp_acceptance_slits_" + oe_name + ")" + "\n"
 
                     else:
-                        text_code += "pp_" + oe_name + " = " + text_array  + "\n"
+                        text_code += "pp_" + oe_name + " = " + oe_pp_array  + "\n"
 
                     text_code += "\n"
                     text_code += "srw_oe_array.append(" + oe_name + ")" + "\n"
@@ -147,15 +167,33 @@ class SRWBeamline(Beamline, SRWObject):
                             text_code += "srw_oe_array.append(optTrEr_" + oe_name + ")" + "\n"
                             text_code += "srw_pp_array.append(" + WavefrontPropagationParameters().to_python_code() + ")" + "\n"
 
+                    if not optical_element.displacement is None and optical_element.displacement.where == SRWOpticalElementDisplacement.AFTER:
+                        text_code += optical_element.displacement.to_python_code(data_oe)
+
+                        text_code += "\n"
+
+                        if optical_element.displacement.has_shift:
+                            text_code += "srw_oe_array.append(shift_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_shift_" + oe_name + ")" + "\n"
+                            text_code += "\n"
+
+                        if optical_element.displacement.has_rotation:
+                            text_code += "srw_oe_array.append(rotation_" + oe_name + ")" + "\n"
+                            text_code += "srw_pp_array.append(pp_rotation_" + oe_name + ")" + "\n"
+                            text_code += "\n"
+
+
+                # DRIFT AFTER ----------------
+
                 if coordinates.q() != 0.0:
                     text_code += "\n"
                     text_code += "drift_after_" + oe_name + " = " + "SRWLOptD(" + str(coordinates.q()) + ")" + "\n"
 
                     wp, wop = self.get_wavefront_propagation_parameters_at(index, Where.DRIFT_AFTER)
-                    text_array = wp.to_python_code()
-                    if not wop is None: text_array = wop.append_to_python_code(text_array)
+                    drift_pp_array = wp.to_python_code()
+                    if not wop is None: drift_pp_array = wop.append_to_python_code(drift_pp_array)
 
-                    text_code += "pp_drift_after_" + oe_name + " = " + text_array  + "\n"
+                    text_code += "pp_drift_after_" + oe_name + " = " + drift_pp_array  + "\n"
                     text_code += "\n"
                     text_code += "srw_oe_array.append(drift_after_" + oe_name + ")" + "\n"
                     text_code += "srw_pp_array.append(pp_drift_after_" + oe_name + ")" + "\n"

@@ -31,6 +31,7 @@ class ScaleType:
 class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
     def __init__(self,
                  name                               = "Undefined",
+                 optical_element_displacement       = None,
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
                  vertical_position_of_mirror_center = 0.0,
@@ -44,6 +45,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
                  height_amplification_coefficient   = 1.0):
 
         SRWOpticalElementWithAcceptanceSlit.__init__(self,
+                                                     optical_element_displacement         = optical_element_displacement,
                                                      tangential_size                      = tangential_size,
                                                      sagittal_size                        = sagittal_size,
                                                      grazing_angle                        = grazing_angle,

@@ -1,13 +1,13 @@
-from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
-from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, ApertureShape, SimulationMethod, TreatInputOutput
+from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, SimulationMethod, TreatInputOutput
 from wofrysrw.beamline.optical_elements.gratings.srw_grating import SRWGrating
 from syned.beamline.shape import Ellipsoid
 
 from srwlib import SRWLOptMirEl
 
-class SRWEllipticalGrating(SRWGrating, SRWOpticalElement):
+class SRWEllipticalGrating(SRWGrating):
     def __init__(self,
                  name                                       = "Undefined",
+                 optical_element_displacement       = None,
                  tangential_size                            = 1.2,
                  sagittal_size                              = 0.01,
                  grazing_angle                              = 0.003,
@@ -27,6 +27,7 @@ class SRWEllipticalGrating(SRWGrating, SRWOpticalElement):
 
 
         super().__init__(name=name,
+                         optical_element_displacement=optical_element_displacement,
                          tangential_size=tangential_size,
                          sagittal_size=sagittal_size,
                          grazing_angle=grazing_angle,

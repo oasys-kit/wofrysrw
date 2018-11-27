@@ -1,12 +1,12 @@
-from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
-from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, ApertureShape, SimulationMethod, TreatInputOutput
+from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, SimulationMethod, TreatInputOutput
 from syned.beamline.shape import Sphere
 
 from srwlib import SRWLOptMirSph
 
-class SRWSphericalMirror(SRWMirror, SRWOpticalElement):
+class SRWSphericalMirror(SRWMirror):
     def __init__(self,
                  name                                       = "Undefined",
+                 optical_element_displacement               = None,
                  tangential_size                            = 1.2,
                  sagittal_size                              = 0.01,
                  grazing_angle                              = 0.003,
@@ -18,6 +18,7 @@ class SRWSphericalMirror(SRWMirror, SRWOpticalElement):
                  height_amplification_coefficient           = 1.0):
 
         super().__init__(name=name,
+                         optical_element_displacement=optical_element_displacement,
                          tangential_size=tangential_size,
                          sagittal_size=sagittal_size,
                          grazing_angle=grazing_angle,

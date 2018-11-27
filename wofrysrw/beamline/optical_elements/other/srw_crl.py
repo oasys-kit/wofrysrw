@@ -47,6 +47,7 @@ class SRWCRL(SRWOpticalElement):
     """
     def __init__(self,
                  name="Undefined",
+                 optical_element_displacement       = None,
                  plane_of_focusing=PlaneOfFocusing.BOTH,
                  refractive_index=1e-6,
                  attenuation_length=1e-3,
@@ -63,6 +64,8 @@ class SRWCRL(SRWOpticalElement):
                  final_photon_energy=8010,
                  horizontal_points=1001,
                  vertical_points=1001):
+        SRWOpticalElement.__init__(self, optical_element_displacement=optical_element_displacement)
+
         self._name = name
 
         self.plane_of_focusing = plane_of_focusing

@@ -4,6 +4,7 @@ from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalEle
 
 class SRWScreen(Screen, SRWOpticalElement):
     def __init__(self, name="Undefined"):
+        SRWOpticalElement.__init__(self, optical_element_displacement=None)
         Screen.__init__(self, name=name)
 
     def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):

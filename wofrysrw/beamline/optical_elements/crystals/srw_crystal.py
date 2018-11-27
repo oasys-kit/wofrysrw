@@ -33,6 +33,7 @@ from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, T
 class SRWCrystal(Crystal, SRWOpticalElement):
     def __init__(self,
                  name                                 = "Undefined",
+                 optical_element_displacement         = None,
                  orientation_of_reflection_plane      = Orientation.UP,
                  invert_tangent_component             = False,
                  d_spacing                            = 0.0,
@@ -47,6 +48,8 @@ class SRWCrystal(Crystal, SRWOpticalElement):
                  diffraction_geometry                 = DiffractionGeometry.BRAGG,
                  incident_angle                       = 0.0
                 ):
+        SRWOpticalElement.__init__(self, optical_element_displacement=optical_element_displacement)
+
         Crystal.__init__(self,
                          name,
                          surface_shape=Plane(),
@@ -59,6 +62,7 @@ class SRWCrystal(Crystal, SRWOpticalElement):
                          asymmetry_angle = asymmetry_angle,
                          thickness = thickness
                         )
+
         self.orientation_of_reflection_plane                  = orientation_of_reflection_plane
         self.invert_tangent_component                         = invert_tangent_component
 

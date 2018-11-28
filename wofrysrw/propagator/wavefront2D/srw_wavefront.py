@@ -502,17 +502,22 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
     def setScanningData(self, scanned_variable_data=ScanningData(None, None, None, None)):
         self.scanned_variable_data=scanned_variable_data
 
-    def get_intensity(self, multi_electron=True, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
+    def get_intensity(self, multi_electron=True, polarization_component_to_be_extracted=PolarizationComponent.TOTAL, type_of_dependence=TypeOfDependence.VS_XY):
+        if type_of_dependence not in (TypeOfDependence.VS_X, TypeOfDependence.VS_Y, TypeOfDependence.VS_XY):
+            raise ValueError("Wrong Type of Dependence: only vs. X, vs. Y, vs. XY are supported")
+
         if multi_electron:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_INTENSITY,
                                                                   polarization_component_to_be_extracted=polarization_component_to_be_extracted,
-                                                                  type_of_dependence = TypeOfDependence.VS_XY)
+                                                                  type_of_dependence = type_of_dependence)
         else:
             flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
                                                                   polarization_component_to_be_extracted=polarization_component_to_be_extracted,
-                                                                  type_of_dependence = TypeOfDependence.VS_XY)
-
-        return self.get_2D_intensity_distribution(type='f', flux_calculation_parameters=flux_calculation_parameters)
+                                                                  type_of_dependence = type_of_dependence)
+        if type_of_dependence == TypeOfDependence.VS_XY:
+            return self.get_2D_intensity_distribution(type='f', flux_calculation_parameters=flux_calculation_parameters)
+        elif (type_of_dependence == TypeOfDependence.VS_X or type_of_dependence == TypeOfDependence.VS_Y):
+            return self.get_1D_intensity_distribution(type='f', flux_calculation_parameters=flux_calculation_parameters)
 
     def get_phase(self, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
         flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_PHASE,
@@ -589,6 +594,43 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                     intensity_array[ie, ix, iy] = output_array[iy, ix]
 
         return (e_array, h_array, v_array, intensity_array)
+
+    def get_1D_intensity_distribution(self, type='f', flux_calculation_parameters=FluxCalculationParameters()):
+        mesh = copy.deepcopy(self.mesh)
+
+        if flux_calculation_parameters._type_of_dependence == TypeOfDependence.VS_X:
+            pos_array = numpy.linspace(mesh.xStart, mesh.xFin, mesh.nx)
+        else:
+            pos_array = numpy.linspace(mesh.yStart, mesh.yFin, mesh.ny)
+
+        e_array = numpy.linspace(mesh.eStart, mesh.eFin, mesh.ne)
+
+        intensity_array = numpy.zeros((e_array.size, pos_array.size))
+
+        for ie in range(e_array.size):
+            output_array = srw_array(type, [0] * len(pos_array))  # "flat" array to take 2D intensity data
+
+            flux_calculation_parameters._fixed_input_photon_energy_or_time = e_array[ie]
+
+            SRWWavefront.get_intensity_from_electric_field(output_array, self, flux_calculation_parameters)
+
+            # FROM UTI_PLOT in SRW
+            tot_len = len(pos_array)
+            len_output_array = len(output_array)
+
+            if len_output_array > tot_len:
+                output_array = numpy.array(output_array[0:tot_len])
+            elif len_output_array < tot_len:
+                aux_array = srw_array('d', [0] * len_output_array)
+                for i in range(len_output_array): aux_array[i] = output_array[i]
+                output_array = numpy.array(srw_array(aux_array))
+            else:
+                output_array = numpy.array(output_array)
+
+            for i in range(len(pos_array)):
+                intensity_array[ie, i] = output_array[i]
+
+        return (e_array, pos_array, intensity_array)
 
     @classmethod
     def get_intensity_from_electric_field(cls,

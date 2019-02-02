@@ -11,8 +11,6 @@ from wofrysrw.propagator.propagators2D.srw_propagation_mode import SRWPropagatio
 
 from srwlib import *
 
-from PyQt5.QtWidgets import QMessageBox
-
 SRW_APPLICATION = "SRW"
 
 class FresnelSRWNative(Propagator2D):

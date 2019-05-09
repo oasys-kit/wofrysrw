@@ -2,7 +2,7 @@ from syned.beamline.optical_elements.ideal_elements.lens import IdealLens
 
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 
-from srwlib import SRWLOptL
+from oasys_srw.srwlib import SRWLOptL
 
 class SRWIdealLens(IdealLens, SRWOpticalElement):
     def __init__(self,

@@ -65,7 +65,7 @@ class SRWBeamline(Beamline, SRWObject):
         wavefront = data[0]
         is_multi_electron = data[1] == True
 
-        text_code  = "from oasys_srw.srwlib import *\nfrom uti_plot import *\nimport numpy\n\n"
+        text_code  = "from oasys_srw.srwlib import *\nfrom oasys_srw.uti_plot import *\nimport numpy\n\n"
 
         if is_multi_electron: text_code += "#if not srwl_uti_proc_is_master(): exit()\n"
         else: text_code += "if not srwl_uti_proc_is_master(): exit()\n"

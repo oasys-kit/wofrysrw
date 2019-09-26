@@ -381,16 +381,42 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         return WavefrontDimension.TWO
 
     def toGenericWavefront(self):
-        wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
-                                                                       self.mesh.xFin,
-                                                                       self.mesh.yStart,
-                                                                       self.mesh.yFin,
-                                                                       number_of_points=(self.mesh.nx, self.mesh.ny),
-                                                                       wavelength=self.get_wavelength(),
-                                                                       polarization=Polarization.TOTAL)
+        if self.mesh.ne > 1:
+            wavefront = numpy.full(self.mesh.ne, None)
 
-        wavefront.set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[0, :, :, 0],
-                                        SRWEFieldAsNumpy(srwwf=self)[0, :, :, 1])
+            step = (self.mesh.eFin - self.mesh.eStart)/self.mesh.ne
+
+            is_time = self.mesh.eStart < 1e-7
+
+            for index in range(self.mesh.ne):
+                energy = self.mesh.eStart + step*index
+
+                if is_time:
+                    wavelenght = energy
+                else:
+                    wavelenght = m_to_eV/energy
+
+                wavefront[index] = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
+                                                                                      self.mesh.xFin,
+                                                                                      self.mesh.yStart,
+                                                                                      self.mesh.yFin,
+                                                                                      number_of_points=(self.mesh.nx, self.mesh.ny),
+                                                                                      wavelength=wavelenght,
+                                                                                      polarization=Polarization.TOTAL)
+
+                wavefront[index].set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[index, :, :, 0],
+                                                       SRWEFieldAsNumpy(srwwf=self)[index, :, :, 1])
+        else:
+            wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
+                                                                           self.mesh.xFin,
+                                                                           self.mesh.yStart,
+                                                                           self.mesh.yFin,
+                                                                           number_of_points=(self.mesh.nx, self.mesh.ny),
+                                                                           wavelength=self.get_wavelength(),
+                                                                           polarization=Polarization.TOTAL)
+
+            wavefront.set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[0, :, :, 0],
+                                            SRWEFieldAsNumpy(srwwf=self)[0, :, :, 1])
 
         return wavefront
 

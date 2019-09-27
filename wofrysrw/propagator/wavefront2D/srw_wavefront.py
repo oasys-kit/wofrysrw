@@ -381,6 +381,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         return WavefrontDimension.TWO
 
     def toGenericWavefront(self):
+        sigma_polarization_field, pi_polarization_field = SRWEFieldAsNumpy(srwwf=self)
+
         if self.mesh.ne > 1:
             wavefront = numpy.full(self.mesh.ne, None)
 
@@ -404,8 +406,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                                       wavelength=wavelenght,
                                                                                       polarization=Polarization.TOTAL)
 
-                wavefront[index].set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[index, :, :, 0],
-                                                       SRWEFieldAsNumpy(srwwf=self)[index, :, :, 1])
+                wavefront[index].set_complex_amplitude(sigma_polarization_field[index, :, :],
+                                                       pi_polarization_field[index, :, :])
         else:
             wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
                                                                            self.mesh.xFin,
@@ -415,8 +417,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                            wavelength=self.get_wavelength(),
                                                                            polarization=Polarization.TOTAL)
 
-            wavefront.set_complex_amplitude(SRWEFieldAsNumpy(srwwf=self)[0, :, :, 0],
-                                            SRWEFieldAsNumpy(srwwf=self)[0, :, :, 1])
+            wavefront.set_complex_amplitude(sigma_polarization_field[0, :, :],
+                                            pi_polarization_field[0, :, :])
 
         return wavefront
 
@@ -696,9 +698,7 @@ def SRWEFieldAsNumpy(srwwf):
     x_polarization = SRWArrayToNumpy(srwwf.arEx, dim_x, dim_y, number_energies)
     y_polarization = SRWArrayToNumpy(srwwf.arEy, dim_x, dim_y, number_energies)
 
-    e_field = numpy.concatenate((x_polarization, y_polarization), 3)
-
-    return e_field
+    return [x_polarization, y_polarization]
 
 def SRWWavefrontFromElectricField(horizontal_start,
                                   horizontal_end,

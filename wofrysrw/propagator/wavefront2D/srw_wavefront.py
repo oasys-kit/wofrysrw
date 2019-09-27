@@ -406,8 +406,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                                       wavelength=wavelenght,
                                                                                       polarization=Polarization.TOTAL)
 
-                wavefront[index].set_complex_amplitude(sigma_polarization_field[index, :, :],
-                                                       pi_polarization_field[index, :, :])
+                wavefront[index].set_complex_amplitude(sigma_polarization_field[index, :, :, 0],
+                                                       pi_polarization_field[index, :, :, 0])
         else:
             wavefront = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
                                                                            self.mesh.xFin,
@@ -417,8 +417,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                                            wavelength=self.get_wavelength(),
                                                                            polarization=Polarization.TOTAL)
 
-            wavefront.set_complex_amplitude(sigma_polarization_field[0, :, :],
-                                            pi_polarization_field[0, :, :])
+            wavefront.set_complex_amplitude(sigma_polarization_field[0, :, :, 0],
+                                            pi_polarization_field[0, :, :, 0])
 
         return wavefront
 

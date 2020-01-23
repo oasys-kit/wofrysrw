@@ -45,11 +45,13 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
 
     def __init__(self,
                  file_name="",
-                 comment_character="#"):
+                 comment_character="#",
+                 interpolation_method=1):
         MagneticStructure.__init__(self)
 
         self.file_name = file_name
         self.comment_character = comment_character
+        self.interpolation_method=interpolation_method
 
     def get_SRWMagneticStructure(self):
         return AuxReadInMagFld3D(self.file_name, self.comment_character)
@@ -59,7 +61,7 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
         magnetic_field_container.allocate(1)  # Magnetic Field consists of 1 part
 
         magnetic_field_container.arMagFld[0] = self.get_SRWMagneticStructure()
-        magnetic_field_container.arMagFld[0].interp = 4
+        magnetic_field_container.arMagFld[0].interp = self.interpolation_method
         magnetic_field_container.arXc[0] = self.horizontal_central_position
         magnetic_field_container.arYc[0] = self.vertical_central_position
         magnetic_field_container.arZc[0] = self.longitudinal_central_position
@@ -81,7 +83,7 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
         text_code += "magnetic_field_container = SRWLMagFldC()" + "\n"
         text_code += "magnetic_field_container.allocate(1)" + "\n"
         text_code += "magnetic_field_container.arMagFld[0] = magnetic_structure" + "\n"
-        text_code += "magnetic_field_container.arMagFld[0].interp = 4" + "\n"
+        text_code += "magnetic_field_container.arMagFld[0].interp = 1" + "\n"
         text_code += "magnetic_field_container.arXc[0] = " + str(self.horizontal_central_position) + "\n"
         text_code += "magnetic_field_container.arYc[0] = " + str(self.vertical_central_position) + "\n"
         text_code += "magnetic_field_container.arZc[0] = " + str(self.longitudinal_central_position) + "\n"

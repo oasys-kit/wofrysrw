@@ -13,6 +13,7 @@ from wofry.propagator.decorators import WavefrontDecorator
 from wofry.propagator.polarization import Polarization
 
 from wofrysrw.srw_object import SRWObject
+from wofrysrw.util.srw_util import SRWArrayToNumpyComplexArray, numpyComplexArrayToSRWArray
 
 class WavefrontPrecisionParameters(SRWObject):
     def __init__(self,
@@ -393,10 +394,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
             for index in range(self.mesh.ne):
                 energy = self.mesh.eStart + step*index
 
-                if is_time:
-                    wavelenght = energy
-                else:
-                    wavelenght = m_to_eV/energy
+                if is_time: wavelenght = energy
+                else:       wavelenght = m_to_eV/energy
 
                 wavefront[index] = GenericWavefront2D.initialize_wavefront_from_range(self.mesh.xStart,
                                                                                       self.mesh.xFin,
@@ -462,8 +461,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         dim_y = srwwf.mesh.ny
         number_energies = srwwf.mesh.ne
 
-        x_polarization = SRWArrayToNumpy(srwwf.arEx, dim_x, dim_y, number_energies)
-        y_polarization = SRWArrayToNumpy(srwwf.arEy, dim_x, dim_y, number_energies)
+        x_polarization = SRWArrayToNumpyComplexArray(srwwf.arEx, dim_x, dim_y, number_energies)
+        y_polarization = SRWArrayToNumpyComplexArray(srwwf.arEy, dim_x, dim_y, number_energies)
 
         wavefront = SRWWavefrontFromElectricField(horizontal_start=srwwf.mesh.xStart,
                                                   horizontal_end=srwwf.mesh.xFin,
@@ -695,8 +694,8 @@ def SRWEFieldAsNumpy(srwwf):
     dim_y = srwwf.mesh.ny
     number_energies = srwwf.mesh.ne
 
-    x_polarization = SRWArrayToNumpy(srwwf.arEx, dim_x, dim_y, number_energies)
-    y_polarization = SRWArrayToNumpy(srwwf.arEy, dim_x, dim_y, number_energies)
+    x_polarization = SRWArrayToNumpyComplexArray(srwwf.arEx, dim_x, dim_y, number_energies)
+    y_polarization = SRWArrayToNumpyComplexArray(srwwf.arEy, dim_x, dim_y, number_energies)
 
     return [x_polarization, y_polarization]
 
@@ -739,8 +738,8 @@ def SRWWavefrontFromElectricField(horizontal_start,
         # raise Exception("Both horizontal and vertical grid must have even number of points")
         print("NumpyToSRW: WARNING: Both horizontal and vertical grid must have even number of points")
 
-    horizontal_field = numpyArrayToSRWArray(horizontal_efield)
-    vertical_field = numpyArrayToSRWArray(vertical_efield)
+    horizontal_field = numpyComplexArrayToSRWArray(horizontal_efield)
+    vertical_field = numpyComplexArrayToSRWArray(vertical_efield)
 
     srwwf = SRWWavefront(_arEx=horizontal_field,
                          _arEy=vertical_field,
@@ -763,44 +762,5 @@ def SRWWavefrontFromElectricField(horizontal_start,
 
     return srwwf
 
-def numpyArrayToSRWArray(numpy_array):
-    """
-    Converts a numpy.array to an array usable by SRW.
-    :param numpy_array: a 2D numpy array
-    :return: a 2D complex SRW array
-    """
-    elements_size = numpy_array.size
 
-    r_horizontal_field = numpy_array[:, :].real.transpose().flatten().astype(numpy.float)
-    i_horizontal_field = numpy_array[:, :].imag.transpose().flatten().astype(numpy.float)
-
-    tmp = numpy.zeros(elements_size * 2, dtype=numpy.float32)
-    for i in range(elements_size):
-        tmp[2*i] = r_horizontal_field[i]
-        tmp[2*i+1] = i_horizontal_field[i]
-
-    return srw_array('f', tmp)
-
-def SRWArrayToNumpy(srw_array, dim_x, dim_y, number_energies):
-    """
-    Converts a SRW array to a numpy.array.
-    :param srw_array: SRW array
-    :param dim_x: size of horizontal dimension
-    :param dim_y: size of vertical dimension
-    :param number_energies: Size of energy dimension
-    :return: 4D numpy array: [energy, horizontal, vertical, polarisation={0:horizontal, 1: vertical}]
-    """
-    re = numpy.array(srw_array[::2], dtype=numpy.float)
-    im = numpy.array(srw_array[1::2], dtype=numpy.float)
-
-    e = re + 1j * im
-    e = e.reshape((dim_y,
-                   dim_x,
-                   number_energies,
-                   1)
-                  )
-
-    e = e.swapaxes(0, 2)
-
-    return e.copy()
 

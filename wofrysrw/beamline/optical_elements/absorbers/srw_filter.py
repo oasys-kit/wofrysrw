@@ -6,7 +6,8 @@ from syned.beamline.optical_elements.absorbers.filter import Filter
 from wofrysrw.beamline.optical_elements.absorbers.srw_transmission import SRWTransmission
 
 class SRWFilter(Filter, SRWTransmission):
-    def __init__(self, name="Undefined",
+    def __init__(self,
+                 name="Undefined",
                  material="Be",
                  thickness=1e-3,
                  x_range=[-1e-3, 1e-3],
@@ -15,7 +16,7 @@ class SRWFilter(Filter, SRWTransmission):
                  n_points_y=100,
                  energy=15000,
                  thickness_error_profile=None):
-        Filter.__init__(name, material, thickness)
+        Filter.__init__(self, name=name, material=material, thickness=thickness)
 
         transmission_optical_path_difference = numpy.zeros((n_points_x, n_points_y))
         thickness_profile = numpy.full((n_points_x, n_points_y), self.get_thickness())
@@ -33,7 +34,7 @@ class SRWFilter(Filter, SRWTransmission):
                     transmission_optical_path_difference[i, j] += thickness_error
                     thickness_profile += thickness_error
 
-        transmission_amplitudes = getAmplitudeTransmittance(thickness_profile, alpha=getLinearAbsorptionCoefficient(self.get_material(), self.energy))
+        transmission_amplitudes = getAmplitudeTransmittance(thickness_profile, alpha=getLinearAbsorptionCoefficient(self.get_material(), energy))
 
         SRWTransmission.__init__(self,
                                  x_range=x_range,

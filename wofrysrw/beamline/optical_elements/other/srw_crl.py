@@ -1,5 +1,8 @@
+import numpy
+
+from syned.beamline.shape import Ellipse, Rectangle
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
-from syned.beamline.shape import Circle, Ellipse, Rectangle
+import wofrysrw.util.srw_absorption as srwa
 
 from oasys_srw.srwlib import *
 
@@ -21,7 +24,6 @@ class CRLShape:
         return ["Parabolic", "Spherical"]
 
 class SRWCRL(SRWOpticalElement):
-
     """
     Setup Transmission type Optical Element which simulates Compound Refractive Lens (CRL)
     :param _foc_plane: plane of focusing: 1- horizontal, 2- vertical, 3- both
@@ -49,7 +51,7 @@ class SRWCRL(SRWOpticalElement):
                  name="Undefined",
                  optical_element_displacement       = None,
                  plane_of_focusing=PlaneOfFocusing.BOTH,
-                 refractive_index=1e-6,
+                 delta=1e-6,
                  attenuation_length=1e-3,
                  shape=CRLShape.PARABOLIC,
                  horizontal_aperture_size=1e-3,
@@ -63,13 +65,15 @@ class SRWCRL(SRWOpticalElement):
                  initial_photon_energy=8000,
                  final_photon_energy=8010,
                  horizontal_points=1001,
-                 vertical_points=1001):
+                 vertical_points=1001,
+                 thickness_error_profile_files=None,
+                 scaling_factor=1.0):
         SRWOpticalElement.__init__(self, optical_element_displacement=optical_element_displacement)
 
         self._name = name
 
         self.plane_of_focusing = plane_of_focusing
-        self.refractive_index = refractive_index
+        self.delta = delta
         self.attenuation_length = attenuation_length
         self.shape = shape
         self.horizontal_aperture_size = horizontal_aperture_size
@@ -85,30 +89,58 @@ class SRWCRL(SRWOpticalElement):
         self.horizontal_points = horizontal_points
         self.vertical_points = vertical_points
 
+        if not thickness_error_profile_files is None:
+            self.has_error = True
+            thickness_profile = numpy.zeros((self.horizontal_points, self.vertical_points))
+
+            x_range = [self.horizontal_center_coordinate - self.horizontal_aperture_size/2,
+                       self.horizontal_center_coordinate + self.horizontal_aperture_size/2]
+            y_range = [self.vertical_center_coordinate - self.vertical_aperture_size/2,
+                       self.vertical_center_coordinate + self.vertical_aperture_size/2]
+
+            for thickness_error_profile_file in thickness_error_profile_files:
+                srwa.add_thickness_error_to_thickness_profile(thickness_profile,
+                                                              thickness_error_profile_file,
+                                                              scaling_factor,
+                                                              x_range,
+                                                              y_range,
+                                                              horizontal_points,
+                                                              vertical_points)
+            self.error_transmission_amplitudes              = srwa.get_transmission_amplitudes(thickness_profile, attenuation_length)
+            self.error_transmission_optical_path_difference = srwa.get_transmission_optical_path_difference(thickness_profile, delta)
+        else:
+            self.has_error = False
+
     def toSRWLOpt(self):
-        return srwl_opt_setup_CRL(_foc_plane=self.plane_of_focusing,
-                                  _delta=self.refractive_index,
-                                  _atten_len=self.attenuation_length,
-                                  _shape=self.shape,
-                                  _apert_h=self.horizontal_aperture_size,
-                                  _apert_v=self.vertical_aperture_size,
-                                  _r_min=self.radius_of_curvature,
-                                  _n=self.number_of_lenses,
-                                  _wall_thick=self.wall_thickness,
-                                  _xc=self.horizontal_center_coordinate,
-                                  _yc=self.vertical_center_coordinate,
-                                  _void_cen_rad=self.void_center_coordinates,
-                                  _e_start=self.initial_photon_energy,
-                                  _e_fin=self.final_photon_energy,
-                                  _nx=self.horizontal_points,
-                                  _ny=self.vertical_points)
+        crl_opt = srwl_opt_setup_CRL(_foc_plane=self.plane_of_focusing,
+                                     _delta=self.delta,
+                                     _atten_len=self.attenuation_length,
+                                     _shape=self.shape,
+                                     _apert_h=self.horizontal_aperture_size,
+                                     _apert_v=self.vertical_aperture_size,
+                                     _r_min=self.radius_of_curvature,
+                                     _n=self.number_of_lenses,
+                                     _wall_thick=self.wall_thickness,
+                                     _xc=self.horizontal_center_coordinate,
+                                     _yc=self.vertical_center_coordinate,
+                                     _void_cen_rad=self.void_center_coordinates,
+                                     _e_start=self.initial_photon_energy,
+                                     _e_fin=self.final_photon_energy,
+                                     _nx=self.horizontal_points,
+                                     _ny=self.vertical_points)
+
+        if self.has_error:
+            srwa.add_thickness_error_transmission(crl_opt, self.horizontal_points, self.vertical_points,
+                                                  self.error_transmission_amplitudes, self.error_transmission_optical_path_difference)
+
+        return crl_opt
 
     def fromSRWLOpt(self, srwlopt=None):
         if not srwlopt.input_params or not srwlopt.input_params["type"] == "crl":
             raise TypeError("SRW optical element is not a CRL")
 
         self.plane_of_focusing = srwlopt.input_params["focalPlane"]
-        self.refractive_index = srwlopt.input_params["refractiveIndex"]
+        self.delta = srwlopt.input_params["refractiveIndex"]
         self.attenuation_length = srwlopt.input_params["attenuationLength"]
         self.shape = srwlopt.input_params["shape"]
         self.horizontal_aperture_size = srwlopt.input_params["horizontalApertureSize"]
@@ -120,13 +152,13 @@ class SRWCRL(SRWOpticalElement):
         self.vertical_center_coordinate = srwlopt.input_params["verticalCenterCoordinate"]
         self.void_center_coordinates = srwlopt.input_params["voidCenterCoordinates"]
         self.initial_photon_energy = srwlopt.input_params["initialPhotonEnergy"]
-        self.final_photon_energy = srwlopt.input_params["finalPhotonPnergy"]
+        self.final_photon_energy = srwlopt.input_params["finalPhotonEnergy"]
         self.horizontal_points = srwlopt.input_params["horizontalPoints"]
         self.vertical_points = srwlopt.input_params["verticalPoints"]
 
     def to_python_code(self, data=None):
         text_code = data[0] + "=srwl_opt_setup_CRL(_foc_plane=" + str(self.plane_of_focusing) + ",\n"
-        text_code += "                _delta=" + str(self.refractive_index) + ",\n"
+        text_code += "                _delta=" + str(self.delta) + ",\n"
         text_code += "                _atten_len=" + str(self.attenuation_length) + ",\n"
         text_code += "                _shape=" + str(self.shape) + ",\n"
         text_code += "                _apert_h=" + str(self.horizontal_aperture_size) + ",\n"

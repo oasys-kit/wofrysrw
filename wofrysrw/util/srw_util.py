@@ -32,7 +32,7 @@ def numpyArraysToSRWArray(numpy_array_re, numpy_array_im):
 
     tmp = numpy.zeros(elements_size * 2, dtype=numpy.float32)
     for i in range(elements_size):
-        tmp[2*i] = r_horizontal_field[i]
+        tmp[2*i]   = r_horizontal_field[i]
         tmp[2*i+1] = i_horizontal_field[i]
 
     return srw_array('d', tmp)

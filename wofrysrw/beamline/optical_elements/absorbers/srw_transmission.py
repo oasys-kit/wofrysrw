@@ -1,3 +1,5 @@
+import numpy
+
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.util.srw_util import numpyArraysToSRWArray, SRWArrayToNumpyArrays
 
@@ -62,9 +64,14 @@ class SRWTransmission(SRWOpticalElement):
         transmission_array = numpyArraysToSRWArray(numpy_array_re=self.transmission_amplitudes,
                                                    numpy_array_im=self.transmission_optical_path_difference)
 
-        text_code = "transmission_array = array('f', " + transmission_array.tostring() + ")\n\n"
+        def to_string(srw_array):
+            text = "["
+            for element in srw_array: text += str(element) + ", "
+            return text[:-2] + "]"
+
+        text_code = "transmission_array = array('d', " + to_string(transmission_array) + ")\n\n"
         text_code += oe_name + "=" + "SRWLOptT(_nx=" + str(nx) + "," + "\n"
-        text_code += "               _ny" + str(ny) +  "," + "\n"
+        text_code += "               _ny=" + str(ny) +  "," + "\n"
         text_code += "               _x=" + str(0.5*(self.x_range[1]+self.x_range[0])) + "," + "\n"
         text_code += "               _y=" + str(0.5*(self.y_range[1]+self.y_range[0])) + "," + "\n"
         text_code += "               _rx=" + str(self.x_range[1]-self.x_range[0]) + "," + "\n"

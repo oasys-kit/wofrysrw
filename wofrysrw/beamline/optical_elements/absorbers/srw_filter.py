@@ -15,44 +15,48 @@ class SRWFilter(Filter, SRWTransmission):
                  n_points_x=100,
                  n_points_y=100,
                  energy=15000,
-                 thickness_error_profile=None):
+                 thickness_error_profile=None,
+                 scaling_factor=1.0):
         Filter.__init__(self, name=name, material=material, thickness=thickness)
 
-        transmission_optical_path_difference = numpy.zeros((n_points_x, n_points_y))
-        thickness_profile = numpy.full((n_points_x, n_points_y), self.get_thickness())
+        thickness_profile = numpy.ones((n_points_x, n_points_y))*self.get_thickness()
 
         if not thickness_error_profile is None:
             xx, yy, zz = read_surface_file(thickness_error_profile)
-            interpolator = RectBivariateSpline(xx, yy, zz.T)
+            interpolator = RectBivariateSpline(xx, yy, (zz.T)*scaling_factor)
 
             xx_t = numpy.linspace(x_range[0], x_range[1], n_points_x)
             yy_t = numpy.linspace(y_range[0], y_range[1], n_points_y)
 
             for i in range(n_points_x):
                 for j in range(n_points_y):
-                    thickness_error = interpolator.ev(xx_t[i], yy_t[i])
-                    transmission_optical_path_difference[i, j] += thickness_error
-                    thickness_profile += thickness_error
+                    thickness_profile[i, j] += interpolator.ev(xx_t[i], yy_t[j])
 
-        transmission_amplitudes = getAmplitudeTransmittance(thickness_profile, alpha=getLinearAbsorptionCoefficient(self.get_material(), energy))
+        attenuation_length, delta = get_absorption_parameters(material, energy)
 
         SRWTransmission.__init__(self,
                                  x_range=x_range,
                                  y_range=y_range,
-                                 transmission_amplitudes=transmission_amplitudes,
-                                 transmission_optical_path_difference=transmission_optical_path_difference,
+                                 transmission_amplitudes=get_transmission_amplitudes(thickness_profile, attenuation_length),
+                                 transmission_optical_path_difference=get_transmission_optical_path_difference(thickness_profile, delta),
                                  energy=energy)
 
-def getAmplitudeTransmittance(thickness, alpha):
-    return numpy.sqrt(numpy.exp(-alpha * thickness * 100))
+def get_transmission_amplitudes(thickness_profile, attenuation_length):
+    return numpy.exp(-0.5*thickness_profile/attenuation_length)
 
-def getLinearAbsorptionCoefficient(chemical_formula, energy):
-    mu = xraylib.CS_Total_CP(chemical_formula, energy/1000) # energy in KeV
-    rho = getMaterialDensity(chemical_formula)
+def get_transmission_optical_path_difference(thickness_profile, delta):
+    return -delta*thickness_profile
 
-    return mu*rho
+def get_absorption_parameters(material, energy):
+    energy_in_KeV = energy / 1000
 
-def getMaterialDensity(material_name):
+    mu    = xraylib.CS_Total_CP(material, energy_in_KeV) # energy in KeV
+    rho   = get_material_density(material)
+    delta = 1 - xraylib.Refractive_Index_Re(material, energy_in_KeV, rho)
+
+    return 0.01/(mu*rho), delta
+
+def get_material_density(material_name):
     if material_name is None: return 0.0
     if str(material_name.strip()) == "": return 0.0
 

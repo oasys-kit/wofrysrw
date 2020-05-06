@@ -17,7 +17,7 @@ def numpyComplexArrayToSRWArray(numpy_array):
         tmp[2*i] = r_horizontal_field[i]
         tmp[2*i+1] = i_horizontal_field[i]
 
-    return srw_array('f', tmp)
+    return srw_array('d', tmp)
 
 def numpyArraysToSRWArray(numpy_array_re, numpy_array_im):
     """
@@ -35,7 +35,7 @@ def numpyArraysToSRWArray(numpy_array_re, numpy_array_im):
         tmp[2*i] = r_horizontal_field[i]
         tmp[2*i+1] = i_horizontal_field[i]
 
-    return srw_array('f', tmp)
+    return srw_array('d', tmp)
 
 def __reshape(numpy_array, dim_x, dim_y, number_energies, polarized=True):
     if polarized: numpy_array = numpy_array.reshape((dim_y, dim_x, number_energies, 1))

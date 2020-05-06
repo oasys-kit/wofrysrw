@@ -174,6 +174,8 @@ class SRWCRL(SRWOpticalElement):
         text_code += "                _nx=" + str(self.horizontal_points) + ",\n"
         text_code += "                _ny=" + str(self.vertical_points) + ")\n"
 
+        #TODO: CODE for Thickness Error
+
         return text_code
 
     def get_boundary_shape(self):

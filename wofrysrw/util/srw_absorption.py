@@ -23,8 +23,8 @@ def add_thickness_error_to_thickness_profile(thickness_profile,
 def add_thickness_error_transmission(srwlopt_t, n_points_x, n_points_y,
                                      error_transmission_amplitudes, error_transmission_optical_path_difference):
     ofst = 0
-    for iy in range(n_points_x):
-        for ix in range(n_points_y):
+    for iy in range(n_points_y):
+        for ix in range(n_points_x):
             srwlopt_t.arTr[ofst] *= error_transmission_amplitudes[ix, iy]
             srwlopt_t.arTr[ofst + 1] += error_transmission_optical_path_difference[ix, iy]
             ofst += 2

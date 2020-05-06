@@ -174,7 +174,34 @@ class SRWCRL(SRWOpticalElement):
         text_code += "                _nx=" + str(self.horizontal_points) + ",\n"
         text_code += "                _ny=" + str(self.vertical_points) + ")\n"
 
-        #TODO: CODE for Thickness Error
+        if self.has_error:
+            text_code += "\n\n"
+            text_code += "def add_thickness_error_transmission(srwlopt_t, n_points_x, n_points_y,\n" + \
+                         "                                     error_transmission_amplitudes, error_transmission_optical_path_difference):\n" + \
+                         "    ofst = 0\n" + \
+                         "    for iy in range(n_points_y):\n" + \
+                         "        for ix in range(n_points_x):\n" + \
+                         "            srwlopt_t.arTr[ofst]     *= error_transmission_amplitudes[ix, iy]\n" + \
+                         "            srwlopt_t.arTr[ofst + 1] += error_transmission_optical_path_difference[ix, iy]\n" + \
+                         "            ofst += 2\n\n"
+
+            def to_string(numpy_array):
+                text = "["
+                for i in range(numpy_array.shape[0]):
+                    for j in range(numpy_array.shape[1]):
+                        text += ("[" if j == 0 else "") + str(numpy_array[i, j]) + ("]" if j == numpy_array.shape[1]-1 else ", ")
+                    text += ", "
+                return text[:-2] + "]"
+
+            print(to_string(self.error_transmission_optical_path_difference))
+
+            text_code += "error_transmission_amplitudes              = numpy.array(" + to_string(self.error_transmission_amplitudes) + ")\n"
+            text_code += "error_transmission_optical_path_difference = numpy.array(" + to_string(self.error_transmission_optical_path_difference) + ")\n\n"
+
+            text_code += "add_thickness_error_transmission(" + \
+                         data[0] + ", " + \
+                         str(self.horizontal_points) + ", " + \
+                         str(self.vertical_points) + ", error_transmission_amplitudes, error_transmission_optical_path_difference)\n\n"
 
         return text_code
 

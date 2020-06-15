@@ -422,8 +422,7 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         return wavefront
 
     @classmethod
-    def fromGenericWavefront(cls, wavefront):
-
+    def fromGenericWavefront(cls, wavefront, z=10.0, Rx=10.0, dRx=0.001, Ry=10, dRy=0.001):
         if wavefront.is_polarized():
             return SRWWavefrontFromElectricField(horizontal_start  = wavefront.get_coordinate_x()[0],
                                                  horizontal_end    = wavefront.get_coordinate_x()[-1],
@@ -434,11 +433,11 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                  energy_min        = wavefront.get_photon_energy(),
                                                  energy_max        = wavefront.get_photon_energy(),
                                                  energy_points     = 1,
-                                                 z                 = 0.0,
-                                                 Rx                = 1e5,
-                                                 dRx               = 1.0,
-                                                 Ry                = 1e5,
-                                                 dRy               = 1.0)
+                                                 z                 = z,
+                                                 Rx                = Rx,
+                                                 dRx               = dRx,
+                                                 Ry                = Ry,
+                                                 dRy               = dRy)
         else:
             return SRWWavefrontFromElectricField(horizontal_start  = wavefront.get_coordinate_x()[0],
                                                  horizontal_end    = wavefront.get_coordinate_x()[-1],
@@ -449,11 +448,11 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                  energy_min        = wavefront.get_photon_energy(),
                                                  energy_max        = wavefront.get_photon_energy(),
                                                  energy_points     = 1,
-                                                 z                 = 0.0,
-                                                 Rx                = 1e5,
-                                                 dRx               = 1.0,
-                                                 Ry                = 1e5,
-                                                 dRy               = 1.0)
+                                                 z                 = z,
+                                                 Rx                = Rx,
+                                                 dRx               = dRx,
+                                                 Ry                = Ry,
+                                                 dRy               = dRy)
 
     @classmethod
     def decorateSRWWF(self, srwwf):

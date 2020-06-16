@@ -754,10 +754,11 @@ def SRWWavefrontFromElectricField(horizontal_start,
                          _ny=vertical_size,
                          _zStart=z)
 
-    srwwf.Rx = Rx
-    srwwf.Ry = Ry
+    srwwf.Rx  = Rx
+    srwwf.Ry  = Ry
     srwwf.dRx = dRx
     srwwf.dRy = dRy
+    srwwf.avgPhotEn = 0.5*(energy_max + energy_min)
 
     return srwwf
 

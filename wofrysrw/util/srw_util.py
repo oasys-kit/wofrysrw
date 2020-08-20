@@ -1,7 +1,7 @@
 import numpy
 from oasys_srw.srwlib import array as srw_array
 
-def numpyComplexArrayToSRWArray(numpy_array):
+def numpyComplexArrayToSRWArray(numpy_array, type='f'):
     """
     Converts a numpy.array to an array usable by SRW.
     :param numpy_array: a 2D numpy array
@@ -17,9 +17,9 @@ def numpyComplexArrayToSRWArray(numpy_array):
         tmp[2*i] = r_horizontal_field[i]
         tmp[2*i+1] = i_horizontal_field[i]
 
-    return srw_array('f', tmp)
+    return srw_array(type, tmp)
 
-def numpyArraysToSRWArray(numpy_array_re, numpy_array_im):
+def numpyArraysToSRWArray(numpy_array_re, numpy_array_im, type='f'):
     """
     Converts a numpy.array to an array usable by SRW.
     :param numpy_array: a 2D numpy array
@@ -35,7 +35,7 @@ def numpyArraysToSRWArray(numpy_array_re, numpy_array_im):
         tmp[2*i]   = r_horizontal_field[i]
         tmp[2*i+1] = i_horizontal_field[i]
 
-    return srw_array('f', tmp)
+    return srw_array(type, tmp)
 
 def __reshape(numpy_array, dim_x, dim_y, number_energies, polarized=True):
     if polarized: numpy_array = numpy_array.reshape((dim_y, dim_x, number_energies, 1))

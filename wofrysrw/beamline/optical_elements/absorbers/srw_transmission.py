@@ -24,7 +24,8 @@ class SRWTransmission(SRWOpticalElement):
         nx = self.transmission_amplitudes.shape[0]
         ny = self.transmission_amplitudes.shape[1]
         transmission_array = numpyArraysToSRWArray(numpy_array_re=self.transmission_amplitudes,
-                                                   numpy_array_im=self.transmission_optical_path_difference)
+                                                   numpy_array_im=self.transmission_optical_path_difference,
+                                                   type='d')
 
         return SRWLOptT(_nx=nx,
                         _ny=ny,

@@ -1,5 +1,5 @@
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, SimulationMethod, TreatInputOutput
-from syned.beamline.shape import Sphere
+from syned.beamline.shape import SphericalCylinder
 
 from oasys_srw.srwlib import SRWLOptMirSph
 
@@ -18,6 +18,7 @@ class SRWSphericalMirror(SRWMirror):
                  height_amplification_coefficient           = 1.0):
 
         super().__init__(name=name,
+                         shape=SphericalCylinder(radius=radius),
                          optical_element_displacement=optical_element_displacement,
                          tangential_size=tangential_size,
                          sagittal_size=sagittal_size,
@@ -28,15 +29,10 @@ class SRWSphericalMirror(SRWMirror):
                          height_profile_data_file_dimension=height_profile_data_file_dimension,
                          height_amplification_coefficient=height_amplification_coefficient)
 
-        self.radius  = radius
-
-    def get_shape(self):
-        return Sphere()
-
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         return SRWLOptMirSph(_size_tang=self.tangential_size,
                             _size_sag=self.sagittal_size,
-                            _r=self.radius,
+                            _r=self._surface_shape.get_radius(),
                             _ap_shape=ap_shape,
                             _sim_meth=SimulationMethod.THICK,
                             _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER,
@@ -52,14 +48,12 @@ class SRWSphericalMirror(SRWMirror):
         if not isinstance(srwlopt, SRWLOptMirSph):
             raise ValueError("SRW object is not a SRWLOptMirEl object")
 
-        super().fromSRWLOpt(srwlopt)
-
-        self.radius = srwlopt.rad
+        super().fromSRWLOpt(srwlopt, SphericalCylinder(radius=srwlopt.rad))
 
     def to_python_code_aux(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         text_code  = "SRWLOptMirSph(_size_tang=" + str(self.tangential_size) +"," + "\n"
         text_code += "                      _size_sag=" + str(self.sagittal_size) +"," + "\n"
-        text_code += "                      _r=" + str(self.radius) +"," + "\n"
+        text_code += "                      _r=" + str(self._surface_shape.get_radius()) +"," + "\n"
         text_code += "                      _ap_shape='" + str(ap_shape) +"'," + "\n"
         text_code += "                      _sim_meth=" + str(SimulationMethod.THICK) +"," + "\n"
         text_code += "                      _treat_in_out=" + str(TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER) +"," + "\n"

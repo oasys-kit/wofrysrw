@@ -17,6 +17,7 @@ class SRWPlaneMirror(SRWMirror):
                  height_amplification_coefficient   = 1.0):
 
         super().__init__(name=name,
+                         shape=Plane(),
                          optical_element_displacement=optical_element_displacement,
                          tangential_size=tangential_size,
                          sagittal_size=sagittal_size,
@@ -26,9 +27,6 @@ class SRWPlaneMirror(SRWMirror):
                          height_profile_data_file=height_profile_data_file,
                          height_profile_data_file_dimension=height_profile_data_file_dimension,
                          height_amplification_coefficient=height_amplification_coefficient)
-
-    def get_shape(self):
-        return Plane()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         return SRWLOptMirPl(_size_tang=self.tangential_size,
@@ -44,11 +42,11 @@ class SRWPlaneMirror(SRWMirror):
                             _x=x,
                             _y=y)
 
-    def fromSRWLOpt(self, srwlopt=SRWLOptMirPl()):
+    def fromSRWLOpt(self, srwlopt):
         if not isinstance(srwlopt, SRWLOptMirPl):
             raise ValueError("SRW object is not a SRWLOptMirEl object")
 
-        super().fromSRWLOpt(srwlopt)
+        super().fromSRWLOpt(srwlopt, Plane())
 
     def to_python_code_aux(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         text_code  = "SRWLOptMirPl(_size_tang=" + str(self.tangential_size) +"," + "\n"

@@ -31,6 +31,7 @@ class ScaleType:
 class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
     def __init__(self,
                  name                               = "Undefined",
+                 shape                              = None,
                  optical_element_displacement       = None,
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
@@ -61,7 +62,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
                                                  x_right=horizontal_position_of_mirror_center + 0.5*sagittal_size,
                                                  y_bottom=vertical_position_of_mirror_center - 0.5*tangential_size,
                                                  y_top=vertical_position_of_mirror_center + 0.5*tangential_size),
-                        surface_shape=self.get_shape())
+                        surface_shape=shape)
 
         self.height_profile_data_file = height_profile_data_file
         self.height_profile_data_file_dimension = height_profile_data_file_dimension
@@ -89,9 +90,6 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
         self.angle_start       = angle_start
         self.angle_end         = angle_end
         self.angle_scale_type  = angle_scale_type
-
-    def get_shape(self):
-        raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):
         optical_elements, propagation_parameters = super(SRWMirror, self).create_propagation_elements()
@@ -169,8 +167,6 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
                                _ang_fin=self.angle_end,
                                _ang_scale_type=self.angle_scale_type)
 
-
-
         return mirror
 
 
@@ -192,7 +188,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
 
         return mirror
 
-    def fromSRWLOpt(self, srwlopt=SRWLOptMir()):
+    def fromSRWLOpt(self, srwlopt, shape):
         if not isinstance(srwlopt, SRWLOptMir):
             raise ValueError("SRW object is not a SRWLOptMir object")
 
@@ -209,7 +205,8 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
         else:
             raise ValueError("Tangential orientation angles (tvx/tvy) are both 0.0!")
 
-        self.__init__(tangential_size                 = srwlopt.dt,
+        self.__init__(shape                           = shape,
+                      tangential_size                 = srwlopt.dt,
                       sagittal_size                   = srwlopt.ds,
                       grazing_angle                   = grazing_angle,
                       orientation_of_reflection_plane = orientation_of_reflection_plane,

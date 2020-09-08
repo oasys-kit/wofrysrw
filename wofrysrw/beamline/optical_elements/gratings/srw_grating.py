@@ -15,6 +15,7 @@ from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, T
 class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
     def __init__(self,
                  name                               = "Undefined",
+                 shape                              = None,
                  optical_element_displacement       = None,
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
@@ -53,7 +54,7 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
                                                  x_right=horizontal_position_of_mirror_center + 0.5*sagittal_size,
                                                  y_bottom=vertical_position_of_mirror_center - 0.5*tangential_size,
                                                  y_top=vertical_position_of_mirror_center + 0.5*tangential_size),
-                        surface_shape=self.get_shape(),
+                        surface_shape=shape,
                         ruling=grooving_density_0*1e3)
 
         self.height_profile_data_file = height_profile_data_file
@@ -92,9 +93,6 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
             return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
         elif self.orientation_of_reflection_plane == Orientation.RIGHT:
             return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
-
-    def get_shape(self):
-        raise NotImplementedError()
 
     def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):
         optical_elements, propagation_parameters = super(SRWGrating, self).create_propagation_elements()
@@ -190,8 +188,6 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
                                                     _amp_coef=self.height_amplification_coefficient)
 
         return optTrEr
-
-
 
     def to_python_code(self, data=None):
         oe_name = data[0]

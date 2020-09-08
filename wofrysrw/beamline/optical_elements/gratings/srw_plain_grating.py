@@ -8,6 +8,7 @@ from oasys_srw.srwlib import SRWLOptMirPl
 class SRWPlaneGrating(SRWGrating):
     def __init__(self,
                  name                               = "Undefined",
+                 shape                              = Plane(),
                  optical_element_displacement       = None,
                  tangential_size                    = 1.2,
                  sagittal_size                      = 0.01,
@@ -40,9 +41,6 @@ class SRWPlaneGrating(SRWGrating):
                          grooving_density_2=grooving_density_2,
                          grooving_density_3=grooving_density_3,
                          grooving_density_4=grooving_density_4)
-
-    def get_shape(self):
-        return Plane()
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         return SRWLOptMirPl(_size_tang=self.tangential_size,

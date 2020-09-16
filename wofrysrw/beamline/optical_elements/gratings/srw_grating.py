@@ -76,7 +76,7 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
     def get_beta_angle(self, photon_energy):
         wavelength = 1.239842e-3/photon_energy # in mm
 
-        return numpy.arcsin(wavelength*self.grooving_density_0 - numpy.cos(self.get_alpha_angle())) # Grating Output Angle
+        return numpy.arcsin(self.diffraction_order*wavelength*self.grooving_density_0 - numpy.cos(self.get_alpha_angle())) # Grating Output Angle
 
     def get_deflection_angle(self, photon_energy):
         return self.get_alpha_angle() + self.get_beta_angle(photon_energy) + 1.57079632679 # Grating Deflection Angle
@@ -85,14 +85,26 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
         deflection_angle = self.get_deflection_angle(photon_energy)
         tangent = 1.0 if not self.invert_tangent_component else -1.0
 
-        if self.orientation_of_reflection_plane == Orientation.UP:
-            return 0,  numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
-        elif self.orientation_of_reflection_plane == Orientation.DOWN:
-            return 0,  -numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
-        elif self.orientation_of_reflection_plane == Orientation.LEFT:
-            return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
-        elif self.orientation_of_reflection_plane == Orientation.RIGHT:
-            return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
+        if self.grooving_angle == 0.0:
+            if self.orientation_of_reflection_plane == Orientation.UP:
+                return 0,  numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
+            elif self.orientation_of_reflection_plane == Orientation.DOWN:
+                return 0,  -numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
+            elif self.orientation_of_reflection_plane == Orientation.LEFT:
+                return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
+            elif self.orientation_of_reflection_plane == Orientation.RIGHT:
+                return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
+        elif self.grooving_angle == numpy.radians(90.0):
+            if self.orientation_of_reflection_plane == Orientation.LEFT:
+                return 0,  numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
+            elif self.orientation_of_reflection_plane == Orientation.RIGHT:
+                return 0,  -numpy.sin(deflection_angle),  numpy.cos(deflection_angle), tangent, 0.0
+            elif self.orientation_of_reflection_plane == Orientation.UP:
+                return numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
+            elif self.orientation_of_reflection_plane == Orientation.DOWN:
+                return -numpy.sin(deflection_angle),  0, numpy.cos(deflection_angle), 0.0, tangent
+        else:
+            raise ValueError("Automatic calculation of output orientation vector not possible")
 
     def applyOpticalElement(self, wavefront=None, parameters=None, element_index=None):
         optical_elements, propagation_parameters = super(SRWGrating, self).create_propagation_elements()

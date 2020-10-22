@@ -26,9 +26,10 @@ def AuxReadInMagFld3D(filePath, sCom):
 
     for i in range(totNp):
         curLineParts = f.readline().split('\t')
-        locArBx[i] = float(curLineParts[0])
-        locArBy[i] = float(curLineParts[1])
-        locArBz[i] = float(curLineParts[2])
+        if len(curLineParts) == 3:
+            locArBx[i] = float(curLineParts[0].strip())
+            locArBy[i] = float(curLineParts[1].strip())
+            locArBz[i] = float(curLineParts[2].strip())
 
     f.close()
 
@@ -95,16 +96,13 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
         text_code = "def AuxReadInMagFld3D(filePath, sCom):" + "\n" + \
                     "    f = open(filePath, 'r')" + "\n" + \
                     "    f.readline()  # 1st line: just pass" + "\n\n" + \
-                    "    xStart = float(" + "\n" + \
-                    "        f.readline().split(sCom, 2)[1])  # 2nd line: initial X position [m]; it will not actually be used" + "\n" + \
-                    "    xStep = float(f.readline().split(sCom, 2)[1])  # 3rd line: step vs X [m]" + "\n" + \
+                    "    xStart = float(f.readline().split(sCom, 2)[1])  # 2nd line: initial X position [m]; it will not actually be used" + "\n" + \
+                    "    xStep  = float(f.readline().split(sCom, 2)[1])  # 3rd line: step vs X [m]" + "\n" + \
                     "    xNp = int(f.readline().split(sCom, 2)[1])  # 4th line: number of points vs X" + "\n" + \
-                    "    yStart = float(" + "\n" + \
-                    "        f.readline().split(sCom, 2)[1])  # 5th line: initial Y position [m]; it will not actually be used" + "\n" + \
+                    "    yStart = float(f.readline().split(sCom, 2)[1])  # 5th line: initial Y position [m]; it will not actually be used" + "\n" + \
                     "    yStep = float(f.readline().split(sCom, 2)[1])  # 6th line: step vs Y [m]" + "\n" + \
                     "    yNp = int(f.readline().split(sCom, 2)[1])  # 7th line: number of points vs Y" + "\n" + \
-                    "    zStart = float(" + "\n" + \
-                    "        f.readline().split(sCom, 2)[1])  # 8th line: initial Z position [m]; it will not actually be used" + "\n" + \
+                    "    zStart = float(f.readline().split(sCom, 2)[1])  # 8th line: initial Z position [m]; it will not actually be used" + "\n" + \
                     "    zStep = float(f.readline().split(sCom, 2)[1])  # 9th line: step vs Z [m]" + "\n" + \
                     "    zNp = int(f.readline().split(sCom, 2)[1])  # 10th line: number of points vs Z" + "\n" + \
                     "    totNp = xNp * yNp * zNp" + "\n" + \
@@ -113,9 +111,10 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
                     "    locArBz = array('d', [0] * totNp)" + "\n\n" + \
                     "    for i in range(totNp):" + "\n" + \
                     "        curLineParts = f.readline().split('\t')" + "\n" + \
-                    "        locArBx[i] = float(curLineParts[0])" + "\n" + \
-                    "        locArBy[i] = float(curLineParts[1])" + "\n" + \
-                    "        locArBz[i] = float(curLineParts[2])" + "\n" + \
+                    "        if len(curLineParts) == 3:" + "\n" + \
+                    "            locArBx[i] = float(curLineParts[0].strip())" + "\n" + \
+                    "            locArBy[i] = float(curLineParts[1].strip())" + "\n" + \
+                    "            locArBz[i] = float(curLineParts[2].strip())" + "\n" + \
                     "    f.close()" + "\n" + \
                     "    xRange = xStep" + "\n" + \
                     "    if xNp > 1: xRange = (xNp - 1) * xStep" + "\n" + \

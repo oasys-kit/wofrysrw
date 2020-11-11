@@ -84,7 +84,7 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
         text_code += "magnetic_field_container = SRWLMagFldC()" + "\n"
         text_code += "magnetic_field_container.allocate(1)" + "\n"
         text_code += "magnetic_field_container.arMagFld[0] = magnetic_structure" + "\n"
-        text_code += "magnetic_field_container.arMagFld[0].interp = 1" + "\n"
+        text_code += "magnetic_field_container.arMagFld[0].interp = " + str(self.interpolation_method) + "\n"
         text_code += "magnetic_field_container.arXc[0] = " + str(self.horizontal_central_position) + "\n"
         text_code += "magnetic_field_container.arYc[0] = " + str(self.vertical_central_position) + "\n"
         text_code += "magnetic_field_container.arZc[0] = " + str(self.longitudinal_central_position) + "\n"
@@ -92,7 +92,6 @@ class SRW3DMagneticStructure(MagneticStructure, SRWMagneticStructure):
         return text_code
 
     def to_python_code_aux(self):
-
         text_code = "def AuxReadInMagFld3D(filePath, sCom):" + "\n" + \
                     "    f = open(filePath, 'r')" + "\n" + \
                     "    f.readline()  # 1st line: just pass" + "\n\n" + \

@@ -66,6 +66,7 @@ class WavefrontParameters(SRWObject):
                  h_position = 0.0,
                  v_position = 0.0,
                  distance = 10.0,
+                 electric_field_units = 1, #electric field units: 0- arbitrary, 1- sqrt(Phot/s/0.1%bw/mm^2), 2- sqrt(J/eV/mm^2) or sqrt(W/mm^2), depending on representation (freq. or time)
                  wavefront_precision_parameters=WavefrontPrecisionParameters()):
         self._photon_energy_min         = photon_energy_min
         self._photon_energy_max         = photon_energy_max
@@ -77,6 +78,7 @@ class WavefrontParameters(SRWObject):
         self._h_position                = h_position
         self._v_position                = v_position
         self._distance                  = distance
+        self._electric_field_units      = electric_field_units
         self._wavefront_precision_parameters  = wavefront_precision_parameters
 
     def to_SRWRadMesh(self):
@@ -455,36 +457,33 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                                  dRy               = dRy)
 
     @classmethod
-    def decorateSRWWF(self, srwwf):
-        dim_x = srwwf.mesh.nx
-        dim_y = srwwf.mesh.ny
-        number_energies = srwwf.mesh.ne
-
-        x_polarization = SRWArrayToNumpyComplexArray(srwwf.arEx, dim_x, dim_y, number_energies)
-        y_polarization = SRWArrayToNumpyComplexArray(srwwf.arEy, dim_x, dim_y, number_energies)
-
-        wavefront = SRWWavefrontFromElectricField(horizontal_start=srwwf.mesh.xStart,
-                                                  horizontal_end=srwwf.mesh.xFin,
-                                                  horizontal_efield=x_polarization,
-                                                  vertical_start=srwwf.mesh.yStart,
-                                                  vertical_end=srwwf.mesh.yFin,
-                                                  vertical_efield=y_polarization,
-                                                  energy_min=srwwf.mesh.eStart,
-                                                  energy_max=srwwf.mesh.eFin,
-                                                  energy_points=srwwf.mesh.ne,
-                                                  z=srwwf.mesh.zStart,
-                                                  Rx=srwwf.Rx,
-                                                  dRx=srwwf.dRx,
-                                                  Ry=srwwf.Ry,
-                                                  dRy=srwwf.dRy)
-
+    def decorateSRWWF(cls, srwwf):
+        wavefront = SRWWavefront(_arEx=srwwf.arEx,
+                                 _arEy=srwwf.arEy,
+                                 _typeE=srwwf.typeE,
+                                 _eStart=srwwf.eStart,
+                                 _eFin=srwwf.eFin,
+                                 _ne=srwwf.ne,
+                                 _xStart=srwwf.xStart,
+                                 _xFin=srwwf.xFin,
+                                 _nx=srwwf.nx,
+                                 _yStart=srwwf.yStart,
+                                 _yFin=srwwf.yFin,
+                                 _ny=srwwf.ny,
+                                 _zStart=srwwf.zStart,
+                                 _partBeam=copy.deepcopy(srwwf.partBeam))
 
         wavefront.numTypeElFld=srwwf.numTypeElFld
-        wavefront.partBeam=srwwf.partBeam
 
-        # debug srio@esrf.eu: added these fields as they are not correctly pased
-        wavefront.mesh.nx = dim_x
-        wavefront.mesh.ny = dim_y
+        wavefront.xc  = srwwf.xc
+        wavefront.yc = srwwf.yc
+        wavefront.presCA = srwwf.presCA
+        wavefront.presFT  = srwwf.presFT
+        wavefront.unitElFld  = srwwf.unitElFld
+        wavefront.arElecPropMatr  = copy.deepcopy(srwwf.arElecPropMatr)
+        wavefront.arMomX  = copy.deepcopy(srwwf.arMomX)
+        wavefront.arMomY  = copy.deepcopy(srwwf.arMomY)
+        wavefront.arWfrAuxData  = copy.deepcopy(srwwf.arWfrAuxData)
 
         return wavefront
 
@@ -503,9 +502,8 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                  _yFin=self.mesh.yFin,
                                  _ny=self.mesh.ny,
                                  _zStart=self.mesh.zStart,
-                                 _partBeam=self.partBeam)
+                                 _partBeam=copy.deepcopy(self.partBeam))
 
-        wavefront.mesh = copy.deepcopy(self.mesh)
         wavefront.Rx  = self.Rx
         wavefront.Ry  = self.Ry
         wavefront.dRx  = self.dRx

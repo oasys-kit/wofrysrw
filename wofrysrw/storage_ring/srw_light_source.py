@@ -88,6 +88,7 @@ class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
         wfr.allocate(mesh.ne, mesh.nx, mesh.ny)
         wfr.mesh = mesh
         wfr.partBeam = self._electron_beam.to_SRWLPartBeam()
+        wfr.unitElFld = source_wavefront_parameters._electric_field_units
 
         srwl.CalcElecFieldSR(wfr,
                              0,
@@ -116,6 +117,7 @@ class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
             text_code += "wfr.allocate(mesh.ne, mesh.nx, mesh.ny)" + "\n"
             text_code += "wfr.mesh = mesh" + "\n"
             text_code += "wfr.partBeam = part_beam" + "\n"
+            text_code += "wfr.unitElFld = " + str(source_wavefront_parameters.unitElFld) + "\n"
             text_code += "\n"
             text_code += "initial_mesh = deepcopy(wfr.mesh)"
             text_code += "\n"

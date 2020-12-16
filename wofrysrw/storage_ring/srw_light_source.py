@@ -117,7 +117,7 @@ class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
             text_code += "wfr.allocate(mesh.ne, mesh.nx, mesh.ny)" + "\n"
             text_code += "wfr.mesh = mesh" + "\n"
             text_code += "wfr.partBeam = part_beam" + "\n"
-            text_code += "wfr.unitElFld = " + str(source_wavefront_parameters.unitElFld) + "\n"
+            text_code += "wfr.unitElFld = " + str(source_wavefront_parameters._electric_field_units) + "\n"
             text_code += "\n"
             text_code += "initial_mesh = deepcopy(wfr.mesh)"
             text_code += "\n"

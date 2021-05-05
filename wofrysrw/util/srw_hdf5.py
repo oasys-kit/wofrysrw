@@ -173,7 +173,7 @@ def load_hdf5_2_wfr(filename,filepath):
     :param filepath: the trying to access the file (wavefront entry name in the file, e.g., "wfr" or "wfr_end")
     :return:
     """
-    wdic = load_hdf5_2_dictionary(filename,filepath)
+    wdic = load_hdf5_2_dictionary(filename, filepath)
     wfr = _dictionary_to_wfr(wdic)
     return wfr
 

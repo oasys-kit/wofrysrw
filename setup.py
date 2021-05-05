@@ -8,7 +8,7 @@ except AttributeError:
     from setuptools import find_packages, setup
 
 NAME = 'wofrysrw'
-VERSION = '1.1.16'
+VERSION = '1.1.17'
 ISRELEASED = True
 
 DESCRIPTION = 'WOFRY for SRW library'

@@ -458,22 +458,20 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
 
     @classmethod
     def decorateSRWWF(cls, srwwf):
-        wavefront = SRWWavefront(_arEx=srwwf.arEx,
-                                 _arEy=srwwf.arEy,
-                                 _typeE=srwwf.typeE,
-                                 _eStart=srwwf.eStart,
-                                 _eFin=srwwf.eFin,
-                                 _ne=srwwf.ne,
-                                 _xStart=srwwf.xStart,
-                                 _xFin=srwwf.xFin,
-                                 _nx=srwwf.nx,
-                                 _yStart=srwwf.yStart,
-                                 _yFin=srwwf.yFin,
-                                 _ny=srwwf.ny,
-                                 _zStart=srwwf.zStart,
+        wavefront = SRWWavefront(_arEx=copy.deepcopy(srwwf.arEx),
+                                 _arEy=copy.deepcopy(srwwf.arEy),
+                                 _typeE=srwwf.numTypeElFld,
+                                 _eStart=srwwf.mesh.eStart,
+                                 _eFin=srwwf.mesh.eFin,
+                                 _ne=srwwf.mesh.ne,
+                                 _xStart=srwwf.mesh.xStart,
+                                 _xFin=srwwf.mesh.xFin,
+                                 _nx=srwwf.mesh.nx,
+                                 _yStart=srwwf.mesh.yStart,
+                                 _yFin=srwwf.mesh.yFin,
+                                 _ny=srwwf.mesh.ny,
+                                 _zStart=srwwf.mesh.zStart,
                                  _partBeam=copy.deepcopy(srwwf.partBeam))
-
-        wavefront.numTypeElFld=srwwf.numTypeElFld
 
         wavefront.xc  = srwwf.xc
         wavefront.yc = srwwf.yc

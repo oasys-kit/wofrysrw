@@ -12,6 +12,7 @@ class SRWPlaneMirror(SRWMirror):
                  grazing_angle                      = 0.003,
                  orientation_of_reflection_plane    = Orientation.UP,
                  invert_tangent_component           = False,
+                 add_acceptance_slit                = False,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0):
@@ -24,6 +25,7 @@ class SRWPlaneMirror(SRWMirror):
                          grazing_angle=grazing_angle,
                          orientation_of_reflection_plane=orientation_of_reflection_plane,
                          invert_tangent_component=invert_tangent_component,
+                         add_acceptance_slit=add_acceptance_slit,
                          height_profile_data_file=height_profile_data_file,
                          height_profile_data_file_dimension=height_profile_data_file_dimension,
                          height_amplification_coefficient=height_amplification_coefficient)

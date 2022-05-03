@@ -12,6 +12,7 @@ class SRWEllipticalMirror(SRWMirror):
                  grazing_angle                              = 0.003,
                  orientation_of_reflection_plane            = Orientation.UP,
                  invert_tangent_component                   = False,
+                 add_acceptance_slit                        = False,
                  distance_from_first_focus_to_mirror_center = 1.0,
                  distance_from_mirror_center_to_second_focus= 1.0,
                  height_profile_data_file                   = "mirror.dat",
@@ -29,6 +30,7 @@ class SRWEllipticalMirror(SRWMirror):
                          grazing_angle=grazing_angle,
                          orientation_of_reflection_plane=orientation_of_reflection_plane,
                          invert_tangent_component=invert_tangent_component,
+                         add_acceptance_slit=add_acceptance_slit,
                          height_profile_data_file=height_profile_data_file,
                          height_profile_data_file_dimension=height_profile_data_file_dimension,
                          height_amplification_coefficient=height_amplification_coefficient)

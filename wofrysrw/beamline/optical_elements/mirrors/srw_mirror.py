@@ -40,7 +40,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
                  grazing_angle                      = 0.003,
                  orientation_of_reflection_plane    = Orientation.UP,
                  invert_tangent_component           = False,
-                 add_acceptance_slit=False,
+                 add_acceptance_slit                = False,
                  height_profile_data_file           = "mirror.dat",
                  height_profile_data_file_dimension = 1,
                  height_amplification_coefficient   = 1.0):

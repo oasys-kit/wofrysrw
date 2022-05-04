@@ -89,6 +89,7 @@ class SRWBeamline(Beamline, SRWObject):
             text_code += "#srwl_uti_save_intens_ascii(arI, mesh0, <file_path>)" + "\n"
             text_code += "plotMesh0x = [1000*mesh0.xStart, 1000*mesh0.xFin, mesh0.nx]" + "\n"
             text_code += "plotMesh0y = [1000*mesh0.yStart, 1000*mesh0.yFin, mesh0.ny]" + "\n"
+            text_code += "uti_plot_init(backend=\"Qt5Agg\")" + "\n"
             text_code += "uti_plot2d1d (arI, plotMesh0x, plotMesh0y, labels=['Horizontal Position [mm]', 'Vertical Position [mm]', 'Intensity Before Propagation'])" + "\n"
 
         if self.get_beamline_elements_number() > 0:

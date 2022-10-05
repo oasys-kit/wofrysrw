@@ -79,7 +79,7 @@ class SRWGrating(Grating, SRWOpticalElementWithAcceptanceSlit):
         return numpy.arcsin(self.diffraction_order*wavelength*self.grooving_density_0 - numpy.cos(self.get_alpha_angle())) # Grating Output Angle
 
     def get_deflection_angle(self, photon_energy):
-        return self.get_alpha_angle() + self.get_beta_angle(photon_energy) + 1.57079632679 # Grating Deflection Angle
+        return self.get_alpha_angle() + self.get_beta_angle(photon_energy) + 0.5*numpy.pi # Grating Deflection Angle
 
     def get_output_orientation_vectors(self, photon_energy):
         deflection_angle = self.get_deflection_angle(photon_energy)

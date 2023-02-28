@@ -1,5 +1,5 @@
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, SimulationMethod, TreatInputOutput
-from syned.beamline.shape import Toroidal
+from syned.beamline.shape import Toroid
 
 from oasys_srw.srwlib import SRWLOptMirTor
 
@@ -19,7 +19,7 @@ class SRWToroidalMirror(SRWMirror):
                  height_amplification_coefficient   = 1.0):
 
         super().__init__(name=name,
-                         shape=Toroidal(min_radius=sagittal_radius, maj_radius=tangential_radius),
+                         shape=Toroid(min_radius=sagittal_radius, maj_radius=tangential_radius),
                          optical_element_displacement=optical_element_displacement,
                          tangential_size=tangential_size,
                          sagittal_size=sagittal_size,

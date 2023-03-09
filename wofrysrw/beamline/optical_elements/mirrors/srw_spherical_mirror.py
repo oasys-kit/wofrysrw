@@ -32,7 +32,7 @@ class SRWSphericalMirror(SRWMirror):
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         return SRWLOptMirSph(_size_tang=self.tangential_size,
                             _size_sag=self.sagittal_size,
-                            _r=self._surface_shape.get_radius(),
+                            _r=self.get_surface_shape().get_radius(),
                             _ap_shape=ap_shape,
                             _sim_meth=SimulationMethod.THICK,
                             _treat_in_out=TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER,
@@ -53,7 +53,7 @@ class SRWSphericalMirror(SRWMirror):
     def to_python_code_aux(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         text_code  = "SRWLOptMirSph(_size_tang=" + str(self.tangential_size) +"," + "\n"
         text_code += "                      _size_sag=" + str(self.sagittal_size) +"," + "\n"
-        text_code += "                      _r=" + str(self._surface_shape.get_radius()) +"," + "\n"
+        text_code += "                      _r=" + str(self.get_surface_shape().get_radius()) +"," + "\n"
         text_code += "                      _ap_shape='" + str(ap_shape) +"'," + "\n"
         text_code += "                      _sim_meth=" + str(SimulationMethod.THICK) +"," + "\n"
         text_code += "                      _treat_in_out=" + str(TreatInputOutput.WAVEFRONT_INPUT_CENTER_OUTPUT_CENTER) +"," + "\n"

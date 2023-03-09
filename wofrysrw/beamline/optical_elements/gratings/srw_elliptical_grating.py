@@ -47,7 +47,7 @@ class SRWEllipticalGrating(SRWGrating):
                          grooving_density_4=grooving_density_4)
 
     def get_p_q(self):
-        return self._surface_shape.get_p_q(self.grazing_angle)
+        return self.get_surface_shape().get_p_q(self.grazing_angle)
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         p, q = self.get_p_q()

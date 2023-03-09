@@ -11,16 +11,16 @@ class SRWSlit(Slit, SRWOpticalElement):
         SRWOpticalElement.__init__(self, optical_element_displacement)
 
     def toSRWLOpt(self):
-        boundaries = self._boundary_shape.get_boundaries()
+        boundaries = self.get_boundary_shape().get_boundaries()
 
         Dx = abs(boundaries[1]-boundaries[0])
         Dy = abs(boundaries[3]-boundaries[2])
         x = 0.5*(boundaries[1]+boundaries[0])
         y = 0.5*(boundaries[3]+boundaries[2])
 
-        if isinstance(self._boundary_shape, Rectangle):
+        if isinstance(self.get_boundary_shape(), Rectangle):
             shape = 'r'
-        elif isinstance(self._boundary_shape, Ellipse):
+        elif isinstance(self.get_boundary_shape(), Ellipse):
             if Dx != Dy:
                 raise ValueError("SRW doesn't support elliptic apertures")
 
@@ -60,16 +60,16 @@ class SRWSlit(Slit, SRWOpticalElement):
     def to_python_code(self, data=None):
         oe_name = data[0]
 
-        boundaries = self._boundary_shape.get_boundaries()
+        boundaries = self.get_boundary_shape().get_boundaries()
 
         Dx = abs(boundaries[1]-boundaries[0])
         Dy = abs(boundaries[3]-boundaries[2])
         x = 0.5*(boundaries[1]+boundaries[0])
         y = 0.5*(boundaries[3]+boundaries[2])
 
-        if isinstance(self._boundary_shape, Rectangle):
+        if isinstance(self.get_boundary_shape(), Rectangle):
             shape = 'r'
-        elif isinstance(self._boundary_shape, Ellipse):
+        elif isinstance(self.get_boundary_shape(), Ellipse):
             if Dx != Dy:
                 raise ValueError("SRW doesn't support elliptic apertures")
 

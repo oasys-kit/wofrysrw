@@ -31,7 +31,7 @@ class SRWToroidalMirror(SRWMirror):
                          height_amplification_coefficient=height_amplification_coefficient)
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
-        rs, rt = self._surface_shape.get_radii()
+        rs, rt = self.get_surface_shape().get_radii()
 
         return SRWLOptMirTor(_size_tang=self.tangential_size,
                             _size_sag=self.sagittal_size,
@@ -52,10 +52,10 @@ class SRWToroidalMirror(SRWMirror):
         if not isinstance(srwlopt, SRWLOptMirTor):
             raise ValueError("SRW object is not a SRWLOptMirEl object")
 
-        super().fromSRWLOpt(srwlopt, Toroidal(min_radius=srwlopt.radSag, maj_radius=srwlopt.radTan))
+        super().fromSRWLOpt(srwlopt, Toroid(min_radius=srwlopt.radSag, maj_radius=srwlopt.radTan))
 
     def to_python_code_aux(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
-        rs, rt = self._surface_shape.get_radii()
+        rs, rt = self.get_surface_shape().get_radii()
 
         text_code  = "SRWLOptMirTor(_size_tang=" + str(self.tangential_size) +"," + "\n"
         text_code += "                      _size_sag=" + str(self.sagittal_size) +"," + "\n"

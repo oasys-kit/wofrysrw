@@ -473,8 +473,13 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
                                  _zStart=srwwf.mesh.zStart,
                                  _partBeam=copy.deepcopy(srwwf.partBeam))
 
+        wavefront.Rx  = srwwf.Rx
+        wavefront.Ry  = srwwf.Ry
+        wavefront.dRx = srwwf.dRx
+        wavefront.dRy = srwwf.dRy
         wavefront.xc  = srwwf.xc
         wavefront.yc = srwwf.yc
+        wavefront.avgPhotEn = srwwf.avgPhotEn
         wavefront.presCA = srwwf.presCA
         wavefront.presFT  = srwwf.presFT
         wavefront.unitElFld  = srwwf.unitElFld

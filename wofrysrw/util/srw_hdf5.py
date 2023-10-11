@@ -93,8 +93,8 @@ def save_wfr_2_hdf5(wfr,filename,subgroupname="wfr",intensity=False,phase=False,
         aryy = aryy.reshape((wfr.mesh.ny, wfr.mesh.nx))#.T
 
         _dump_arr_2_hdf5(arxx-aryy, "phase/wfr_phase", filename, subgroupname) # difference
-        _dump_arr_2_hdf5(arxx, "phase/wfr_phase_s", filename, subgroupname)
-        _dump_arr_2_hdf5(aryy, "phase/wfr_phase_p", filename, subgroupname)
+        _dump_arr_2_hdf5(arxx,      "phase/wfr_phase_s", filename, subgroupname)
+        _dump_arr_2_hdf5(aryy,      "phase/wfr_phase_p", filename, subgroupname)
 
     if (_complex_amplitude) or (intensity):
         x_polarization = _SRWArrayToNumpy(wfr.arEx, wfr.mesh.nx, wfr.mesh.ny, wfr.mesh.ne)   # sigma
@@ -114,33 +114,61 @@ def save_wfr_2_hdf5(wfr,filename,subgroupname="wfr",intensity=False,phase=False,
             intens_s = numpy.abs(complex_amplitude_s) ** 2
             intens = intens_s + intens_p
 
-            _dump_arr_2_hdf5(intens.T,"intensity/wfr_intensity",filename, subgroupname)
+            _dump_arr_2_hdf5(intens.T, "intensity/wfr_intensity", filename, subgroupname)
             if intensity == 2:
-                _dump_arr_2_hdf5(intens_s.T,"intensity/wfr_intensity_s",filename, subgroupname)
-                _dump_arr_2_hdf5(intens_p.T,"intensity/wfr_intensity_p",filename, subgroupname)
+                _dump_arr_2_hdf5(intens_s.T, "intensity/wfr_intensity_s", filename, subgroupname)
+                _dump_arr_2_hdf5(intens_p.T, "intensity/wfr_intensity_p", filename, subgroupname)
 
     f = h5py.File(filename, 'a')
     f1 = f[subgroupname]
+
+    f2 = f1.create_group("partBeam")
+    f2.attrs['NX_class'] = 'NXdata'
+    f2["Iavg"]           = wfr.partBeam.Iavg
+    f2["nPart"]          = wfr.partBeam.nPart
+    f2["particle_x"]     = wfr.partBeam.partStatMom1.x
+    f2["particle_y"]     = wfr.partBeam.partStatMom1.y
+    f2["particle_z"]     = wfr.partBeam.partStatMom1.z
+    f2["particle_xp"]    = wfr.partBeam.partStatMom1.xp
+    f2["particle_yp"]    = wfr.partBeam.partStatMom1.yp
+    f2["particle_gamma"] = wfr.partBeam.partStatMom1.gamma
+    f2["particle_relE0"] = wfr.partBeam.partStatMom1.relE0
+    f2["particle_nq"]    = wfr.partBeam.partStatMom1.nq
+    f2.create_dataset('arStatMom2', data=numpy.array(wfr.partBeam.arStatMom2))
 
     # points to the default data to be plotted
     f1.attrs['NX_class'] = 'NXentry'
     f1.attrs['default']  = 'intensity'
 
-    #f1["wfr_method"] = "SRW"
-    #f1["wfr_dimension"] = 2
-    f1["wfr_photon_energy"] = float(wfr.mesh.eStart)
-    f1["wfr_zStart"] = wfr.mesh.zStart
-    f1["wfr_Rx_dRx"] =  numpy.array([wfr.Rx,wfr.dRx])
-    f1["wfr_Ry_dRy"] =  numpy.array([wfr.Ry,wfr.dRy])
-    f1["wfr_mesh_X"] =  numpy.array([wfr.mesh.xStart,wfr.mesh.xFin,wfr.mesh.nx])
-    f1["wfr_mesh_Y"] =  numpy.array([wfr.mesh.yStart,wfr.mesh.yFin,wfr.mesh.ny])
+    f1["wfr_typeE"]         = wfr.numTypeElFld
+    f1["wfr_xc"]            = wfr.xc
+    f1["wfr_yc"]            = wfr.yc
+    f1["wfr_avgPhotEn"]     = wfr.avgPhotEn
+    f1["wfr_presCA"]        = wfr.presCA
+    f1["wfr_presFT"]        = wfr.presFT
+    f1["wfr_unitElFld"]     = wfr.unitElFld
+    f1["wfr_unitElFldAng"]  = wfr.unitElFldAng
+
+    f1["wfr_Rx_dRx"] = numpy.array([wfr.Rx, wfr.dRx])
+    f1["wfr_Ry_dRy"] = numpy.array([wfr.Ry, wfr.dRy])
+
+    f1["wfr_photon_energy"] = wfr.mesh.eStart
+    f1["wfr_zStart"]        = wfr.mesh.zStart
+    f1["wfr_mesh_X"]        = numpy.array([wfr.mesh.xStart, wfr.mesh.xFin, wfr.mesh.nx])
+    f1["wfr_mesh_Y"]        = numpy.array([wfr.mesh.yStart, wfr.mesh.yFin, wfr.mesh.ny])
+    f1["wfr_mesh_E"]        = numpy.array([wfr.mesh.eStart, wfr.mesh.eFin, wfr.mesh.ne])
+
+    _dump_arr_2_hdf5(numpy.array(wfr.arElecPropMatr), "wfr_arElecPropMatr", filename, subgroupname)
+    _dump_arr_2_hdf5(numpy.array(wfr.arMomX),         "wfr_arMomX",         filename, subgroupname)
+    _dump_arr_2_hdf5(numpy.array(wfr.arMomY),         "wfr_arMomY",         filename, subgroupname)
+    _dump_arr_2_hdf5(numpy.array(wfr.arWfrAuxData),   "wfr_arWfrAuxData",   filename, subgroupname)
+
 
     # Add NX plot attribites for automatic plot with silx view
-    myflags = [intensity,phase]
-    mylabels = ['intensity','phase']
+    myflags = [intensity, phase]
+    mylabels = ['intensity', 'phase']
     for i,label in enumerate(mylabels):
         if myflags[i]:
-
             f2 = f1[mylabels[i]]
             f2.attrs['NX_class'] = 'NXdata'
             f2.attrs['signal'] = 'wfr_%s'%(mylabels[i])
@@ -332,8 +360,6 @@ def SRWdat_2_h5(_file_path,_num_type='f'):
     f1["wfr_mesh_X"] = numpy.array([wfr.mesh.xStart, wfr.mesh.xFin, wfr.mesh.nx])
     f1["wfr_mesh_Y"] = numpy.array([wfr.mesh.yStart, wfr.mesh.yFin, wfr.mesh.ny])
 
-
-
     f2 = f1["converted_array"]
     f2.attrs['NX_class'] = 'NXdata'
     f2.attrs['signal'] = 'array'
@@ -357,28 +383,51 @@ def SRWdat_2_h5(_file_path,_num_type='f'):
     f.close()
 
 
-def load_hdf5_2_dictionary(filename,filepath):
+def load_hdf5_2_dictionary(filename, filepath):
 
     try:
         f = h5py.File(filename, 'r')
-        # mesh_X = f[filepath+"/wfr_mesh_X"].value
-        # mesh_Y = f[filepath+"/wfr_mesh_Y"].value
-        # complex_amplitude_s = f[filepath+"/wfr_complex_amplitude_s"].value.T
-        # complex_amplitude_p = f[filepath+"/wfr_complex_amplitude_p"].value.T
-        # photon_energy = f[filepath+"/wfr_photon_energy"].value
 
         out =  {
-            "wfr_complex_amplitude_s":f[filepath+"/wfr_complex_amplitude_s"].value.T,
-            "wfr_complex_amplitude_p":f[filepath+"/wfr_complex_amplitude_p"].value.T,
-            "wfr_photon_energy":f[filepath+"/wfr_photon_energy"].value,
-            "wfr_zStart":f[filepath+"/wfr_zStart"].value,
-            "wfr_mesh_X":f[filepath+"/wfr_mesh_X"].value,
-            "wfr_mesh_Y":f[filepath+"/wfr_mesh_Y"].value,
-            "wfr_Rx_dRx":f[filepath+"/wfr_Rx_dRx"].value,
-            "wfr_Ry_dRy":f[filepath+"/wfr_Ry_dRy"].value,
+            "wfr_complex_amplitude_s": f[filepath+"/wfr_complex_amplitude_s"][()].T,
+            "wfr_complex_amplitude_p": f[filepath+"/wfr_complex_amplitude_p"][()].T,
+            "wfr_photon_energy":       f[filepath+"/wfr_photon_energy"][()],
+            "wfr_zStart":              f[filepath+"/wfr_zStart"][()],
+            "wfr_mesh_X":              f[filepath+"/wfr_mesh_X"][()],
+            "wfr_mesh_Y":              f[filepath+"/wfr_mesh_Y"][()],
+            "wfr_mesh_E":              f[filepath+"/wfr_mesh_E"][()],
+            "wfr_Rx_dRx":              f[filepath+"/wfr_Rx_dRx"][()],
+            "wfr_Ry_dRy":              f[filepath+"/wfr_Ry_dRy"][()],
+
+            "wfr_typeE" :        f[filepath+"/wfr_typeE"][()],
+            "wfr_xc" :           f[filepath+"/wfr_xc"][()],
+            "wfr_yc" :           f[filepath+"/wfr_yc"][()],
+            "wfr_avgPhotEn" :    f[filepath+"/wfr_avgPhotEn"][()],
+            "wfr_presCA" :       f[filepath+"/wfr_presCA"][()],
+            "wfr_presFT" :       f[filepath+"/wfr_presFT"][()],
+            "wfr_unitElFld" :    f[filepath+"/wfr_unitElFld"][()],
+            "wfr_unitElFldAng" : f[filepath+"/wfr_unitElFldAng"][()],
+
+            "wfr_partBeam_Iavg":           f[filepath+"/partBeam/Iavg"][()],
+            "wfr_partBeam_nPart":          f[filepath + "/partBeam/nPart"][()],
+            "wfr_partBeam_particle_x":     f[filepath + "/partBeam/particle_x"][()],
+            "wfr_partBeam_particle_y":     f[filepath + "/partBeam/particle_y"][()],
+            "wfr_partBeam_particle_z":     f[filepath + "/partBeam/particle_z"][()],
+            "wfr_partBeam_particle_xp":    f[filepath + "/partBeam/particle_xp"][()],
+            "wfr_partBeam_particle_yp":    f[filepath + "/partBeam/particle_yp"][()],
+            "wfr_partBeam_particle_gamma": f[filepath + "/partBeam/particle_gamma"][()],
+            "wfr_partBeam_particle_relE0": f[filepath + "/partBeam/particle_relE0"][()],
+            "wfr_partBeam_particle_nq":    f[filepath + "/partBeam/particle_nq"][()],
+            "wfr_partBeam_arStatMom2":     f[filepath + "/partBeam/arStatMom2"][()],
+
+            "wfr_arElecPropMatr" : f[filepath+"/wfr_arElecPropMatr"][()],
+            "wfr_arMomX" :         f[filepath+"/wfr_arMomX"][()],
+            "wfr_arMomY" :         f[filepath+"/wfr_arMomY"][()],
+            "wfr_arWfrAuxData" :   f[filepath+"/wfr_arWfrAuxData"][()],
         }
 
         f.close()
+
         return out
     except:
         raise Exception("Failed to load SRW wavefront from h5 file: "+filename)
@@ -457,6 +506,7 @@ def _dictionary_to_wfr(wdic):
     energy = wdic["wfr_photon_energy"]
     X = wdic["wfr_mesh_X"]
     Y = wdic["wfr_mesh_Y"]
+    E = wdic["wfr_mesh_E"]
     RX = wdic["wfr_Rx_dRx"]
     RY = wdic["wfr_Ry_dRy"]
     Z = wdic["wfr_zStart"]
@@ -478,12 +528,24 @@ def _dictionary_to_wfr(wdic):
     horizontal_field = _numpyArrayToSRWArray(w_s)
     vertical_field = _numpyArrayToSRWArray(w_p)
 
+    partBeam = SRWLPartBeam(_Iavg=wdic["wfr_partBeam_Iavg"],
+                            _nPart=wdic["wfr_partBeam_nPart"],
+                            _partStatMom1=SRWLParticle(_x=wdic["wfr_partBeam_particle_x"],
+                                                       _y=wdic["wfr_partBeam_particle_y"],
+                                                       _z=wdic["wfr_partBeam_particle_z"],
+                                                       _xp=wdic["wfr_partBeam_particle_xp"],
+                                                       _yp=wdic["wfr_partBeam_particle_yp"],
+                                                       _gamma=wdic["wfr_partBeam_particle_gamma"],
+                                                       _relE0=wdic["wfr_partBeam_particle_relE0"],
+                                                       _nq=wdic["wfr_partBeam_particle_nq"]),
+                            _arStatMom2=array('d', wdic["wfr_partBeam_arStatMom2"]))
+
     srw_wavefront = SRWLWfr(_arEx=horizontal_field,
                             _arEy=vertical_field,
-                            _typeE='f',
-                            _eStart=energy,
-                            _eFin=energy,
-                            _ne=1,
+                            _typeE=wdic["wfr_typeE"],
+                            _eStart=E[0],
+                            _eFin=E[1],
+                            _ne=int(E[2]),
                             _xStart=X[0],
                             _xFin=X[1],
                             _nx=int(X[2]),
@@ -491,14 +553,23 @@ def _dictionary_to_wfr(wdic):
                             _yFin=Y[1],
                             _ny=int(Y[2]),
                             _zStart=Z,
-                            _partBeam=None)
+                            _partBeam=partBeam)
 
-    # srw_wavefront.nx = X[2]
-    # srw_wavefront.ny = Y[2]
+    srw_wavefront.xc = wdic["wfr_xc"]
+    srw_wavefront.yc = wdic["wfr_yc"]
+    srw_wavefront.avgPhotEn = wdic["wfr_avgPhotEn"]
+    srw_wavefront.presCA = wdic["wfr_presCA"]
+    srw_wavefront.presFT = wdic["wfr_presFT"]
+    srw_wavefront.unitElFld = wdic["wfr_unitElFld"]
+    srw_wavefront.unitElFldAng = wdic["wfr_unitElFldAng"]
 
     srw_wavefront.Rx = RX[0]
     srw_wavefront.Ry = RY[0]
     srw_wavefront.dRx = RX[1]
     srw_wavefront.dRy = RY[1]
 
+    srw_wavefront.arElecPropMatr = array('d', wdic["wfr_arElecPropMatr"])
+    srw_wavefront.arMomX         = array('d', wdic["wfr_arMomX"])
+    srw_wavefront.arMomY         = array('d', wdic["wfr_arMomY"])
+    srw_wavefront.arWfrAuxData   = array('d', wdic["wfr_arWfrAuxData"])
     return srw_wavefront

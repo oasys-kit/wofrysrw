@@ -251,6 +251,27 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
 
         text_code += "\n"
 
+        if hasattr(self, "reflectivity_data"):
+            if type(self.reflectivity_data)==float:
+                text_code += f"reflectivity_data = {str(self.reflectivity_data)}" + "\n\n"
+            else:
+                text_code += "try:    from oasys_srw.srwlib import array as srw_array\n"
+                text_code += "except: from srwlib import array as srw_array\n\n"
+                text_code += f"reflectivity_data = srw_array('d', {str(list(self.reflectivity_data))})" + "\n\n"
+
+            text_code += oe_name + ".set_reflect(_refl=reflectivity_data,"  + "\n"
+            text_code += f"                _n_ph_en={str(self.energies_number)},"  + "\n"
+            text_code += f"                _n_ang={str(self.angles_number)},"  + "\n"
+            text_code += f"                _n_comp={str(self.components_number)},"  + "\n"
+            text_code += f"                _ph_en_start={str(self.energy_start)},"  + "\n"
+            text_code += f"                _ph_en_fin={str(self.energy_end)},"  + "\n"
+            text_code += f"                _ph_en_scale_type='{self.energy_scale_type}',"  + "\n"
+            text_code += f"                _ang_start={str(self.angle_start)},"  + "\n"
+            text_code += f"                _ang_fin={str(self.angle_end)},"  + "\n"
+            text_code += f"                _ang_scale_type='{self.angle_scale_type}')"  + "\n"
+
+            text_code += "\n"
+
         if not self.height_profile_data_file is None:
             text_code += "\n"
 

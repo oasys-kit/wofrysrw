@@ -554,36 +554,48 @@ class SRWWavefront(SRWLWfr, WavefrontDecorator):
         return self.get_2D_intensity_distribution(type='d', flux_calculation_parameters=flux_calculation_parameters)
 
     def get_flux(self, multi_electron=True, polarization_component_to_be_extracted=PolarizationComponent.TOTAL):
+        on_axis = False
+
+        if (self.mesh.nx == 1 and self.mesh.ny == 1): # on-axis calculation
+            on_axis = True
+            if multi_electron:                     multi_electron = False
+            if self.mesh.xStart != self.mesh.xFin: self.mesh.xFin = self.mesh.xStart
+            if self.mesh.yStart != self.mesh.yFin: self.mesh.yFin = self.mesh.yStart
+
+        hc = self.mesh.xStart + 0.5*(self.mesh.xFin - self.mesh.xStart)
+        vc = self.mesh.yStart + 0.5*(self.mesh.yFin - self.mesh.yStart)
+
         if multi_electron:
-            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_INTENSITY,
+            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.MULTI_ELECTRON_FLUX,
                                                                   type_of_dependence = TypeOfDependence.VS_E,
                                                                   polarization_component_to_be_extracted=polarization_component_to_be_extracted,
                                                                   fixed_input_photon_energy_or_time=self.mesh.eStart,
-                                                                  fixed_horizontal_position=self.mesh.xStart,
-                                                                  fixed_vertical_position=self.mesh.yStart)
+                                                                  fixed_horizontal_position=hc,
+                                                                  fixed_vertical_position=vc)
         else:
-            flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
-                                                                  type_of_dependence = TypeOfDependence.VS_E,
-                                                                  polarization_component_to_be_extracted=polarization_component_to_be_extracted,
-                                                                  fixed_input_photon_energy_or_time=self.mesh.eStart,
-                                                                  fixed_horizontal_position=self.mesh.xStart,
-                                                                  fixed_vertical_position=self.mesh.yStart)
+            if on_axis:
+                flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_INTENSITY,
+                                                                      type_of_dependence = TypeOfDependence.VS_E,
+                                                                      polarization_component_to_be_extracted=polarization_component_to_be_extracted,
+                                                                      fixed_input_photon_energy_or_time=self.mesh.eStart,
+                                                                      fixed_horizontal_position=hc,
+                                                                      fixed_vertical_position=vc)
+            else:
+                flux_calculation_parameters=FluxCalculationParameters(calculation_type   = CalculationType.SINGLE_ELECTRON_FLUX,
+                                                                      type_of_dependence = TypeOfDependence.VS_E,
+                                                                      polarization_component_to_be_extracted=polarization_component_to_be_extracted,
+                                                                      fixed_input_photon_energy_or_time=self.mesh.eStart,
+                                                                      fixed_horizontal_position=hc,
+                                                                      fixed_vertical_position=vc)
 
         output_array = srw_array('f', [0]*self.mesh.ne)
 
         SRWWavefront.get_intensity_from_electric_field(output_array, self, flux_calculation_parameters)
-        
-        data = numpy.ndarray(buffer=output_array, shape=self.mesh.ne, dtype=output_array.typecode)
 
-        energy_array=numpy.linspace(self.mesh.eStart,
-                                    self.mesh.eFin,
-                                    self.mesh.ne)
-        spectral_flux_array = numpy.zeros(energy_array.size)
+        energy_array        = numpy.linspace(self.mesh.eStart, self.mesh.eFin, self.mesh.ne)
+        spectral_flux_array = numpy.ndarray(buffer=output_array, shape=self.mesh.ne, dtype=output_array.typecode)
 
-        for ie in range(energy_array.size):
-            spectral_flux_array[ie] = data[ie]
-
-        return (energy_array, spectral_flux_array)
+        return energy_array, spectral_flux_array
 
     def get_2D_intensity_distribution(self, type='f', flux_calculation_parameters=FluxCalculationParameters()):
         mesh = copy.deepcopy(self.mesh)

@@ -9,8 +9,8 @@ def numpyComplexArrayToSRWArray(numpy_array, type='f'):
     """
     elements_size = numpy_array.size
 
-    r_horizontal_field = numpy_array[:, :].real.transpose().flatten().astype(numpy.float)
-    i_horizontal_field = numpy_array[:, :].imag.transpose().flatten().astype(numpy.float)
+    r_horizontal_field = numpy_array[:, :].real.transpose().flatten().astype(numpy.float32)
+    i_horizontal_field = numpy_array[:, :].imag.transpose().flatten().astype(numpy.float32)
 
     tmp = numpy.zeros(elements_size * 2, dtype=numpy.float32)
     for i in range(elements_size):
@@ -27,8 +27,8 @@ def numpyArraysToSRWArray(numpy_array_re, numpy_array_im, type='f'):
     """
     elements_size = numpy_array_re.size
 
-    r_horizontal_field = numpy_array_re[:, :].transpose().flatten().astype(numpy.float)
-    i_horizontal_field = numpy_array_im[:, :].transpose().flatten().astype(numpy.float)
+    r_horizontal_field = numpy_array_re[:, :].transpose().flatten().astype(numpy.float32)
+    i_horizontal_field = numpy_array_im[:, :].transpose().flatten().astype(numpy.float32)
 
     tmp = numpy.zeros(elements_size * 2, dtype=numpy.float32)
     for i in range(elements_size):
@@ -53,8 +53,8 @@ def SRWArrayToNumpyComplexArray(srw_array, dim_x, dim_y, number_energies, polari
     :param number_energies: Size of energy dimension
     :return: 4D numpy array: [energy, horizontal, vertical, polarisation={0:horizontal, 1: vertical}]
     """
-    re = numpy.array(srw_array[::2], dtype=numpy.float)
-    im = numpy.array(srw_array[1::2], dtype=numpy.float)
+    re = numpy.array(srw_array[::2], dtype=numpy.float32)
+    im = numpy.array(srw_array[1::2], dtype=numpy.float32)
 
     return __reshape(re + 1j * im, dim_x, dim_y, number_energies, polarized)
 
@@ -67,8 +67,8 @@ def SRWArrayToNumpyArrays(srw_array, dim_x, dim_y, number_energies, polarized=Tr
     :param number_energies: Size of energy dimension
     :return: 4D numpy array: [energy, horizontal, vertical, polarisation={0:horizontal, 1: vertical}]
     """
-    re = numpy.array(srw_array[::2], dtype=numpy.float)
-    im = numpy.array(srw_array[1::2], dtype=numpy.float)
+    re = numpy.array(srw_array[::2], dtype=numpy.float32)
+    im = numpy.array(srw_array[1::2], dtype=numpy.float32)
 
     return __reshape(re, dim_x, dim_y, number_energies, polarized), \
            __reshape(im, dim_x, dim_y, number_energies, polarized)

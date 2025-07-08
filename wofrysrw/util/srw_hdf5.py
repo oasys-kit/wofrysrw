@@ -443,8 +443,8 @@ def _numpyArrayToSRWArray(numpy_array):
     """
     elements_size = numpy_array.size
 
-    r_horizontal_field = numpy_array[:, :].real.transpose().flatten().astype(numpy.float)
-    i_horizontal_field = numpy_array[:, :].imag.transpose().flatten().astype(numpy.float)
+    r_horizontal_field = numpy_array[:, :].real.transpose().flatten().astype(numpy.float32)
+    i_horizontal_field = numpy_array[:, :].imag.transpose().flatten().astype(numpy.float32)
 
     tmp = numpy.zeros(elements_size * 2, dtype=numpy.float32)
     for i in range(elements_size):
@@ -462,8 +462,8 @@ def _SRWArrayToNumpy(srw_array, dim_x, dim_y, number_energies):
     :param number_energies: Size of energy dimension
     :return: 4D numpy array: [energy, horizontal, vertical, polarisation={0:horizontal, 1: vertical}]
     """
-    re = numpy.array(srw_array[::2],  dtype=numpy.float)
-    im = numpy.array(srw_array[1::2], dtype=numpy.float)
+    re = numpy.array(srw_array[::2],  dtype=numpy.float32)
+    im = numpy.array(srw_array[1::2], dtype=numpy.float32)
 
     e = re + 1j * im
     e = e.reshape((dim_y,

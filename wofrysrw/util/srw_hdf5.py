@@ -32,7 +32,7 @@ __date__ = "27/05/2018"
 
 
 
-from oasys_srw.srwlib import *
+from wofrysrw.srw import *
 import numpy
 import h5py
 

@@ -2,7 +2,7 @@ from syned.beamline.shape import Circle
 
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 
-from oasys_srw.srwlib import *
+from wofrysrw.srw import *
 
 class SRWZonePlate(SRWOpticalElement):
     def __init__(self,

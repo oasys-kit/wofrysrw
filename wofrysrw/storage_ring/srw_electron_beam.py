@@ -1,6 +1,6 @@
 import numpy
 
-from oasys_srw.srwlib import SRWLPartBeam
+from wofrysrw.srw import SRWLPartBeam
 
 from syned.storage_ring.electron_beam import ElectronBeam
 

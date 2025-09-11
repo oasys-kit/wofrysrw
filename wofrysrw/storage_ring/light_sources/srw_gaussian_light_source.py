@@ -2,7 +2,7 @@ from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontParameters, S
 from wofrysrw.storage_ring.srw_light_source import SRWLightSource
 from wofrysrw.storage_ring.srw_electron_beam import SRWElectronBeam
 
-from oasys_srw.srwlib import *
+from wofrysrw.srw import *
 
 '''
 x = 0.0, #Transverse Coordinates of Gaussian Beam Center at Waist [m]

@@ -3,7 +3,7 @@ import numpy
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 from wofrysrw.util.srw_util import numpyArraysToSRWArray, SRWArrayToNumpyArrays
 
-from oasys_srw.srwlib import SRWLOptT
+from wofrysrw.srw import SRWLOptT
 
 class SRWTransmission(SRWOpticalElement):
     def __init__(self,

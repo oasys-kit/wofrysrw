@@ -7,8 +7,8 @@ from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalEle
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 from wofrysrw.beamline.optical_elements.absorbers.srw_aperture import SRWAperture
 
-from oasys_srw.srwlib import SRWLOptC, SRWLOptMir, SRWLOptG
-from oasys_srw.srwlib import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
+from wofrysrw.srw import SRWLOptC, SRWLOptMir, SRWLOptG
+from wofrysrw.srw import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
 
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, TreatInputOutput, ApertureShape, SimulationMethod
 

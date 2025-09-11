@@ -1,0 +1,12 @@
+try:
+    try:
+        from srwpy.srwlib import *   # OASYS 2.0 - SRW 4
+        from srwpy.uti_plot import *
+    except:
+        from srwlib import *     # SRW 3
+        from uti_plot import *
+except:
+    try:
+        from wofrysrw.srw import *   # OASYS 1.X
+        from oasys_srw.uti_plot import *
+    except: raise ImportError("SRW is not available")

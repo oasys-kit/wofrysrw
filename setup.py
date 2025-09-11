@@ -8,7 +8,7 @@ except AttributeError:
     from setuptools import find_packages, setup
 
 NAME = 'wofrysrw'
-VERSION = '1.1.29'
+VERSION = '1.1.30'
 ISRELEASED = True
 
 DESCRIPTION = 'WOFRY for SRW library'
@@ -42,11 +42,7 @@ SETUP_REQUIRES = (
 
 INSTALL_REQUIRES = (
     'setuptools',
-    'numpy',
-    'scipy',
-    'syned>=1.0.26',
-    'wofry>=1.0.31',
-    'oasys-srwpy>=1.0.5'
+    'wofry>=1.0.31'
 )
 
 PACKAGES = [
@@ -56,27 +52,22 @@ PACKAGES = [
 PACKAGE_DATA = {}
 
 if __name__ == '__main__':
-    try:
-        import PyMca5, PyQt4
-
-        raise NotImplementedError("This version of wofrysrw doesn't work with Oasys1 beta.\nPlease install OASYS1 final release: https://www.aps.anl.gov/Science/Scientific-Software/OASYS")
-    except:
-        setup(
-              name = NAME,
-              version = VERSION,
-              description = DESCRIPTION,
-              long_description = LONG_DESCRIPTION,
-              author = AUTHOR,
-              author_email = AUTHOR_EMAIL,
-              url = URL,
-              download_url = DOWNLOAD_URL,
-              license = LICENSE,
-              keywords = KEYWORDS,
-              classifiers = CLASSIFIERS,
-              packages = PACKAGES,
-              package_data = PACKAGE_DATA,
-              setup_requires = SETUP_REQUIRES,
-              install_requires = INSTALL_REQUIRES,
-              include_package_data = True,
-              zip_safe = False,
-              )
+    setup(
+          name = NAME,
+          version = VERSION,
+          description = DESCRIPTION,
+          long_description = LONG_DESCRIPTION,
+          author = AUTHOR,
+          author_email = AUTHOR_EMAIL,
+          url = URL,
+          download_url = DOWNLOAD_URL,
+          license = LICENSE,
+          keywords = KEYWORDS,
+          classifiers = CLASSIFIERS,
+          packages = PACKAGES,
+          package_data = PACKAGE_DATA,
+          setup_requires = SETUP_REQUIRES,
+          install_requires = INSTALL_REQUIRES,
+          include_package_data = True,
+          zip_safe = False,
+        )

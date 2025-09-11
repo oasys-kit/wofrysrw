@@ -1,7 +1,17 @@
 import numpy
+import os, h5py
 
 from scipy.interpolate import RectBivariateSpline
-from oasys.util.oasys_util import read_surface_file
+
+def read_surface_file(file_name):
+    if not os.path.isfile(file_name): raise ValueError("File " + file_name + " not existing")
+
+    file = h5py.File(file_name, 'r')
+    xx = file["surface_file/X"][()]
+    yy = file["surface_file/Y"][()]
+    zz = file["surface_file/Z"][()]
+
+    return xx, yy, zz
 
 def add_thickness_error_to_thickness_profile(thickness_profile,
                                              thickness_error_profile_file,

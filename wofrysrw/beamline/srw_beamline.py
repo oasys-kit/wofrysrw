@@ -6,8 +6,6 @@ from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalEle
 from wofrysrw.storage_ring.srw_light_source import SRWLightSource
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 
-from oasys_srw.srwlib import *
-
 class Where:
     DRIFT_BEFORE = "before"
     DRIFT_AFTER = "after"
@@ -65,10 +63,13 @@ class SRWBeamline(Beamline, SRWObject):
         wavefront = data[0]
         is_multi_electron = data[1] == True
 
-        text_code  =  "try:\n"
-        text_code  += "    from oasys_srw.srwlib import *\n    from oasys_srw.uti_plot import *\n"
-        text_code  += "except:\n"
-        text_code  += "    from srwlib import *\n    from uti_plot import *\n\nimport numpy\n\n"
+        #text_code  =  "try:\n"
+        #text_code  += "    from wofrysrw.srw import *\n    from oasys_srw.uti_plot import *\n"
+        #text_code  += "except:\n"
+        #text_code  += "    from srwlib import *\n    from uti_plot import *\n\nimport numpy\n\n"
+
+        text_code  = "from wofrysrw.srw import *\n"
+        text_code += "import numpy\n\n"
 
         if is_multi_electron: text_code += "#if not srwl_uti_proc_is_master(): exit()\n"
         else: text_code += "if not srwl_uti_proc_is_master(): exit()\n"

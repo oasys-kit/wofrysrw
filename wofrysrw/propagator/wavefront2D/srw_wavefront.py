@@ -1,4 +1,4 @@
-from oasys_srw.srwlib import srwl, SRWLWfr, SRWLRadMesh, SRWLStokes, array as srw_array
+from wofrysrw.srw import srwl, SRWLWfr, SRWLRadMesh, SRWLStokes, array as srw_array
 
 import copy
 import numpy

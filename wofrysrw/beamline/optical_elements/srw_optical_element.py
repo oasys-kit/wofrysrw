@@ -7,7 +7,7 @@ from wofry.propagator.propagator import PropagationParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 from wofrysrw.srw_object import SRWObject
 
-from oasys_srw.srwlib import SRWLOptC, srwl, SRWLOptShift, SRWLOptAng
+from wofrysrw.srw import SRWLOptC, srwl, SRWLOptShift, SRWLOptAng
 
 class Orientation:
     UP = 0
@@ -191,7 +191,7 @@ class SRWOpticalElement(SRWOpticalElementDecorator, OpticalElementDecorator):
     def get_default_propagation_parameters(self):
         return WavefrontPropagationParameters().to_SRW_array()
 
-from oasys_srw.srwlib import SRWLOptA
+from wofrysrw.srw import SRWLOptA
 
 class SRWOpticalElementWithAcceptanceSlit(SRWOpticalElement):
 

@@ -1,6 +1,6 @@
 import numpy
 
-from oasys_srw.srwlib import srwl
+from wofrysrw.srw import srwl
 
 from syned.storage_ring.light_source import LightSource
 

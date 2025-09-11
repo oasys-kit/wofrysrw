@@ -7,7 +7,7 @@ from wofry.propagator.propagator import Propagator2D
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters, WavefrontPropagationOptionalParameters
 from wofrysrw.propagator.wavefront2D.srw_wavefront import SRWWavefront
 
-from oasys_srw.srwlib import *
+from wofrysrw.srw import *
 
 class FresnelSRWWofry(Propagator2D):
 

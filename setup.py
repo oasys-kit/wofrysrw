@@ -20,21 +20,21 @@ URL = 'https://github.com/lucarebuffi/wofrysrw'
 DOWNLOAD_URL = 'https://github.com/lucarebuffi/wofrysrw'
 LICENSE = 'GPLv3'
 
-KEYWORDS = (
+KEYWORDS = [
     'dictionary',
     'glossary',
     'synchrotron'
     'simulation',
-)
+]
 
-CLASSIFIERS = (
+CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Environment :: X11 Applications :: Qt',
     'Environment :: Console',
     'Environment :: Plugins',
     'Programming Language :: Python :: 3',
     'Intended Audience :: Science/Research',
-)
+]
 
 SETUP_REQUIRES = (
     'setuptools',
@@ -45,10 +45,7 @@ INSTALL_REQUIRES = (
     'wofry>=1.0.31'
 )
 
-PACKAGES = [
-    "wofrysrw",
-]
-
+PACKAGES = ["wofrysrw",]
 PACKAGE_DATA = {}
 
 if __name__ == '__main__':

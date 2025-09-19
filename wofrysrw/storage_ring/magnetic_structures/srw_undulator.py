@@ -51,7 +51,7 @@ class SRWUndulator(Undulator, SRWMagneticStructure):
 
         return SRWLMagFldU(_arHarm=magnetic_fields,
                            _per=self._period_length,
-                           _nPer=self._number_of_periods)
+                           _nPer=int(self._number_of_periods))
 
     def to_python_code_aux(self):
         text_code = "magnetic_fields = []" + "\n"
@@ -70,6 +70,6 @@ class SRWUndulator(Undulator, SRWMagneticStructure):
             text_code += "                                   _s=" + str(self.symmetry_vs_longitudinal_position_horizontal) + ", " + "\n"
             text_code += "                                   _a=" + str(self.coefficient_for_transverse_dependence_horizontal) + "))" + "\n"
 
-        text_code += "magnetic_structure = SRWLMagFldU(_arHarm=magnetic_fields, _per=" + str(self._period_length) + ", _nPer=" + str(self._number_of_periods) + ")" + "\n"
+        text_code += "magnetic_structure = SRWLMagFldU(_arHarm=magnetic_fields, _per=" + str(self._period_length) + ", _nPer=" + str(int(self._number_of_periods))+ ")" + "\n"
 
         return text_code

@@ -82,13 +82,22 @@ class SRWLightSource(LightSource, LightSourceDecorator, SRWObject):
     def get_SRW_Wavefront(self, source_wavefront_parameters = WavefrontParameters()):
         self.__source_wavefront_parameters = source_wavefront_parameters
 
+        print(source_wavefront_parameters.__dict__)
+        print(self._magnetic_structure.__dict__)
+        print(self._electron_beam.__dict__)
+
+
         mesh = source_wavefront_parameters.to_SRWRadMesh()
+
+        print(mesh.__dict__)
 
         wfr = SRWWavefront()
         wfr.allocate(mesh.ne, mesh.nx, mesh.ny)
         wfr.mesh = mesh
         wfr.partBeam = self._electron_beam.to_SRWLPartBeam()
         wfr.unitElFld = source_wavefront_parameters._electric_field_units
+
+
 
         srwl.CalcElecFieldSR(wfr,
                              0,

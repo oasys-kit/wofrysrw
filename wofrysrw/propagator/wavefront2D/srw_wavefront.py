@@ -1,4 +1,4 @@
-from wofrysrw.srw import srwl, SRWLWfr, SRWLRadMesh, SRWLStokes, array as srw_array
+from wofrysrw.util.srw import srwl, SRWLWfr, SRWLRadMesh, SRWLStokes, array as srw_array
 
 import copy
 import numpy

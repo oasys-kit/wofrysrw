@@ -67,7 +67,7 @@ class SRWBeamline(Beamline, SRWObject):
         text_code =  "try:\n"
         text_code += "    from srwpy.srwlib import *\n    from srwpy.uti_plot import *\n"
         text_code  += "except: \n"
-        text_code += "    from wofrysrw.srw import *\n"
+        text_code += "    from wofrysrw.util.srw import *\n"
         text_code += "import numpy\n\n"
 
         if is_multi_electron: text_code += "#if not srwl_uti_proc_is_master(): exit()\n"

@@ -4,7 +4,7 @@ from syned.beamline.shape import Ellipse, Rectangle
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 import wofrysrw.util.srw_absorption as srwa
 
-from wofrysrw.srw import *
+from wofrysrw.util.srw import *
 
 class PlaneOfFocusing:
     HORIZONTAL=1

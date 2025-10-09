@@ -1,5 +1,5 @@
 import numpy
-from wofrysrw.srw import array as srw_array
+from wofrysrw.util.srw import array as srw_array
 
 def numpyComplexArrayToSRWArray(numpy_array, type='f'):
     """

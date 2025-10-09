@@ -2,7 +2,7 @@ from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import Orientation, S
 from wofrysrw.beamline.optical_elements.gratings.srw_grating import SRWGrating
 from syned.beamline.shape import EllipticalCylinder
 
-from wofrysrw.srw import SRWLOptMirEl
+from wofrysrw.util.srw import SRWLOptMirEl
 
 class SRWEllipticalGrating(SRWGrating):
     def __init__(self,

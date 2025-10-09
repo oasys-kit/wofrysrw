@@ -32,7 +32,7 @@ __date__ = "27/05/2018"
 
 
 
-from wofrysrw.srw import *
+from wofrysrw.util.srw import *
 import numpy
 import h5py
 

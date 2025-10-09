@@ -1,5 +1,5 @@
 from syned.storage_ring.magnetic_structure import MagneticStructure
-from wofrysrw.srw import array, SRWLMagFldC
+from wofrysrw.util.srw import array, SRWLMagFldC
 
 from wofrysrw.srw_object import SRWObject
 

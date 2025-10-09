@@ -1,7 +1,7 @@
 from wofrysrw.beamline.optical_elements.mirrors.srw_mirror import SRWMirror, Orientation, SimulationMethod, TreatInputOutput
 from syned.beamline.shape import SphericalCylinder
 
-from wofrysrw.srw import SRWLOptMirSph
+from wofrysrw.util.srw import SRWLOptMirSph
 
 class SRWSphericalMirror(SRWMirror):
     def __init__(self,

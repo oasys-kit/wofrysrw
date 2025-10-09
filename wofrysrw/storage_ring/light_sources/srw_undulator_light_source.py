@@ -1,6 +1,6 @@
 import numpy
 
-from wofrysrw.srw import srwl
+from wofrysrw.util.srw import srwl
 
 
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontParameters

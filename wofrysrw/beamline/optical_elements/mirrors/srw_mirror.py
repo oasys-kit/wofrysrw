@@ -7,8 +7,8 @@ from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalEle
 from wofrysrw.propagator.wavefront2D.srw_wavefront import WavefrontPropagationParameters
 from wofrysrw.beamline.optical_elements.absorbers.srw_aperture import SRWAperture
 
-from wofrysrw.srw import SRWLOptC, SRWLOptMir
-from wofrysrw.srw import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
+from wofrysrw.util.srw import SRWLOptC, SRWLOptMir
+from wofrysrw.util.srw import srwl, srwl_opt_setup_surf_height_1d, srwl_opt_setup_surf_height_2d, srwl_uti_read_data_cols
 
 
 class ApertureShape:
@@ -149,7 +149,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
         mirror = self.get_SRWLOptMir(nvx, nvy, nvz, tvx, tvy, x, y, ap_shape)
 
         if hasattr(self, "reflectivity_data"):
-            from wofrysrw.srw import array as srw_array
+            from wofrysrw.util.srw import array as srw_array
 
             try:
                 reflectivity_data = srw_array('d', self.reflectivity_data)
@@ -255,7 +255,7 @@ class SRWMirror(Mirror, SRWOpticalElementWithAcceptanceSlit):
             if type(self.reflectivity_data)==float:
                 text_code += f"reflectivity_data = {str(self.reflectivity_data)}" + "\n\n"
             else:
-                text_code += "try:    from wofrysrw.srw import array as srw_array\n"
+                text_code += "try:    from wofrysrw.util.srw import array as srw_array\n"
                 text_code += "except: from srwlib import array as srw_array\n\n"
                 text_code += f"reflectivity_data = srw_array('d', {str(list(self.reflectivity_data))})" + "\n\n"
 

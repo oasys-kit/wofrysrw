@@ -1,4 +1,4 @@
-from wofrysrw.srw import SRWLMagFldC, SRWLMagFld3D, array
+from wofrysrw.util.srw import SRWLMagFldC, SRWLMagFld3D, array
 
 from syned.storage_ring.magnetic_structure import MagneticStructure
 from wofrysrw.storage_ring.srw_magnetic_structure import SRWMagneticStructure

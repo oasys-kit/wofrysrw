@@ -78,7 +78,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator, SRWObject):
                self._moment_z
 
     def get_electron_beam_geometrical_properties(self):
-        x, xp, y, yp = self.get_sigmas_all(no_dispersion=False)
+        x, xp, y, yp = self.get_sigmas_all(dispersion=True)
 
         return SRWElectronBeamGeometricalProperties(electron_beam_size_h=x,
                                                     electron_beam_divergence_h=xp,
@@ -99,7 +99,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator, SRWObject):
         moment_xpxp,\
         moment_yy,\
         moment_yyp,\
-        moment_ypyp = self.get_moments_all(no_dispersion=False)
+        moment_ypyp = self.get_moments_all(dispersion=True)
 
         #2nd order statistical moments:
         srw_electron_beam.arStatMom2[0]  = moment_xx   # <(x-x0)^2> [m^2]
@@ -148,7 +148,7 @@ class SRWElectronBeam(ElectronBeam, SRWElectronBeamDecorator, SRWObject):
         moment_xpxp,\
         moment_yy,\
         moment_yyp,\
-        moment_ypyp = self.get_moments_all(no_dispersion=False)
+        moment_ypyp = self.get_moments_all(dispersion=True)
 
         text_code += "part_beam.arStatMom2[0]      = " + str(moment_xx) + "\n"
         text_code += "part_beam.arStatMom2[1]      = " + str(moment_xxp) + "\n"

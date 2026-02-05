@@ -28,10 +28,6 @@ class SRWHyperbolicMirror(SRWMirror):
                                   distance_from_mirror_center_to_second_focus,
                                   grazing_angle)
 
-        #TODO: remove
-        self._p = distance_from_first_focus_to_mirror_center
-        self._q = distance_from_mirror_center_to_second_focus
-
         super().__init__(name=name,
                          shape=shape,
                          optical_element_displacement=optical_element_displacement,
@@ -46,9 +42,7 @@ class SRWHyperbolicMirror(SRWMirror):
                          height_amplification_coefficient=height_amplification_coefficient)
 
     def get_p_q(self):
-        #TODO: remove
-        return self._p, self._q
-        #return self.get_surface_shape().get_p_q(self.grazing_angle)
+        return self.get_surface_shape().get_p_q(self.grazing_angle)
 
     def get_SRWLOptMir(self, nvx, nvy, nvz, tvx, tvy, x, y, ap_shape):
         p, q = self.get_p_q()

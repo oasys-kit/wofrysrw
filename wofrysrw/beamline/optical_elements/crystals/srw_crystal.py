@@ -138,6 +138,8 @@ class SRWCrystal(Crystal, SRWOpticalElement):
     def to_python_code(self, data=None):
         oe_name = data[0]
 
+        nvx, nvy, nvz, tvx, tvy = self.get_orientation_vectors()
+
         text_code  = oe_name + "="+ "SRWLOptCryst(_d_sp=" + str(self.d_spacing) + "," + "\n"
         text_code += "                        _psi0r=" + str(self.psi_0r) + "," + "\n"
         text_code += "                        _psi0i=" + str(self.psi_0i) + "," + "\n"
@@ -149,9 +151,6 @@ class SRWCrystal(Crystal, SRWOpticalElement):
         text_code += "                        _ang_as=" + str(self.asymmetry_angle) + "," + "\n"
         text_code += "                        _uc=" + str(1 if self.diffraction_geometry==DiffractionGeometry.BRAGG else 0) + ")" + "\n"
 
-        text_code += f"\norientation_data = {oe_name}.find_orient({self.energy}, 0.)\n"
-        text_code += f"tO = orientation_data[0][0]\n"
-        text_code += f"nO = orientation_data[0][2]\n"
-        text_code += f"{oe_name}.set_orient(nO[0], nO[1], nO[2], tO[0], tO[1])\n"
+        text_code += f"\n{oe_name}.set_orient({nvx}, {nvy}, {nvz}, {tvx}, {tvy})\n"
 
         return text_code

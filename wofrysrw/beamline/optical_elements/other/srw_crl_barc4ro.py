@@ -4,7 +4,7 @@ from syned.beamline.shape import Ellipse, Rectangle
 from wofrysrw.beamline.optical_elements.srw_optical_element import SRWOpticalElement
 import wofrysrw.util.srw_absorption as srwa
 
-from wofrysrw.util.srw import *
+from barc4ro import barc4ro as b4ro
 
 class PlaneOfFocusing:
     HORIZONTAL=1
@@ -23,7 +23,7 @@ class CRLShape:
     def items(cls):
         return ["Parabolic", "Spherical"]
 
-class SRWCRL(SRWOpticalElement):
+class SRWCRLBarc4ro(SRWOpticalElement):
     """
     Setup Transmission type Optical Element which simulates Compound Refractive Lens (CRL)
     :param _foc_plane: plane of focusing: 1- horizontal, 2- vertical, 3- both
@@ -42,9 +42,25 @@ class SRWCRL(SRWOpticalElement):
     :param _e_fin: final photon energy
     :param _nx: number of points vs horizontal position to represent the transmission element
     :param _ny: number of points vs vertical position to represent the transmission element
+
     :param _ang_rot_ex: angle [rad] of CRL rotation about horizontal axis
     :param _ang_rot_ey: angle [rad] of CRL rotation about vertical axis
     :param _ang_rot_ez: angle [rad] of CRL rotation about longitudinal axis
+    :param _offst_ffs_x: lateral offset in the horizontal axis of the front focusing surface [m]
+    :param _offst_ffs_y: lateral offset in the vertical axis of the front focusing surface [m]
+    :param _tilt_ffs_x: angle [rad] of the parabolic front surface rotation about horizontal axis
+    :param _tilt_ffs_y: angle [rad] of the parabolic front surface rotation about horizontal axis
+    :param _ang_rot_ez_ffs: angle [rad] of the parabolic front surface rotation about the longitudinal axis
+    :param _wt_offst_ffs: excess penetration [m] of the front parabola to be added to _wall_thick
+    :param _offst_bfs_x: lateral offset in the horizontal axis of the back focusing surface [m]
+    :param _offst_bfs_y: lateral offset in the back axis of the front focusing surface [m]
+    :param _tilt_bfs_x: angle [rad] of the parabolic front back rotation about horizontal axis
+    :param _tilt_bfs_y: angle [rad] of the parabolic front back rotation about horizontal axis
+    :param _ang_rot_ez_bfs: angle [rad] of the parabolic back surface rotation about the longitudinal axis
+    :param _wt_offst_bfs: excess penetration [m] of the back parabola to be added to _wall_thick (negative or positive values)
+    :param isdgr: boolean for determining if angles are in degree or in radians (default)
+    :param _aperture: specifies the type of aperture: circular ('c') or square ('s')
+
     :return: transmission (SRWLOptT) type optical element which simulates CRL
     """
     def __init__(self,
@@ -61,13 +77,22 @@ class SRWCRL(SRWOpticalElement):
                  wall_thickness=5e-5,
                  horizontal_center_coordinate=0.0,
                  vertical_center_coordinate=0.0,
-                 void_center_coordinates=None,
                  initial_photon_energy=8000,
                  final_photon_energy=8010,
                  horizontal_points=1001,
                  vertical_points=1001,
                  angle_of_rotation_about_horizontal_axis=0.0,
                  angle_of_rotation_about_vertical_axis=0.0,
+                 lateral_offset_in_horizontal_axis_ffs = 0.0,
+                 lateral_offset_in_vertical_axis_ffs = 0.0,
+                 angle_of_rotation_about_horizontal_axis_ffs = 0.0,
+                 angle_of_rotation_about_vertical_axis_ffs=0.0,
+                 excess_penetration_ffs = 0.0,
+                 lateral_offset_in_horizontal_axis_bfs=0.0,
+                 lateral_offset_in_vertical_axis_bfs=0.0,
+                 angle_of_rotation_about_horizontal_axis_bfs=0.0,
+                 angle_of_rotation_about_vertical_axis_bfs=0.0,
+                 excess_penetration_bfs=0.0,
                  thickness_error_profile_files=None,
                  scaling_factor=1.0):
         SRWOpticalElement.__init__(self, optical_element_displacement=optical_element_displacement)
@@ -85,13 +110,22 @@ class SRWCRL(SRWOpticalElement):
         self.wall_thickness = wall_thickness
         self.horizontal_center_coordinate = horizontal_center_coordinate
         self.vertical_center_coordinate = vertical_center_coordinate
-        self.void_center_coordinates = void_center_coordinates
         self.initial_photon_energy = initial_photon_energy
         self.final_photon_energy = final_photon_energy
         self.horizontal_points = horizontal_points
         self.vertical_points = vertical_points
         self.angle_of_rotation_about_horizontal_axis = angle_of_rotation_about_horizontal_axis
         self.angle_of_rotation_about_vertical_axis = angle_of_rotation_about_vertical_axis
+        self.lateral_offset_in_horizontal_axis_ffs = lateral_offset_in_horizontal_axis_ffs
+        self.lateral_offset_in_vertical_axis_ffs = lateral_offset_in_vertical_axis_ffs
+        self.angle_of_rotation_about_horizontal_axis_ffs = angle_of_rotation_about_horizontal_axis_ffs
+        self.angle_of_rotation_about_vertical_axis_ffs = angle_of_rotation_about_vertical_axis_ffs
+        self.excess_penetration_ffs = excess_penetration_ffs
+        self.lateral_offset_in_horizontal_axis_bfs = lateral_offset_in_horizontal_axis_bfs
+        self.lateral_offset_in_vertical_axis_bfs = lateral_offset_in_vertical_axis_bfs
+        self.angle_of_rotation_about_horizontal_axis_bfs = angle_of_rotation_about_horizontal_axis_bfs
+        self.angle_of_rotation_about_vertical_axis_bfs = angle_of_rotation_about_vertical_axis_bfs
+        self.excess_penetration_bfs = excess_penetration_bfs
 
         if not thickness_error_profile_files is None:
             self.has_error = True
@@ -116,25 +150,35 @@ class SRWCRL(SRWOpticalElement):
             self.has_error = False
 
     def toSRWLOpt(self):
-        crl_opt = srwl_opt_setup_CRL(_foc_plane=self.plane_of_focusing,
-                                     _delta=self.delta,
-                                     _atten_len=self.attenuation_length,
-                                     _shape=self.shape,
-                                     _apert_h=self.horizontal_aperture_size,
-                                     _apert_v=self.vertical_aperture_size,
-                                     _r_min=self.radius_of_curvature,
-                                     _n=self.number_of_lenses,
-                                     _wall_thick=self.wall_thickness,
-                                     _xc=self.horizontal_center_coordinate,
-                                     _yc=self.vertical_center_coordinate,
-                                     _void_cen_rad=self.void_center_coordinates,
-                                     _e_start=self.initial_photon_energy,
-                                     _e_fin=self.final_photon_energy,
-                                     _nx=self.horizontal_points,
-                                     _ny=self.vertical_points,
-                                     _ang_rot_ex=self.angle_of_rotation_about_horizontal_axis,
-                                     _ang_rot_ey=self.angle_of_rotation_about_vertical_axis
-                                     )
+        crl_opt = b4ro.srwl_opt_setup_CRL(_foc_plane=self.plane_of_focusing,
+                                          _delta=self.delta,
+                                          _atten_len=self.attenuation_length,
+                                          _shape=self.shape,
+                                          _apert_h=self.horizontal_aperture_size,
+                                          _apert_v=self.vertical_aperture_size,
+                                          _r_min=self.radius_of_curvature,
+                                          _n=self.number_of_lenses,
+                                          _wall_thick=self.wall_thickness,
+                                          _xc=self.horizontal_center_coordinate,
+                                          _yc=self.vertical_center_coordinate,
+                                          _e_start=self.initial_photon_energy,
+                                          _e_fin=self.final_photon_energy,
+                                          _nx=self.horizontal_points,
+                                          _ny=self.vertical_points,
+                                          _ang_rot_ex=self.angle_of_rotation_about_horizontal_axis,
+                                          _ang_rot_ey=self.angle_of_rotation_about_vertical_axis,
+                                          _offst_ffs_x=self.lateral_offset_in_horizontal_axis_ffs,
+                                          _offst_ffs_y=self.lateral_offset_in_vertical_axis_ffs,
+                                          _tilt_ffs_x=self.angle_of_rotation_about_horizontal_axis_ffs,
+                                          _tilt_ffs_y=self.angle_of_rotation_about_vertical_axis_ffs,
+                                          _wt_offst_ffs=self.excess_penetration_ffs,
+                                          _offst_bfs_x=self.lateral_offset_in_horizontal_axis_bfs,
+                                          _offst_bfs_y=self.lateral_offset_in_vertical_axis_bfs,
+                                          _tilt_bfs_x=self.angle_of_rotation_about_horizontal_axis_bfs,
+                                          _tilt_bfs_y=self.angle_of_rotation_about_vertical_axis_bfs,
+                                          _wt_offst_bfs=self.excess_penetration_bfs,
+                                          isdgr=False,
+                                          _aperture='c' if self.plane_of_focusing == PlaneOfFocusing.BOTH else 'r')
 
         if self.has_error:
             srwa.add_thickness_error_transmission(crl_opt, self.horizontal_points, self.vertical_points,
@@ -143,45 +187,39 @@ class SRWCRL(SRWOpticalElement):
         return crl_opt
 
     def fromSRWLOpt(self, srwlopt=None):
-        if not srwlopt.input_params or not srwlopt.input_params["type"] == "crl":
-            raise TypeError("SRW optical element is not a CRL")
-
-        self.plane_of_focusing = srwlopt.input_params["focalPlane"]
-        self.delta = srwlopt.input_params["refractiveIndex"]
-        self.attenuation_length = srwlopt.input_params["attenuationLength"]
-        self.shape = srwlopt.input_params["shape"]
-        self.horizontal_aperture_size = srwlopt.input_params["horizontalApertureSize"]
-        self.vertical_aperture_size = srwlopt.input_params["verticalApertureSize"]
-        self.radius_of_curvature = srwlopt.input_params["radius"]
-        self.number_of_lenses = srwlopt.input_params["numberOfLenses"]
-        self.wall_thickness = srwlopt.input_params["wallThickness"]
-        self.horizontal_center_coordinate = srwlopt.input_params["horizontalCenterCoordinate"]
-        self.vertical_center_coordinate = srwlopt.input_params["verticalCenterCoordinate"]
-        self.void_center_coordinates = srwlopt.input_params["voidCenterCoordinates"]
-        self.initial_photon_energy = srwlopt.input_params["initialPhotonEnergy"]
-        self.final_photon_energy = srwlopt.input_params["finalPhotonEnergy"]
-        self.horizontal_points = srwlopt.input_params["horizontalPoints"]
-        self.vertical_points = srwlopt.input_params["verticalPoints"]
+        raise TypeError("Barc4ro CRL cannot be imported")
 
     def to_python_code(self, data=None):
-        text_code = data[0] + "=srwl_opt_setup_CRL(_foc_plane=" + str(self.plane_of_focusing) + ",\n"
-        text_code += "                _delta=" + str(self.delta) + ",\n"
-        text_code += "                _atten_len=" + str(self.attenuation_length) + ",\n"
-        text_code += "                _shape=" + str(self.shape) + ",\n"
-        text_code += "                _apert_h=" + str(self.horizontal_aperture_size) + ",\n"
-        text_code += "                _apert_v=" + str(self.vertical_aperture_size) + ",\n"
-        text_code += "                _r_min=" + str(self.radius_of_curvature) + ",\n"
-        text_code += "                _n=" + str(self.number_of_lenses) + ",\n"
-        text_code += "                _wall_thick=" + str(self.wall_thickness) + ",\n"
-        text_code += "                _xc=" + str(self.horizontal_center_coordinate) + ",\n"
-        text_code += "                _yc=" + str(self.vertical_center_coordinate) + ",\n"
-        text_code += "                _void_cen_rad=" + str(self.void_center_coordinates) + ",\n"
-        text_code += "                _e_start=" + str(self.initial_photon_energy) + ",\n"
-        text_code += "                _e_fin=" + str(self.final_photon_energy) + ",\n"
-        text_code += "                _nx=" + str(self.horizontal_points) + ",\n"
-        text_code += "                _ny=" + str(self.vertical_points) + ",\n"
-        text_code += "                _ang_rot_ex=" + str(self.angle_of_rotation_about_horizontal_axis) + ",\n"
-        text_code += "                _ang_rot_ey=" + str(self.angle_of_rotation_about_vertical_axis) + ")\n"
+        text_code = "from barc4ro import barc4ro as b4ro\n\n"
+        text_code += data[0] + "=b4ro.srwl_opt_setup_CRL(_foc_plane=" + str(self.plane_of_focusing) + ",\n"
+        text_code += "                    _delta=" + str(self.delta) + ",\n"
+        text_code += "                    _atten_len=" + str(self.attenuation_length) + ",\n"
+        text_code += "                    _shape=" + str(self.shape) + ",\n"
+        text_code += "                    _apert_h=" + str(self.horizontal_aperture_size) + ",\n"
+        text_code += "                    _apert_v=" + str(self.vertical_aperture_size) + ",\n"
+        text_code += "                    _r_min=" + str(self.radius_of_curvature) + ",\n"
+        text_code += "                    _n=" + str(self.number_of_lenses) + ",\n"
+        text_code += "                    _wall_thick=" + str(self.wall_thickness) + ",\n"
+        text_code += "                    _xc=" + str(self.horizontal_center_coordinate) + ",\n"
+        text_code += "                    _yc=" + str(self.vertical_center_coordinate) + ",\n"
+        text_code += "                    _e_start=" + str(self.initial_photon_energy) + ",\n"
+        text_code += "                    _e_fin=" + str(self.final_photon_energy) + ",\n"
+        text_code += "                    _nx=" + str(self.horizontal_points) + ",\n"
+        text_code += "                    _ny=" + str(self.vertical_points) + ")\n",
+        text_code += "                    _ang_rot_ex=" + str(self.angle_of_rotation_about_horizontal_axis) + ",\n"
+        text_code += "                    _ang_rot_ey=" + str(self.angle_of_rotation_about_vertical_axis) + ",\n"
+        text_code += "                    _offst_ffs_x=" + str(self.lateral_offset_in_horizontal_axis_ffs) + ",\n"
+        text_code += "                    _offst_ffs_y=" + str(self.lateral_offset_in_vertical_axis_ffs) + ",\n"
+        text_code += "                    _tilt_ffs_x=" + str(self.angle_of_rotation_about_horizontal_axis_ffs) + ",\n"
+        text_code += "                    _tilt_ffs_y=" + str(self.angle_of_rotation_about_vertical_axis_ffs) + ",\n"
+        text_code += "                    _wt_offst_ffs=" + str(self.excess_penetration_ffs) + ",\n"
+        text_code += "                    _offst_bfs_x=" + str(self.lateral_offset_in_horizontal_axis_bfs) + ",\n"
+        text_code += "                    _offst_bfs_y=" + str(self.lateral_offset_in_vertical_axis_bfs) + ",\n"
+        text_code += "                    _tilt_bfs_x=" + str(self.angle_of_rotation_about_horizontal_axis_bfs) + ",\n"
+        text_code += "                    _tilt_bfs_y=" + str(self.angle_of_rotation_about_vertical_axis_bfs) + ",\n"
+        text_code += "                    _wt_offst_bfs=" + str(self.excess_penetration_bfs) + ",\n"
+        text_code += "                    isdgr=False,\n"
+        text_code += "                    _aperture='" + str('c' if self.plane_of_focusing == PlaneOfFocusing.BOTH else 'r') + "',\n"
 
         if self.has_error:
             text_code += "\n\n"

@@ -8,7 +8,7 @@ except AttributeError:
     from setuptools import find_packages, setup
 
 NAME = 'wofrysrw'
-VERSION = '1.1.40'
+VERSION = '1.1.41'
 ISRELEASED = True
 
 DESCRIPTION = 'WOFRY for SRW library'
@@ -42,7 +42,7 @@ SETUP_REQUIRES = (
 
 INSTALL_REQUIRES = (
     'setuptools',
-    'wofry>=1.0.31',
+    'wofry>=1.0.35',
     'srwpy==4.2.1',
     'oasys-barc4ro>=2026.7.15.3'
 )

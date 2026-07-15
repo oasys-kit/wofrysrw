@@ -205,7 +205,7 @@ class SRWCRLBarc4ro(SRWOpticalElement):
         text_code += "                    _e_start=" + str(self.initial_photon_energy) + ",\n"
         text_code += "                    _e_fin=" + str(self.final_photon_energy) + ",\n"
         text_code += "                    _nx=" + str(self.horizontal_points) + ",\n"
-        text_code += "                    _ny=" + str(self.vertical_points) + ")\n",
+        text_code += "                    _ny=" + str(self.vertical_points) + ",\n"
         text_code += "                    _ang_rot_ex=" + str(self.angle_of_rotation_about_horizontal_axis) + ",\n"
         text_code += "                    _ang_rot_ey=" + str(self.angle_of_rotation_about_vertical_axis) + ",\n"
         text_code += "                    _offst_ffs_x=" + str(self.lateral_offset_in_horizontal_axis_ffs) + ",\n"
@@ -219,7 +219,7 @@ class SRWCRLBarc4ro(SRWOpticalElement):
         text_code += "                    _tilt_bfs_y=" + str(self.angle_of_rotation_about_vertical_axis_bfs) + ",\n"
         text_code += "                    _wt_offst_bfs=" + str(self.excess_penetration_bfs) + ",\n"
         text_code += "                    isdgr=False,\n"
-        text_code += "                    _aperture='" + str('c' if self.plane_of_focusing == PlaneOfFocusing.BOTH else 'r') + "',\n"
+        text_code += "                    _aperture='" + str('c' if self.plane_of_focusing == PlaneOfFocusing.BOTH else 'r') + "')\n"
 
         if self.has_error:
             text_code += "\n\n"
